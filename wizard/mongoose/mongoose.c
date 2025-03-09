@@ -1,5 +1,5 @@
 // Copyright (c) 2004-2013 Sergey Lyubka
-// Copyright (c) 2013-2024 Cesanta Software Limited
+// Copyright (c) 2013-2025 Cesanta Software Limited
 // All rights reserved
 //
 // This software is dual-licensed: you can redistribute it and/or modify
@@ -1861,6 +1861,7 @@ static struct mg_str s_known_types[] = {
     MG_C_STR("htm"), MG_C_STR("text/html; charset=utf-8"),
     MG_C_STR("css"), MG_C_STR("text/css; charset=utf-8"),
     MG_C_STR("js"), MG_C_STR("text/javascript; charset=utf-8"),
+    MG_C_STR("mjs"), MG_C_STR("text/javascript; charset=utf-8"),
     MG_C_STR("gif"), MG_C_STR("image/gif"),
     MG_C_STR("png"), MG_C_STR("image/png"),
     MG_C_STR("jpg"), MG_C_STR("image/jpeg"),
@@ -5493,9 +5494,17 @@ static bool mg_imxrt_swap(void);
 #elif MG_OTA == MG_OTA_RT1064
 #define MG_IMXRT_FLASH_START 0x70000000
 #define FLEXSPI_NOR_INSTANCE 1
-#else // RT1170
+#else  // RT1170
 #define MG_IMXRT_FLASH_START 0x30000000
 #define FLEXSPI_NOR_INSTANCE 1
+#endif
+
+#if MG_OTA == MG_OTA_RT1050
+#define MG_IMXRT_SECTOR_SIZE (256 * 1024)
+#define MG_IMXRT_PAGE_SIZE 512
+#else
+#define MG_IMXRT_SECTOR_SIZE (4 * 1024)
+#define MG_IMXRT_PAGE_SIZE 256
 #endif
 
 // TODO(): fill at init, support more devices in a dynamic way
@@ -5503,8 +5512,8 @@ static bool mg_imxrt_swap(void);
 static struct mg_flash s_mg_flash_imxrt = {
     (void *) MG_IMXRT_FLASH_START,  // Start,
     4 * 1024 * 1024,                // Size, 4mb
-    4 * 1024,                       // Sector size, 4k
-    256,                            // Align,
+    MG_IMXRT_SECTOR_SIZE,           // Sector size
+    MG_IMXRT_PAGE_SIZE,             // Align
     mg_imxrt_write,
     mg_imxrt_swap,
 };
@@ -5586,8 +5595,10 @@ struct mg_flexspi_nor_config {
 #define MG_CMD_DDR 0x21
 #define MG_DUMMY_SDR 0x0C
 #define MG_DUMMY_DDR 0x2C
+#define MG_DUMMY_RWDS_DDR 0x2D
 #define MG_RADDR_SDR 0x02
 #define MG_RADDR_DDR 0x22
+#define MG_CADDR_DDR 0x23
 #define MG_READ_SDR 0x09
 #define MG_READ_DDR 0x29
 #define MG_WRITE_SDR 0x08
@@ -5621,6 +5632,131 @@ struct mg_flexspi_nor_config {
                                       MG_STOP, MG_FLEXSPI_1PAD, 0x0),          \
   }
 
+#define MG_FLEXSPI_HYPER_LUT                                                  \
+  {                                                                           \
+    [0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xA0, MG_RADDR_DDR, \
+                             MG_FLEXSPI_8PAD, 0x18),                          \
+    [1] = MG_FLEXSPI_LUT_SEQ(MG_CADDR_DDR, MG_FLEXSPI_8PAD, 0x10,             \
+                             MG_DUMMY_DDR, MG_FLEXSPI_8PAD, 0x0C),            \
+    [2] = MG_FLEXSPI_LUT_SEQ(MG_READ_DDR, MG_FLEXSPI_8PAD, 0x04, MG_STOP,     \
+                             MG_FLEXSPI_1PAD, 0x0),                           \
+    [4 * 1 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 1 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 1 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),      \
+    [4 * 1 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x70),      \
+    [4 * 2 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xA0,       \
+                                     MG_RADDR_DDR, MG_FLEXSPI_8PAD, 0x18),    \
+    [4 * 2 + 1] =                                                             \
+        MG_FLEXSPI_LUT_SEQ(MG_CADDR_DDR, MG_FLEXSPI_8PAD, 0x10,               \
+                           MG_DUMMY_RWDS_DDR, MG_FLEXSPI_8PAD, 0x0B),         \
+    [4 * 2 + 2] = MG_FLEXSPI_LUT_SEQ(MG_READ_DDR, MG_FLEXSPI_8PAD, 0x4,       \
+                                     MG_STOP, MG_FLEXSPI_1PAD, 0x0),          \
+    [4 * 3 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 3 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 3 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),      \
+    [4 * 3 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 4 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 4 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x55),      \
+    [4 * 4 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x02),      \
+    [4 * 4 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x55),      \
+    [4 * 5 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 5 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 5 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),      \
+    [4 * 5 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x80),      \
+    [4 * 6 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 6 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 6 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),      \
+    [4 * 6 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 7 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 7 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x55),      \
+    [4 * 7 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x02),      \
+    [4 * 7 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x55),      \
+    [4 * 8 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_RADDR_DDR, MG_FLEXSPI_8PAD, 0x18),    \
+    [4 * 8 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CADDR_DDR, MG_FLEXSPI_8PAD, 0x10,     \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 8 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x30,       \
+                                     MG_STOP, MG_FLEXSPI_1PAD, 0x0),          \
+    [4 * 9 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),       \
+    [4 * 9 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),      \
+    [4 * 9 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),      \
+    [4 * 9 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,        \
+                                     MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xA0),      \
+    [4 * 10 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_RADDR_DDR, MG_FLEXSPI_8PAD, 0x18),   \
+    [4 * 10 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CADDR_DDR, MG_FLEXSPI_8PAD, 0x10,    \
+                                      MG_WRITE_DDR, MG_FLEXSPI_8PAD, 0x80),   \
+    [4 * 11 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),      \
+    [4 * 11 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),     \
+    [4 * 11 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),     \
+    [4 * 11 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x80),     \
+    [4 * 12 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),      \
+    [4 * 12 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),     \
+    [4 * 12 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),     \
+    [4 * 12 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),     \
+    [4 * 13 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),      \
+    [4 * 13 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x55),     \
+    [4 * 13 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x02),     \
+    [4 * 13 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x55),     \
+    [4 * 14 + 0] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0),      \
+    [4 * 14 + 1] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0xAA),     \
+    [4 * 14 + 2] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x05),     \
+    [4 * 14 + 3] = MG_FLEXSPI_LUT_SEQ(MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x0,       \
+                                      MG_CMD_DDR, MG_FLEXSPI_8PAD, 0x10),     \
+  }
+
+#define MG_LUT_CUSTOM_SEQ                          \
+  {                                                \
+    {.seqNum = 0, .seqId = 0, .reserved = 0},      \
+        {.seqNum = 2, .seqId = 1, .reserved = 0},  \
+        {.seqNum = 2, .seqId = 3, .reserved = 0},  \
+        {.seqNum = 4, .seqId = 5, .reserved = 0},  \
+        {.seqNum = 2, .seqId = 9, .reserved = 0},  \
+        {.seqNum = 4, .seqId = 11, .reserved = 0}, \
+  }
+
 #define MG_FLEXSPI_LUT_OPERAND0(x) (((uint32_t) (((uint32_t) (x)))) & 0xFFU)
 #define MG_FLEXSPI_LUT_NUM_PADS0(x) \
   (((uint32_t) (((uint32_t) (x)) << 8U)) & 0x300U)
@@ -5633,8 +5769,8 @@ struct mg_flexspi_nor_config {
 #define MG_FLEXSPI_LUT_OPCODE1(x) \
   (((uint32_t) (((uint32_t) (x)) << 26U)) & 0xFC000000U)
 
-#if MG_OTA == MG_OTA_RT1020
-// RT102X boards support ROM API version 1.4
+#if MG_OTA == MG_OTA_RT1020 || MG_OTA == MG_OTA_RT1050
+// RT102X and RT105x boards support ROM API version 1.4
 struct mg_flexspi_nor_driver_interface {
   uint32_t version;
   int (*init)(uint32_t instance, struct mg_flexspi_nor_config *config);
@@ -5692,10 +5828,10 @@ struct mg_flexspi_nor_driver_interface {
                      uint32_t address);
   void (*hw_reset)(uint32_t instance, uint32_t resetLogic);
   int (*wait_busy)(uint32_t instance, struct mg_flexspi_nor_config *config,
-                  bool isParallelMode, uint32_t address);
+                   bool isParallelMode, uint32_t address);
   int (*set_clock_source)(uint32_t instance, uint32_t clockSrc);
   void (*config_clock)(uint32_t instance, uint32_t freqOption,
-                  uint32_t sampleClkMode);
+                       uint32_t sampleClkMode);
 };
 #endif
 
@@ -5714,33 +5850,67 @@ struct mg_flexspi_nor_driver_interface {
 static bool s_flash_irq_disabled;
 
 MG_IRAM static bool flash_page_start(volatile uint32_t *dst) {
-  char *base = (char *) s_mg_flash_imxrt.start, *end = base + s_mg_flash_imxrt.size;
+  char *base = (char *) s_mg_flash_imxrt.start,
+       *end = base + s_mg_flash_imxrt.size;
   volatile char *p = (char *) dst;
   return p >= base && p < end && ((p - base) % s_mg_flash_imxrt.secsz) == 0;
 }
 
-// Note: the get_config function below works both for RT1020 and 1060
-// must reside in RAM, as flash will be erased
+#if MG_OTA == MG_OTA_RT1050
+// Configuration for Hyper flash memory
 static struct mg_flexspi_nor_config default_config = {
-  .memConfig = {.tag = MG_FLEXSPI_CFG_BLK_TAG,
-                .version = MG_FLEXSPI_CFG_BLK_VERSION,
-                .readSampleClkSrc = 1,  // ReadSampleClk_LoopbackFromDqsPad
-                .csHoldTime = 3,
-                .csSetupTime = 3,
-                .controllerMiscOption = MG_BIT(4),
-                .deviceType = 1,  // serial NOR
-                .sflashPadType = 4,
-                .serialClkFreq = 7,  // 133MHz
-                .sflashA1Size = 8 * 1024 * 1024,
-                .lookupTable = MG_FLEXSPI_QSPI_LUT},
-  .pageSize = 256,
-  .sectorSize = 4 * 1024,
-  .ipcmdSerialClkFreq = 1,
-  .blockSize = 64 * 1024,
-  .isUniformBlockSize = false
-};
+    .memConfig =
+        {
+            .tag = MG_FLEXSPI_CFG_BLK_TAG,
+            .version = MG_FLEXSPI_CFG_BLK_VERSION,
+            .readSampleClkSrc = 3,  // ReadSampleClk_LoopbackFromDqsPad
+            .csHoldTime = 3,
+            .csSetupTime = 3,
+            .columnAddressWidth = 3u,
+            .controllerMiscOption =
+                MG_BIT(6) | MG_BIT(4) | MG_BIT(3) | MG_BIT(0),
+            .deviceType = 1,  // serial NOR
+            .sflashPadType = 8,
+            .serialClkFreq = 7,  // 133MHz
+            .sflashA1Size = 64 * 1024 * 1024,
+            .dataValidTime = {15, 0},
+            .busyOffset = 15,
+            .busyBitPolarity = 1,
+            .lutCustomSeqEnable = 0x1,
+            .lookupTable = MG_FLEXSPI_HYPER_LUT,
+            .lutCustomSeq = MG_LUT_CUSTOM_SEQ,
+        },
+    .pageSize = 512,
+    .sectorSize = 256 * 1024,
+    .ipcmdSerialClkFreq = 1,
+    .serialNorType = 1u,
+    .blockSize = 256 * 1024,
+    .isUniformBlockSize = true};
+#else
+// Note: this QSPI configuration works for RTs supporting QSPI
+// Configuration for QSPI memory
+static struct mg_flexspi_nor_config default_config = {
+    .memConfig = {.tag = MG_FLEXSPI_CFG_BLK_TAG,
+                  .version = MG_FLEXSPI_CFG_BLK_VERSION,
+                  .readSampleClkSrc = 1,  // ReadSampleClk_LoopbackFromDqsPad
+                  .csHoldTime = 3,
+                  .csSetupTime = 3,
+                  .controllerMiscOption = MG_BIT(4),
+                  .deviceType = 1,  // serial NOR
+                  .sflashPadType = 4,
+                  .serialClkFreq = 7,  // 133MHz
+                  .sflashA1Size = 8 * 1024 * 1024,
+                  .lookupTable = MG_FLEXSPI_QSPI_LUT},
+    .pageSize = 256,
+    .sectorSize = 4 * 1024,
+    .ipcmdSerialClkFreq = 1,
+    .blockSize = 64 * 1024,
+    .isUniformBlockSize = false};
+#endif
+
+// must reside in RAM, as flash will be erased
 MG_IRAM static int flexspi_nor_get_config(
-  struct mg_flexspi_nor_config **config) {
+    struct mg_flexspi_nor_config **config) {
   *config = &default_config;
   return 0;
 }
@@ -7666,15 +7836,11 @@ void mg_hmac_sha256(uint8_t dst[32], uint8_t *key, size_t keysz, uint8_t *data,
   mg_sha256_final(dst, &ctx);
 }
 
-//=====================================
-// TODO: rename macros
-#define ROTR64(x, n) (((x) >> (n)) | ((x) << (64 - (n))))
-#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
-#define EP0(x) (ROTR64(x, 28) ^ ROTR64(x, 34) ^ ROTR64(x, 39))
-#define EP1(x) (ROTR64(x, 14) ^ ROTR64(x, 18) ^ ROTR64(x, 41))
-#define SIG0(x) (ROTR64(x, 1) ^ ROTR64(x, 8) ^ ((x) >> 7))
-#define SIG1(x) (ROTR64(x, 19) ^ ROTR64(x, 61) ^ ((x) >> 6))
+#define rotr64(x, n) (((x) >> (n)) | ((x) << (64 - (n))))
+#define ep064(x) (rotr64(x, 28) ^ rotr64(x, 34) ^ rotr64(x, 39))
+#define ep164(x) (rotr64(x, 14) ^ rotr64(x, 18) ^ rotr64(x, 41))
+#define sig064(x) (rotr64(x, 1) ^ rotr64(x, 8) ^ ((x) >> 7))
+#define sig164(x) (rotr64(x, 19) ^ rotr64(x, 61) ^ ((x) >> 6))
 
 static const uint64_t mg_sha256_k2[80] = {
     0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f,
@@ -7716,7 +7882,7 @@ static void mg_sha384_transform(mg_sha384_ctx *ctx, const uint8_t data[]) {
            ((uint64_t) data[j + 4] << 24) | ((uint64_t) data[j + 5] << 16) |
            ((uint64_t) data[j + 6] << 8) | ((uint64_t) data[j + 7]);
   for (; i < 80; ++i)
-    m[i] = SIG1(m[i - 2]) + m[i - 7] + SIG0(m[i - 15]) + m[i - 16];
+    m[i] = sig164(m[i - 2]) + m[i - 7] + sig064(m[i - 15]) + m[i - 16];
 
   a = ctx->state[0];
   b = ctx->state[1];
@@ -7728,8 +7894,8 @@ static void mg_sha384_transform(mg_sha384_ctx *ctx, const uint8_t data[]) {
   h = ctx->state[7];
 
   for (i = 0; i < 80; ++i) {
-    uint64_t t1 = h + EP1(e) + CH(e, f, g) + mg_sha256_k2[i] + m[i];
-    uint64_t t2 = EP0(a) + MAJ(a, b, c);
+    uint64_t t1 = h + ep164(e) + ch(e, f, g) + mg_sha256_k2[i] + m[i];
+    uint64_t t2 = ep064(a) + maj(a, b, c);
     h = g;
     g = f;
     f = e;
@@ -8060,7 +8226,7 @@ long mg_io_send(struct mg_connection *c, const void *buf, size_t len) {
   }
   MG_VERBOSE(("%lu %ld %d", c->id, n, MG_SOCK_ERR(n)));
   if (MG_SOCK_PENDING(n)) return MG_IO_WAIT;
-  if (MG_SOCK_RESET(n)) return MG_IO_RESET;
+  if (MG_SOCK_RESET(n)) return MG_IO_RESET; // MbedTLS, see #1507
   if (n <= 0) return MG_IO_ERR;
   return n;
 }
@@ -8182,7 +8348,7 @@ static long recv_raw(struct mg_connection *c, void *buf, size_t len) {
   }
   MG_VERBOSE(("%lu %ld %d", c->id, n, MG_SOCK_ERR(n)));
   if (MG_SOCK_PENDING(n)) return MG_IO_WAIT;
-  if (MG_SOCK_RESET(n)) return MG_IO_RESET;
+  if (MG_SOCK_RESET(n)) return MG_IO_RESET; // MbedTLS, see #1507
   if (n <= 0) return MG_IO_ERR;
   return n;
 }
@@ -8219,7 +8385,7 @@ static void read_conn(struct mg_connection *c) {
       }
       // there can still be > 16K from last iteration, always mg_tls_recv()
       m = c->is_tls_hs ? (long) MG_IO_WAIT : mg_tls_recv(c, buf, len);
-      if (n == MG_IO_ERR) {
+      if (n == MG_IO_ERR || n == MG_IO_RESET) { // Windows, see #3031
         if (c->rtls.len == 0 || m < 0) {
           // Close only when we have fully drained both rtls and TLS buffers
           c->is_closing = 1;  // or there's nothing we can do about it.
@@ -9185,9 +9351,6 @@ static void gcm_zero_ctx(gcm_context *ctx);
  * REGARDING ITS FITNESS FOR ANY PARTICULAR PURPOSE. USE IT AT YOUR OWN RISK.
  *
  *******************************************************************************/
-
-
-
 
 static int aes_tables_inited = 0;  // run-once flag for performing key
                                    // expasion table generation (see below)
@@ -13767,7 +13930,8 @@ void mg_tls_ctx_free(struct mg_mgr *mgr) {
 #endif
 
 
-#if defined(MG_TLS) && MG_TLS == MG_TLS_BUILTIN
+
+#if MG_TLS == MG_TLS_BUILTIN
 
 #define NS_INTERNAL static
 typedef struct _bigint bigint; /**< An alias for _bigint */
@@ -15413,7 +15577,7 @@ int mg_rsa_mod_pow(const uint8_t *mod, size_t modsz, const uint8_t *exp, size_t 
 #define DEC_31 30
 #define DEC_32 31
 
-#define DEC(N) MG_UECC_CONCAT(DEC_, N)
+#define DEC_(N) MG_UECC_CONCAT(DEC_, N)
 
 #define SECOND_ARG(_, val, ...) val
 #define SOME_CHECK_0 ~, 0
@@ -15427,14 +15591,14 @@ int mg_rsa_mod_pow(const uint8_t *mod, size_t modsz, const uint8_t *exp, size_t 
 #define REPEAT_NAME_SOME() REPEAT_SOME
 #define REPEAT_0(...)
 #define REPEAT_SOME(N, stuff) \
-  DEFER(MG_UECC_CONCAT(REPEAT_NAME_, SOME_OR_0(DEC(N))))()(DEC(N), stuff) stuff
+  DEFER(MG_UECC_CONCAT(REPEAT_NAME_, SOME_OR_0(DEC_(N))))()(DEC_(N), stuff) stuff
 #define REPEAT(N, stuff) EVAL(REPEAT_SOME(N, stuff))
 
 #define REPEATM_NAME_0() REPEATM_0
 #define REPEATM_NAME_SOME() REPEATM_SOME
 #define REPEATM_0(...)
 #define REPEATM_SOME(N, macro) \
-  macro(N) DEFER(MG_UECC_CONCAT(REPEATM_NAME_, SOME_OR_0(DEC(N))))()(DEC(N), macro)
+  macro(N) DEFER(MG_UECC_CONCAT(REPEATM_NAME_, SOME_OR_0(DEC_(N))))()(DEC_(N), macro)
 #define REPEATM(N, macro) EVAL(REPEATM_SOME(N, macro))
 #endif
 
@@ -18586,6 +18750,9 @@ void mg_uecc_point_mult(mg_uecc_word_t *result, const mg_uecc_word_t *point,
 
 
 
+
+#if MG_TLS == MG_TLS_BUILTIN
+
 const uint8_t X25519_BASE_POINT[X25519_BYTES] = {9};
 
 #define X25519_WBITS 32
@@ -18834,6 +19001,8 @@ int mg_tls_x25519(uint8_t out[X25519_BYTES], const uint8_t scalar[X25519_BYTES],
   }
   return ret;
 }
+
+#endif
 
 #ifdef MG_ENABLE_LINES
 #line 1 "src/url.c"
@@ -20538,6 +20707,191 @@ struct mg_tcpip_driver mg_tcpip_driver_ra = {mg_tcpip_driver_ra_init,
 #endif
 
 #ifdef MG_ENABLE_LINES
+#line 1 "src/drivers/rw612.c"
+#endif
+
+
+#if MG_ENABLE_TCPIP && defined(MG_ENABLE_DRIVER_RW612) && MG_ENABLE_DRIVER_RW612
+
+struct ENET_Type {
+  volatile uint32_t RESERVED_0[1], EIR, EIMR, RESERVED_1[1], RDAR, TDAR,
+      RESERVED_2[3], ECR, RESERVED_3[6], MMFR, MSCR, RESERVED_4[7], MIBC,
+      RESERVED_5[7], RCR, RESERVED_6[15], TCR, RESERVED_7[7], PALR, PAUR, OPD,
+      TXIC[1], RESERVED_8[3], RXIC[1], RESERVED_9[5], IAUR, IALR, GAUR, GALR,
+      RESERVED_10[7], TFWR, RESERVED_11[14], RDSR, TDSR, MRBR, RESERVED_12[1],
+      RSFL, RSEM, RAEM, RAFL, TSEM, TAEM, TAFL, TIPG, FTRL, RESERVED_13[3],
+      TACC, RACC, RESERVED_14[15], RMON_T_PACKETS, RMON_T_BC_PKT, RMON_T_MC_PKT,
+      RMON_T_CRC_ALIGN, RMON_T_UNDERSIZE, RMON_T_OVERSIZE, RMON_T_FRAG,
+      RMON_T_JAB, RMON_T_COL, RMON_T_P64, RMON_T_P65TO127, RMON_T_P128TO255,
+      RMON_T_P256TO511, RMON_T_P512TO1023, RMON_T_P1024TO2047, RMON_T_P_GTE2048,
+      RMON_T_OCTETS, IEEE_T_DROP, IEEE_T_FRAME_OK, IEEE_T_1COL, IEEE_T_MCOL,
+      IEEE_T_DEF, IEEE_T_LCOL, IEEE_T_EXCOL, IEEE_T_MACERR, IEEE_T_CSERR,
+      IEEE_T_SQE, IEEE_T_FDXFC, IEEE_T_OCTETS_OK, RESERVED_15[3],
+      RMON_R_PACKETS, RMON_R_BC_PKT, RMON_R_MC_PKT, RMON_R_CRC_ALIGN,
+      RMON_R_UNDERSIZE, RMON_R_OVERSIZE, RMON_R_FRAG, RMON_R_JAB,
+      RESERVED_16[1], RMON_R_P64, RMON_R_P65TO127, RMON_R_P128TO255,
+      RMON_R_P256TO511, RMON_R_P512TO1023, RMON_R_P1024TO2047, RMON_R_P_GTE2048,
+      RMON_R_OCTETS, IEEE_R_DROP, IEEE_R_FRAME_OK, IEEE_R_CRC, IEEE_R_ALIGN,
+      IEEE_R_MACERR, IEEE_R_FDXFC, IEEE_R_OCTETS_OK, RESERVED_17[71], ATCR,
+      ATVR, ATOFF, ATPER, ATCOR, ATINC, ATSTMP, RESERVED_18[122], TGSR,
+      CHANNEL_TCSR[4], CHANNEL_TCCR[4];
+};
+
+#define ENET ((struct ENET_Type *) 0x40138000)
+
+#define ETH_PKT_SIZE 1536  // Max frame size
+#define ETH_DESC_CNT 4     // Descriptors count
+#define ETH_DS 2           // Descriptor size (words)
+
+#define MG_8BYTE_ALIGNED __attribute__((aligned((8U))))
+static uint8_t s_rxbuf[ETH_DESC_CNT][ETH_PKT_SIZE] MG_8BYTE_ALIGNED;
+static uint8_t s_txbuf[ETH_DESC_CNT][ETH_PKT_SIZE] MG_8BYTE_ALIGNED;
+static uint32_t s_rxdesc[ETH_DESC_CNT][ETH_DS] MG_8BYTE_ALIGNED;
+static uint32_t s_txdesc[ETH_DESC_CNT][ETH_DS] MG_8BYTE_ALIGNED;
+static uint8_t s_txno;  // Current TX descriptor
+static uint8_t s_rxno;  // Current RX descriptor
+
+static struct mg_tcpip_if *s_ifp;  // MIP interface
+
+static uint16_t eth_read_phy(uint8_t addr, uint8_t reg) {
+  ENET->MMFR = MG_BIT(30) |  // Start of frame delimiter
+               MG_BIT(29) |  // Opcode
+               ((addr & 0x1f) << 23) | ((reg & 0x1f) << 18) | MG_BIT(17);
+  while ((ENET->EIR & MG_BIT(23)) == 0) (void) 0;
+  ENET->EIR |= MG_BIT(23);
+  return ENET->MMFR & 0xffff;
+}
+
+static void eth_write_phy(uint8_t addr, uint8_t reg, uint16_t val) {
+  ENET->MMFR = MG_BIT(30) |  // Start of frame delimiter
+               MG_BIT(28) |  // Opcode
+               ((addr & 0x1f) << 23) | ((reg & 0x1f) << 18) | MG_BIT(17) | val;
+  while ((ENET->EIR & MG_BIT(23)) == 0) (void) 0;
+  ENET->EIR |= MG_BIT(23);
+}
+
+static bool mg_tcpip_driver_rw612_init(struct mg_tcpip_if *ifp) {
+  struct mg_tcpip_driver_rw612_data *d =
+      (struct mg_tcpip_driver_rw612_data *) ifp->driver_data;
+  s_ifp = ifp;
+  ENET->MSCR = ((d->mdc_cr & 0x3f) << 1) | ((d->mdc_holdtime & 7) << 8);
+  struct mg_phy phy = {eth_read_phy, eth_write_phy};
+  mg_phy_init(&phy, d->phy_addr, 0);
+  ENET->ECR |= MG_BIT(0);  // reset ETH
+
+  // initialize descriptors
+  for (int i = 0; i < ETH_DESC_CNT; i++) {
+    s_rxdesc[i][1] = (uint32_t) s_rxbuf[i];
+    s_rxdesc[i][0] = MG_BIT(31);  // OWN
+    if (i == ETH_DESC_CNT - 1) {
+      s_rxdesc[i][0] |= MG_BIT(29);  // mark last descriptor
+    }
+    s_txdesc[i][1] = (uint32_t) s_txbuf[i];
+    if (i == ETH_DESC_CNT - 1) {
+      s_txdesc[i][0] |= MG_BIT(29);  // mark last descriptor
+    }
+  }
+
+  ENET->RCR = (ENET->RCR & (0xffff << 16)) | MG_BIT(14) | MG_BIT(8) | MG_BIT(2);
+  ENET->TCR = MG_BIT(2);  // full duplex
+  ENET->TDSR = (uint32_t) &s_txdesc[0][0];
+  ENET->RDSR = (uint32_t) &s_rxdesc[0][0];
+  ENET->MRBR = ETH_PKT_SIZE;
+  ENET->PALR =
+      ifp->mac[0] << 24 | ifp->mac[1] << 16 | ifp->mac[2] << 8 | ifp->mac[3];
+  ENET->PAUR |= (ifp->mac[4] << 24 | ifp->mac[5] << 16);
+  ENET->MSCR = ((d->mdc_cr & 0x3f) << 1) | ((d->mdc_holdtime & 7) << 8);
+  ENET->EIMR = MG_BIT(25);             // Enable RX interrupt
+  ENET->ECR |= MG_BIT(8) | MG_BIT(1);  // DBSWP, Enable
+  ENET->RDAR = 0;                      // activate RX descriptors ring
+  return true;
+}
+
+static size_t mg_tcpip_driver_rw612_tx(const void *buf, size_t len,
+                                       struct mg_tcpip_if *ifp) {
+  if (len > sizeof(s_txbuf[s_txno])) {
+    MG_ERROR(("Frame too big, %ld", (long) len));
+    len = 0;  // Frame is too big
+  } else if (((s_txdesc[s_txno][0] & MG_BIT(31)) != 0)) {
+    ifp->nerr++;
+    MG_ERROR(("No free descriptors"));
+    len = 0;  // All descriptors are busy, fail
+  } else {
+    memcpy(s_txbuf[s_txno], buf, len);
+    s_txdesc[s_txno][0] = len | MG_BIT(27) | MG_BIT(26);  // last buffer, crc
+    if (s_txno == ETH_DESC_CNT - 1) {
+      s_txdesc[s_txno][0] |= MG_BIT(29);  // wrap
+    }
+    s_txdesc[s_txno][0] |= MG_BIT(31);  // release ownership
+    MG_DSB();
+    ENET->TDAR = 0;
+    // MG_INFO(("s_txdesc[%d][0]: 0x%x", s_txno, s_txdesc[s_txno][0]));
+    if (++s_txno >= ETH_DESC_CNT) s_txno = 0;
+  }
+
+  return len;
+}
+
+static bool mg_tcpip_driver_rw612_up(struct mg_tcpip_if *ifp) {
+  struct mg_tcpip_driver_rw612_data *d =
+      (struct mg_tcpip_driver_rw612_data *) ifp->driver_data;
+  uint8_t speed = MG_PHY_SPEED_10M;
+  bool up = false, full_duplex = false;
+  struct mg_phy phy = {eth_read_phy, eth_write_phy};
+  up = mg_phy_up(&phy, d->phy_addr, &full_duplex, &speed);
+  if ((ifp->state == MG_TCPIP_STATE_DOWN) && up) {  // link state just went up
+    // tmp = reg with flags set to the most likely situation: 100M full-duplex
+    // if(link is slow or half) set flags otherwise
+    // reg = tmp
+    if (speed == MG_PHY_SPEED_100M && (ENET->RCR & MG_BIT(9))) {
+      ENET->RCR &= ~MG_BIT(9);
+    } else if (speed == MG_PHY_SPEED_10M && (ENET->RCR & MG_BIT(9)) == 0) {
+      ENET->RCR |= MG_BIT(9);
+    }
+    if (full_duplex && (ENET->TCR & MG_BIT(2)) == 0) {
+      ENET->ECR &= ~MG_BIT(1);
+      ENET->TCR |= MG_BIT(2);
+      ENET->ECR |= MG_BIT(1);
+    } else if (!full_duplex && (ENET->TCR & MG_BIT(2))) {
+      ENET->ECR &= ~MG_BIT(1);
+      ENET->TCR &= ~MG_BIT(2);
+      ENET->ECR |= MG_BIT(1);
+    }
+    MG_INFO(("Link is %uM %s-duplex",
+             speed == MG_PHY_SPEED_10M
+                 ? 10
+                 : (speed == MG_PHY_SPEED_100M ? 100 : 1000),
+             full_duplex ? "full" : "half"));
+  }
+  return up;
+}
+
+void ENET_IRQHandler(void) {
+  if (ENET->EIR & MG_BIT(25)) {
+    ENET->EIR = MG_BIT(25); // Ack RX
+    for (uint32_t i = 0; i < 10; i++) {  // read as they arrive but not forever
+      if ((s_rxdesc[s_rxno][0] & MG_BIT(31)) != 0) break;  // exit when done
+      // skip partial/errored frames
+      if ((s_rxdesc[s_rxno][0] & MG_BIT(27)) &&
+          !(s_rxdesc[s_rxno][0] &
+            (MG_BIT(21) | MG_BIT(20) | MG_BIT(18) | MG_BIT(17) | MG_BIT(16)))) {
+        size_t len = s_rxdesc[s_rxno][0] & 0xffff;
+        mg_tcpip_qwrite(s_rxbuf[s_rxno], len, s_ifp);
+        s_rxdesc[s_rxno][0] |= MG_BIT(31);  // OWN bit: handle control to DMA
+        MG_DSB();
+        ENET->RDAR = 0;
+        if (++s_rxno >= ETH_DESC_CNT) s_rxno = 0;
+      }
+    }
+  }
+}
+
+struct mg_tcpip_driver mg_tcpip_driver_rw612 = {mg_tcpip_driver_rw612_init,
+                                                mg_tcpip_driver_rw612_tx, NULL,
+                                                mg_tcpip_driver_rw612_up};
+#endif
+
+#ifdef MG_ENABLE_LINES
 #line 1 "src/drivers/same54.c"
 #endif
 
@@ -21690,19 +22044,18 @@ void EMAC_RX_IRQHandler(void) {
     uint32_t i;
     //MG_INFO(("RX interrupt"));
     for (i = 0; i < 10; i++) {   // read as they arrive but not forever
-      if ((s_rxdesc[s_rxno][3] & SWAP32(MG_BIT(29))) == 0) {
-        uint32_t len = SWAP32(s_rxdesc[s_rxno][3]) & 0xffff;
-        //MG_INFO(("recv len: %d", len));
-        //mg_hexdump(s_rxbuf[s_rxno], len);
-        mg_tcpip_qwrite(s_rxbuf[s_rxno], len > 4 ? len - 4 : len, s_ifp);
-        uint32_t flags = s_rxdesc[s_rxno][3];
-        s_rxdesc[s_rxno][3] = SWAP32(MG_BIT(29));
-        s_rxdesc[s_rxno][2] = SWAP32(ETH_PKT_SIZE);
-        EMAC->RXCP[0] = (uint32_t) &s_rxdesc[s_rxno][0];
-        if (flags & SWAP32(MG_BIT(28))) {
-          //MG_INFO(("EOQ detected"));
-          EMAC->RXHDP[0] = (uint32_t) &s_rxdesc[0][0];
-        }
+      if (s_rxdesc[s_rxno][3] & SWAP32(MG_BIT(29))) break;
+      uint32_t len = SWAP32(s_rxdesc[s_rxno][3]) & 0xffff;
+      //MG_INFO(("recv len: %d", len));
+      //mg_hexdump(s_rxbuf[s_rxno], len);
+      mg_tcpip_qwrite(s_rxbuf[s_rxno], len > 4 ? len - 4 : len, s_ifp);
+      uint32_t flags = s_rxdesc[s_rxno][3];
+      s_rxdesc[s_rxno][3] = SWAP32(MG_BIT(29));
+      s_rxdesc[s_rxno][2] = SWAP32(ETH_PKT_SIZE);
+      EMAC->RXCP[0] = (uint32_t) &s_rxdesc[s_rxno][0];
+      if (flags & SWAP32(MG_BIT(28))) {
+        //MG_INFO(("EOQ detected"));
+        EMAC->RXHDP[0] = (uint32_t) &s_rxdesc[0][0];
       }
       if (++s_rxno >= ETH_DESC_CNT) s_rxno = 0;
     }
@@ -22126,16 +22479,15 @@ void ETH0_0_IRQHandler(void) {
 
   // check if a frame was received
   if (irq_status & MG_BIT(6)) {
-    for (uint8_t i = 0; i < ETH_DESC_CNT; i++) {
-      if ((s_rxdesc[s_rxno][0] & MG_BIT(31)) == 0) {
-        size_t len = (s_rxdesc[s_rxno][0] & 0x3fff0000) >> 16;
-        mg_tcpip_qwrite(s_rxbuf[s_rxno], len, s_ifp);
-        s_rxdesc[s_rxno][0] = MG_BIT(31);   // OWN bit: handle control to DMA
-        // Resume processing
-        ETH0->STATUS = MG_BIT(7) | MG_BIT(6); // clear RU and RI
-        ETH0->RECEIVE_POLL_DEMAND = 0;
-        if (++s_rxno >= ETH_DESC_CNT) s_rxno = 0;
-      }
+    for (uint8_t i = 0; i < 10; i++) { // read as they arrive, but not forever
+      if (s_rxdesc[s_rxno][0] & MG_BIT(31)) break;
+      size_t len = (s_rxdesc[s_rxno][0] & 0x3fff0000) >> 16;
+      mg_tcpip_qwrite(s_rxbuf[s_rxno], len, s_ifp);
+      s_rxdesc[s_rxno][0] = MG_BIT(31);   // OWN bit: handle control to DMA
+      // Resume processing
+      ETH0->STATUS = MG_BIT(7) | MG_BIT(6); // clear RU and RI
+      ETH0->RECEIVE_POLL_DEMAND = 0;
+      if (++s_rxno >= ETH_DESC_CNT) s_rxno = 0;
     }
     ETH0->STATUS = MG_BIT(6);
   }
@@ -22380,13 +22732,12 @@ static bool mg_tcpip_driver_xmc7_up(struct mg_tcpip_if *ifp) {
 void ETH_IRQHandler(void) {
   uint32_t irq_status = ETH0->INT_STATUS;
   if (irq_status & MG_BIT(1)) {
-    for (uint8_t i = 0; i < ETH_DESC_CNT; i++) {
-      if (s_rxdesc[s_rxno][0] & MG_BIT(0)) {
-        size_t len = s_rxdesc[s_rxno][1] & (MG_BIT(13) - 1);
-        mg_tcpip_qwrite(s_rxbuf[s_rxno], len, s_ifp);
-        s_rxdesc[s_rxno][0] &= ~MG_BIT(0);  // OWN bit: handle control to DMA
-        if (++s_rxno >= ETH_DESC_CNT) s_rxno = 0;
-      }
+    for (uint8_t i = 0; i < 10; i++) { // read as they arrive, but not forever
+      if ((s_rxdesc[s_rxno][0] & MG_BIT(0)) == 0) break;
+      size_t len = s_rxdesc[s_rxno][1] & (MG_BIT(13) - 1);
+      mg_tcpip_qwrite(s_rxbuf[s_rxno], len, s_ifp);
+      s_rxdesc[s_rxno][0] &= ~MG_BIT(0);  // OWN bit: handle control to DMA
+      if (++s_rxno >= ETH_DESC_CNT) s_rxno = 0;
     }
   }
 

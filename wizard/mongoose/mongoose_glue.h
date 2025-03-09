@@ -66,13 +66,16 @@ void glue_update_state(void);
 
 // Firmware Glue
 
-bool glue_check_save(void);
-void glue_start_save(void);
-bool glue_check_reboot(void);
-void glue_start_reboot(void);
+void glue_start_save(void);  // Start an action
+bool glue_check_save(void);  // Check if action is still in progress
+
+void glue_start_reboot(void);  // Start an action
+bool glue_check_reboot(void);  // Check if action is still in progress
+
 void *glue_ota_begin_firmware_update(char *file_name, size_t total_size);
 bool glue_ota_end_firmware_update(void *context);
 bool glue_ota_write_firmware_update(void *context, void *buf, size_t len);
+
 struct settings {
   bool gps_pass;
   char gps_sync[12];

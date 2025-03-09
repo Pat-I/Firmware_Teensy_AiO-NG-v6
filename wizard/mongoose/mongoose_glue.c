@@ -8,6 +8,8 @@
 #include "Arduino.h"
 #include "mongoose_glue.h"
 
+static struct settings s_settings = {false, "60ms-F9P", 192, 168, 5, 126, "AiO v5.0d Web GUI - Feb 11 2025 13:47:11"};
+
 void glue_init(void) {
   //MG_DEBUG(("Custom init done"));
 }
