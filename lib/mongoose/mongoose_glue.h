@@ -17,7 +17,6 @@ extern "C" {
 #define WIZARD_ENABLE_HTTP_UI_LOGIN 0
 
 #define WIZARD_ENABLE_WEBSOCKET 0
-#define WIZARD_WEBSOCKET_TIMER_MS 50
 
 #define WIZARD_ENABLE_MQTT 0
 #define WIZARD_MQTT_URL ""
@@ -41,7 +40,9 @@ extern "C" {
 void mongoose_init(void);    // Initialise Mongoose
 void mongoose_poll(void);    // Poll Mongoose
 extern struct mg_mgr g_mgr;  // Mongoose event manager
-void glue_init(void);        // Called at the end of mongoose_init()
+
+void mongoose_set_http_handlers(const char *name, ...);
+void mongoose_add_ws_handler(unsigned ms, void (*)(struct mg_connection *));
 
 #define run_mongoose() \
   do {                 \

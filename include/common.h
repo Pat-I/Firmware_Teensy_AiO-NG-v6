@@ -20,6 +20,9 @@
 #include "mongoose_glue.h"
 #include "RingBuf.h"
 
+// Firmware version variable
+char inoVersion[] = "AiO-NG-v6.0.0";
+
 // Networking variables
 struct NetConfigStruct
 {

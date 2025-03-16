@@ -55,45 +55,6 @@ void load_gps()
     EEPROM.get(400, gpsConfig);
 }
 
-// Save the config values from the GUI to firmware variables and EEPROM
-extern "C" void save_config()
-{
-    Serial.println("Saving config ...");
-    glue_get_settings(&aio_settings);
-    MG_DEBUG(("aio_settings: %s,%d,%d,%d,%d,%s,%d", aio_settings.fversion, aio_settings.bd_ip1, aio_settings.bd_ip2, aio_settings.bd_ip3, aio_settings.bd_ip4, aio_settings.gps_sync, aio_settings.gps_pass));
-
-    netConfig.currentIP[0] = aio_settings.bd_ip1;
-    netConfig.currentIP[1] = aio_settings.bd_ip2;
-    netConfig.currentIP[2] = aio_settings.bd_ip3;
-    netConfig.currentIP[3] = aio_settings.bd_ip4;
-    save_current_net();
-
-    strcpy(gpsConfig.gpsSync, aio_settings.gps_sync);
-    gpsConfig.gpsPass = aio_settings.gps_pass;
-    save_gps();
-}
-
-// Load the config values from the firmware to the GUI
-extern "C" void load_config()
-{
-    Serial.println("Loading config ...");
-
-    load_current_net();
-    aio_settings.bd_ip1 = netConfig.currentIP[0];
-    aio_settings.bd_ip2 = netConfig.currentIP[1];
-    aio_settings.bd_ip3 = netConfig.currentIP[2];
-    aio_settings.bd_ip4 = netConfig.currentIP[3];
-    load_gps();
-    strcpy(aio_settings.gps_sync, gpsConfig.gpsSync);
-    aio_settings.gps_pass = gpsConfig.gpsPass;
-
-    strcpy(aio_settings.fversion, inoVersion);
-
-    Serial.printf("aio_settings: %s,%d,%d,%d,%d,%s,%d\r\n", aio_settings.fversion, aio_settings.bd_ip1, aio_settings.bd_ip2, aio_settings.bd_ip3, aio_settings.bd_ip4, aio_settings.gps_sync, aio_settings.gps_pass);
-    glue_set_settings(&aio_settings);
-    glue_update_state();
-}
-
 // Load the IP address from EEPROM
 void ipSetup()
 {
