@@ -17,6 +17,11 @@ void save_default_net()
     EEPROM.put(300, defaultNet);
 }
 
+void save_default_GPS()
+{
+    EEPROM.put(400, defaultGPS);
+}
+
 // Write current IP to EEPROM
 void save_current_net()
 {
@@ -67,6 +72,9 @@ void ipSetup()
         save_default_net();
         load_current_net();
         Serial.print("\r\n\nWriting IP address defaults to EEPROM\r\n");
+
+        save_default_GPS();
+        Serial.print("\r\n\nWriting GPS defaults to EEPROM\r\n");
     }
     else
     {
