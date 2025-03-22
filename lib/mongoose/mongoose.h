@@ -1,5 +1,5 @@
 // Copyright (c) 2004-2013 Sergey Lyubka
-// Copyright (c) 2013-2024 Cesanta Software Limited
+// Copyright (c) 2013-2025 Cesanta Software Limited
 // All rights reserved
 //
 // This software is dual-licensed: you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 #ifndef MONGOOSE_H
 #define MONGOOSE_H
 
-#define MG_VERSION "7.16"
+#define MG_VERSION "7.17"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1068,7 +1068,7 @@ struct mg_fs {
 };
 
 extern struct mg_fs mg_fs_posix;   // POSIX open/close/read/write/seek
-extern struct mg_fs mg_fs_packed;  // Packed FS, see examples/device-dashboard
+extern struct mg_fs mg_fs_packed;  // see tutorials/core/embedded-filesystem
 extern struct mg_fs mg_fs_fat;     // FAT FS
 
 // File descriptor
@@ -2687,9 +2687,10 @@ void mg_rpc_list(struct mg_rpc_req *r);
 #define MG_OTA_CH32V307 100 // WCH CH32V307
 #define MG_OTA_U2A 200      // Renesas U2A16, U2A8, U2A6
 #define MG_OTA_RT1020 300   // IMXRT1020
-#define MG_OTA_RT1060 301   // IMXRT1060
-#define MG_OTA_RT1064 302   // IMXRT1064
-#define MG_OTA_RT1170 303   // IMXRT1170
+#define MG_OTA_RT1050 301   // IMXRT1050
+#define MG_OTA_RT1060 302   // IMXRT1060
+#define MG_OTA_RT1064 303   // IMXRT1064
+#define MG_OTA_RT1170 304   // IMXRT1170
 #define MG_OTA_MCXN 310 	  // MCXN947
 #define MG_OTA_FLASH 900    // OTA via an internal flash
 #define MG_OTA_ESP32 910    // ESP32 OTA implementation
@@ -2804,6 +2805,7 @@ void mg_tcpip_arp_request(struct mg_tcpip_if *ifp, uint32_t ip, uint8_t *mac);
 
 extern struct mg_tcpip_driver mg_tcpip_driver_stm32f;
 extern struct mg_tcpip_driver mg_tcpip_driver_w5500;
+extern struct mg_tcpip_driver mg_tcpip_driver_w5100;
 extern struct mg_tcpip_driver mg_tcpip_driver_tm4c;
 extern struct mg_tcpip_driver mg_tcpip_driver_tms570;
 extern struct mg_tcpip_driver mg_tcpip_driver_stm32h;
@@ -2815,6 +2817,7 @@ extern struct mg_tcpip_driver mg_tcpip_driver_xmc;
 extern struct mg_tcpip_driver mg_tcpip_driver_xmc7;
 extern struct mg_tcpip_driver mg_tcpip_driver_ppp;
 extern struct mg_tcpip_driver mg_tcpip_driver_pico_w;
+extern struct mg_tcpip_driver mg_tcpip_driver_rw612;
 
 // Drivers that require SPI, can use this SPI abstraction
 struct mg_tcpip_spi {
@@ -2831,7 +2834,7 @@ struct mg_tcpip_spi {
 // timestamp in milliseconds since connection init time.
 //
 // Test (run in two separate terminals):
-//   make -C examples/http-server/ CFLAGS_EXTRA=-DMG_ENABLE_PROFILE=1
+//   make -C tutorials/http/http-server/ CFLAGS_EXTRA=-DMG_ENABLE_PROFILE=1
 //   curl localhost:8000
 // Output:
 //   1ea1f1e7 2 net.c:150:mg_close_conn      3 profile:                                                            
@@ -3025,6 +3028,52 @@ struct mg_tcpip_driver_ra_data {
   uint16_t irqno;    // IRQn, R_ICU->IELSR[irqno]
   uint8_t phy_addr;  // PHY address
 };
+
+#endif
+
+
+#if MG_ENABLE_TCPIP && defined(MG_ENABLE_DRIVER_RW612) && MG_ENABLE_DRIVER_RW612
+
+struct mg_tcpip_driver_rw612_data {
+  // 38.1.8 MII Speed Control Register (MSCR)
+  // MDC clock frequency must not exceed 2.5 MHz and is calculated as follows:
+  // MDC_freq = P_clock / ((mdc_cr + 1) * 2), where P_clock is the
+  // peripheral bus clock.
+  // IEEE802.3 clause 22 defines a minimum of 10 ns for the hold time on the
+  // MDIO output. Depending on the host bus frequency, the setting may need
+  // to be increased.
+  int mdc_cr;
+  int mdc_holdtime; // Valid values: [0-7]
+  uint8_t phy_addr;
+};
+
+#ifndef MG_TCPIP_PHY_ADDR
+#define MG_TCPIP_PHY_ADDR 2
+#endif
+
+#ifndef MG_DRIVER_MDC_CR
+#define MG_DRIVER_MDC_CR 51
+#endif
+
+#ifndef MG_DRIVER_MDC_HOLDTIME
+#define MG_DRIVER_MDC_HOLDTIME 3
+#endif
+
+#define MG_TCPIP_DRIVER_INIT(mgr)                                 \
+  do {                                                            \
+    static struct mg_tcpip_driver_rw612_data driver_data_;       \
+    static struct mg_tcpip_if mif_;                               \
+    driver_data_.mdc_cr = MG_DRIVER_MDC_CR;                       \
+    driver_data_.phy_addr = MG_TCPIP_PHY_ADDR;                    \
+    mif_.ip = MG_TCPIP_IP;                                        \
+    mif_.mask = MG_TCPIP_MASK;                                    \
+    mif_.gw = MG_TCPIP_GW;                                        \
+    mif_.driver = &mg_tcpip_driver_rw612;                        \
+    mif_.driver_data = &driver_data_;                             \
+    MG_SET_MAC_ADDRESS(mif_.mac);                                 \
+    mg_tcpip_init(mgr, &mif_);                                    \
+    MG_INFO(("Driver: rw612, MAC: %M", mg_print_mac, mif_.mac)); \
+  } while (0)
 
 #endif
 
