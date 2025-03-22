@@ -4,13 +4,12 @@
 // You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
 // Like most Arduino code, portions of this are based on other open source Arduino code with a compatiable license.
 
-const char inoVersion[] = "AiO v5.0d Web GUI - " __DATE__ " " __TIME__;
-
 #include "Arduino.h"
 #include "common.h"
 #include "debug.h"
 #include "udpHandlers.h"
 #include "gnssHandlers.h"
+#include "mgHandlers.h"
 #include "setup.h"
 #include "mongooseStart.h"
 #include "KeyaCANBUS.h"
@@ -20,7 +19,7 @@ const char inoVersion[] = "AiO v5.0d Web GUI - " __DATE__ " " __TIME__;
 
 void setup()
 {
-  delay(3000);              // Delay for tesing to allow opening serial terminal to see output
+  delay(10000);              // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");
@@ -31,10 +30,14 @@ void setup()
   // ** IP loading & Mongoose/Eth init needs to be first **
   ipSetup();                      // Load the IP address from EEPROM and setup the gateway & broadcast addresses
   load_gps();                     // Load the GPS settings from EEPROM
-  load_config();                  // Sync the firmware EEPROM values to the GUI
+  //load_config();                  // Sync the firmware EEPROM values to the GUI
+  //set_settings();
   ethernet_init();                // Bring up the ethernet hardware
   mongoose_init();                // Bring up the mongoose services
   udpSetup();                     // Bring up the UDP connections to/from AgIO
+
+  mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
+  mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
 
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);

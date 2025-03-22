@@ -20,6 +20,9 @@
 #include "mongoose_glue.h"
 #include "RingBuf.h"
 
+// Firmware version variable
+char inoVersion[] = "AiO-NG-v6.0.0";
+
 // Networking variables
 struct NetConfigStruct
 {
@@ -174,6 +177,7 @@ struct GPSConfigStruct
   bool gpsPass = false; // False = GPS neeeds to send GGA, VTG & HPR messages. True = GPS needs to send KSXT messages only.
 };
 GPSConfigStruct gpsConfig;
+GPSConfigStruct defaultGPS = { "10ms-UM98x", 0};
 
 const uint8_t syncLUT[12] = {10,9,8,7,6,5,4,3,2,1,0};
 

@@ -17,7 +17,6 @@ extern "C" {
 #define WIZARD_ENABLE_HTTP_UI_LOGIN 0
 
 #define WIZARD_ENABLE_WEBSOCKET 0
-#define WIZARD_WEBSOCKET_TIMER_MS 50
 
 #define WIZARD_ENABLE_MQTT 0
 #define WIZARD_MQTT_URL ""
@@ -41,7 +40,9 @@ extern "C" {
 void mongoose_init(void);    // Initialise Mongoose
 void mongoose_poll(void);    // Poll Mongoose
 extern struct mg_mgr g_mgr;  // Mongoose event manager
-void glue_init(void);        // Called at the end of mongoose_init()
+
+void mongoose_set_http_handlers(const char *name, ...);
+void mongoose_add_ws_handler(unsigned ms, void (*)(struct mg_connection *));
 
 #define run_mongoose() \
   do {                 \
@@ -66,13 +67,16 @@ void glue_update_state(void);
 
 // Firmware Glue
 
-bool glue_check_save(void);
-void glue_start_save(void);
-bool glue_check_reboot(void);
-void glue_start_reboot(void);
+void glue_start_save(void);  // Start an action
+bool glue_check_save(void);  // Check if action is still in progress
+
+void glue_start_reboot(void);  // Start an action
+bool glue_check_reboot(void);  // Check if action is still in progress
+
 void *glue_ota_begin_firmware_update(char *file_name, size_t total_size);
 bool glue_ota_end_firmware_update(void *context);
 bool glue_ota_write_firmware_update(void *context, void *buf, size_t len);
+
 struct settings {
   bool gps_pass;
   char gps_sync[12];
