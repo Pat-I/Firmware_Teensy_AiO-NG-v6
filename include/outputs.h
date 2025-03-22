@@ -66,15 +66,15 @@ void outputsInit() {
 
 
 const uint8_t numMachineOutputs = 6;
-const uint8_t machinePCA9685OutputPins[numMachineOutputs] = { 1, 0, 5, 4, 9, 10 };  // the pairs of pins need to be swapped from the schematic!?!
+const uint8_t machinePCA9685OutputPins[numMachineOutputs] = { 0, 1, 4, 5, 10, 9 };
 //const uint8_t Machine_PCA9685_DRV_OFF_Pins[3] = { 2, 6, 8 };
 //const uint8_t Machine_PCA9685_DRV_Sleep_Pins[3] = { 13, 3, 7 };
 
 void initMachineOutputs() {
   // set all DRV signals HIGH before waking so that outputs are Hi-Z (PWM bridge mode)
   for (uint8_t i = 0; i < numMachineOutputs; i++) {
-    //digitalWrite(machineOutputPins[i], !machinePTR->config.isPinActiveHigh);  // set OFF
-    outputs.setPin(machinePCA9685OutputPins[i], 0, !machinePTR->config.isPinActiveHigh); // HIGH signal sets DRV output HI-Z
+    // Set the pins to 0v (gnd) if not inverted, +12v (board power) if inverted
+    outputs.setPin(machinePCA9685OutputPins[i], 0, machinePTR->config.isPinActiveHigh);
   }
 
   // issue DRV nSLEEP reset pulse to wake them up
@@ -93,9 +93,18 @@ void updateMachineOutputs()
     Serial.printf("\r\n- Pin %2i: %i ", machinePCA9685OutputPins[i-1], machinePTR->states.functions[machinePTR->config.pinFunction[i]]);
     Serial.print(machinePTR->functionNames[machinePTR->config.pinFunction[i]]);
 
+    // Control the "invert" flag of setPin function
+    // leaving the "val" set to 0 always
+    // Truth Table
+    // Active High    Function      DRV8243 Pin    Invert
+    //     1             1             High           0
+    //     1             0             Low            1
+    //     0             1             Low            1
+    //     0             0             High           0
     outputs.setPin(
-      machinePCA9685OutputPins[i-1], 0,
-      machinePTR->states.functions[machinePTR->config.pinFunction[i]] == machinePTR->config.isPinActiveHigh  // == does an XOR operation
+      machinePCA9685OutputPins[i-1], // pin
+      0, // val
+      machinePTR->states.functions[machinePTR->config.pinFunction[i]] != machinePTR->config.isPinActiveHigh // invert
     );
   }
   Serial.println();
