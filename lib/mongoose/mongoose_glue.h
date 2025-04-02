@@ -44,6 +44,15 @@ extern struct mg_mgr g_mgr;  // Mongoose event manager
 void mongoose_set_http_handlers(const char *name, ...);
 void mongoose_add_ws_handler(unsigned ms, void (*)(struct mg_connection *));
 
+struct mongoose_mqtt_handlers {
+  struct mg_connection *(*connect_fn)(mg_event_handler_t);
+  void (*tls_init_fn)(struct mg_connection *);
+  void (*on_connect_fn)(struct mg_connection *, int);
+  void (*on_message_fn)(struct mg_connection *, struct mg_str, struct mg_str);
+  void (*on_cmd_fn)(struct mg_connection *, struct mg_mqtt_message *);
+};
+void mongoose_set_mqtt_handlers(struct mongoose_mqtt_handlers *);
+
 #define run_mongoose() \
   do {                 \
     mongoose_init();   \
@@ -67,10 +76,10 @@ void glue_update_state(void);
 
 // Firmware Glue
 
-void glue_start_save(void);  // Start an action
+void glue_start_save(struct mg_str);  // Start an action
 bool glue_check_save(void);  // Check if action is still in progress
 
-void glue_start_reboot(void);  // Start an action
+void glue_start_reboot(struct mg_str);  // Start an action
 bool glue_check_reboot(void);  // Check if action is still in progress
 
 void *glue_ota_begin_firmware_update(char *file_name, size_t total_size);

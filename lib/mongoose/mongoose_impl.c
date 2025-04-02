@@ -86,14 +86,9 @@ struct apihandler_ota {
 
 struct apihandler_action {
   struct apihandler common;
-  bool (*checker)(void);  // Checker function for actions
-  void (*starter)(void);  // Starter function for actions
+  bool (*checker)(void);           // Checker function for actions
+  void (*starter)(struct mg_str);  // Starter function for actions
 };
-
-// struct apihandler_graph {
-//   struct apihandler common;
-//   size_t (*grapher)(uint32_t, uint32_t, uint32_t *, double *, size_t);
-// };
 
 struct apihandler_data {
   struct apihandler common;
@@ -175,7 +170,8 @@ void mongoose_set_http_handlers(const char *name, ...) {
     ((struct apihandler_data *) h)->setter = va_arg(ap, void (*)(void *));
   } else if (strcmp(h->type, "action") == 0) {
     ((struct apihandler_action *) h)->checker = va_arg(ap, bool (*)(void));
-    ((struct apihandler_action *) h)->starter = va_arg(ap, void (*)(void));
+    ((struct apihandler_action *) h)->starter =
+        va_arg(ap, void (*)(struct mg_str));
   } else if (strcmp(h->type, "ota") == 0 || strcmp(h->type, "upload") == 0) {
     ((struct apihandler_ota *) h)->opener =
         va_arg(ap, void *(*) (char *, size_t));
@@ -354,29 +350,19 @@ static void handle_uploads(struct mg_connection *c, int ev, void *ev_data) {
   if (ev == MG_EV_HTTP_HDRS && us->marker == 0) {
     struct mg_http_message *hm = (struct mg_http_message *) ev_data;
     struct apihandler *h = find_handler(hm);
-    struct apihandler_upload *hu = (struct apihandler_upload *) h;
-#if WIZARD_ENABLE_HTTP_UI_LOGIN
-    struct user *u = authenticate(hm);
-    if (mg_match(hm->uri, mg_str("/api/#"), NULL) &&
-        (u == NULL ||
-         (h != NULL && (u->level < h->read_level ||
-                        (hm->body.len > 0 && u->level < h->write_level))))) {
-      // MG_INFO(("DENY: %d, %d %d", u->level, h->read_level, h->write_level));
-      mg_http_reply(c, 403, JSON_HEADERS, "Not Authorised\n");
-    } else
-#endif
-        if (h != NULL &&
-            (strcmp(h->type, "upload") == 0 || strcmp(h->type, "ota") == 0)) {
-      // OTA/upload endpoints
+    if (h != NULL &&
+        (strcmp(h->type, "upload") == 0 || strcmp(h->type, "ota") == 0)) {
+      struct apihandler_upload *hu = (struct apihandler_upload *) h;
       prep_upload(c, hm, hu->opener, hu->closer, hu->writer);
     }
   }
 }
 
 static void handle_action(struct mg_connection *c, struct mg_http_message *hm,
-                          bool (*check_fn)(void), void (*start_fn)(void)) {
+                          bool (*check_fn)(void),
+                          void (*start_fn)(struct mg_str)) {
   if (hm->body.len > 0) {
-    start_fn();
+    start_fn(hm->body);
     if (check_fn()) {
       struct action_state *as = (struct action_state *) c->data;
       as->marker = 'A';
@@ -513,6 +499,23 @@ void glue_update_state(void) {
 
 // Mongoose event handler function, gets called by the mg_mgr_poll()
 static void http_ev_handler(struct mg_connection *c, int ev, void *ev_data) {
+  if (ev == MG_EV_HTTP_HDRS && c->data[0] == 0) {
+#if WIZARD_ENABLE_HTTP_UI_LOGIN
+    struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+    if (mg_match(hm->uri, mg_str("/api/#"), NULL) ||
+        mg_match(hm->uri, mg_str("/websocket"), NULL)) {
+      struct apihandler *h = find_handler(hm);
+      struct user *u = authenticate(hm);
+      if ((u == NULL ||
+           (h != NULL && (u->level < h->read_level ||
+                          (hm->body.len > 0 && u->level < h->write_level))))) {
+        mg_http_reply(c, 403, JSON_HEADERS, "Not Authorised\n");
+        c->data[0] = 'Z';  // Mark this connection as handled
+      }
+    }
+#endif
+  }
+
   // We're checking c->is_websocket cause WS connection use c->data
   if (c->is_websocket == 0) handle_uploads(c, ev, ev_data);
   if (ev == MG_EV_POLL && c->is_websocket == 0 && c->data[0] == 'A') {
@@ -522,22 +525,13 @@ static void http_ev_handler(struct mg_connection *c, int ev, void *ev_data) {
       mg_http_reply(c, 200, JSON_HEADERS, "true");
       memset(as, 0, sizeof(*as));
     }
-  } else if (ev == MG_EV_HTTP_MSG && c->is_websocket == 0 &&
-             c->data[0] != 'U') {
+  } else if (ev == MG_EV_HTTP_MSG && c->is_websocket == 0 && c->data[0] == 0) {
     struct mg_http_message *hm = (struct mg_http_message *) ev_data;
 #if WIZARD_ENABLE_HTTP || WIZARD_ENABLE_HTTPS
     struct apihandler *h = find_handler(hm);
 #if WIZARD_ENABLE_HTTP_UI_LOGIN
     struct user *u = authenticate(hm);
-    if (mg_match(hm->uri, mg_str("/api/#"), NULL) &&
-        (u == NULL ||
-         (h != NULL && (u->level < h->read_level ||
-                        (hm->body.len > 0 && u->level < h->write_level))))) {
-      // MG_INFO(("DENY: %d, %d %d", u->level, h->read_level, h->write_level));
-      mg_http_reply(c, 403, JSON_HEADERS, "Not Authorised\n");
-    } else if (mg_match(hm->uri, mg_str("/websocket"), NULL) && u == NULL) {
-      mg_http_reply(c, 403, JSON_HEADERS, "Not Authorised\n");
-    } else if (mg_match(hm->uri, mg_str("/api/login"), NULL)) {
+    if (mg_match(hm->uri, mg_str("/api/login"), NULL)) {
       handle_login(c, u);
     } else if (mg_match(hm->uri, mg_str("/api/logout"), NULL)) {
       handle_logout(c);
@@ -552,7 +546,7 @@ static void http_ev_handler(struct mg_connection *c, int ev, void *ev_data) {
                     s_device_change_version);
     } else if (h != NULL) {
       handle_api_call(c, hm, h);
-    } else
+    } else if (c->data[0] == 0)
 #endif  // WIZARD_ENABLE_HTTP || WIZARD_ENABLE_HTTPS
     {
 #if WIZARD_ENABLE_HTTP_UI
@@ -567,9 +561,9 @@ static void http_ev_handler(struct mg_connection *c, int ev, void *ev_data) {
 #endif  // WIZARD_ENABLE_HTTP_UI
     }
     // Show this request
-    MG_DEBUG(("%lu %.*s %.*s %lu -> %.*s", c->id, hm->method.len,
+    MG_DEBUG(("%lu %.*s %.*s %lu -> %.*s %lu", c->id, hm->method.len,
               hm->method.buf, hm->uri.len, hm->uri.buf, hm->body.len,
-              c->send.len > 15 ? 3 : 0, &c->send.buf[9]));
+              c->send.len > 15 ? 3 : 0, &c->send.buf[9], c->send.len));
   } else if (ev == MG_EV_WS_MSG) {
     // Got websocket frame. Received data is wm->data
     struct mg_ws_message *wm = (struct mg_ws_message *) ev_data;
@@ -661,18 +655,22 @@ static void sntp_timer(void *param) {
 #endif  // WIZARD_ENABLE_SNTP
 
 #if WIZARD_ENABLE_MQTT
+static struct mongoose_mqtt_handlers s_mqtt_handlers = {
+    glue_mqtt_connect, glue_mqtt_tls_init, glue_mqtt_on_connect,
+    glue_mqtt_on_message, glue_mqtt_on_cmd};
+
 struct mg_connection *g_mqtt_conn;  // MQTT client connection
 
 static void mqtt_event_handler(struct mg_connection *c, int ev, void *ev_data) {
   if (ev == MG_EV_CONNECT) {
-    glue_mqtt_tls_init(c);
+    s_mqtt_handlers.tls_init_fn(c);
   } else if (ev == MG_EV_MQTT_OPEN) {
-    glue_mqtt_on_connect(c, *(int *) ev_data);
+    s_mqtt_handlers.on_connect_fn(c, *(int *) ev_data);
   } else if (ev == MG_EV_MQTT_CMD) {
-    glue_mqtt_on_cmd(c, ev_data);
+    s_mqtt_handlers.on_cmd_fn(c, ev_data);
   } else if (ev == MG_EV_MQTT_MSG) {
     struct mg_mqtt_message *mm = (struct mg_mqtt_message *) ev_data;
-    glue_mqtt_on_message(c, mm->topic, mm->data);
+    s_mqtt_handlers.on_message_fn(c, mm->topic, mm->data);
   } else if (ev == MG_EV_CLOSE) {
     MG_DEBUG(("%lu Closing", c->id));
     g_mqtt_conn = NULL;
@@ -680,10 +678,18 @@ static void mqtt_event_handler(struct mg_connection *c, int ev, void *ev_data) {
 }
 
 static void mqtt_timer(void *arg) {
-  struct mg_mgr *mgr = (struct mg_mgr *) arg;
   if (g_mqtt_conn == NULL) {
-    g_mqtt_conn = glue_mqtt_connect(mgr, mqtt_event_handler);
+    g_mqtt_conn = glue_mqtt_connect(mqtt_event_handler);
   }
+  (void) arg;
+}
+
+void mongoose_set_mqtt_handlers(struct mongoose_mqtt_handlers *h) {
+  if (h->connect_fn) s_mqtt_handlers.connect_fn = h->connect_fn;
+  if (h->tls_init_fn) s_mqtt_handlers.tls_init_fn = h->tls_init_fn;
+  if (h->on_message_fn) s_mqtt_handlers.on_message_fn = h->on_message_fn;
+  if (h->on_connect_fn) s_mqtt_handlers.on_connect_fn = h->on_connect_fn;
+  if (h->on_cmd_fn) s_mqtt_handlers.on_cmd_fn = h->on_cmd_fn;
 }
 #endif  // WIZARD_ENABLE_MQTT
 
