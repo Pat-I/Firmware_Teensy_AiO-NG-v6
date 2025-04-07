@@ -36,9 +36,6 @@ void setup()
   mongoose_init();                // Bring up the mongoose services
   udpSetup();                     // Bring up the UDP connections to/from AgIO
 
-  mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
-  mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
-
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);
 
@@ -56,6 +53,8 @@ void setup()
   machinePTR->setUdpReplyHandler(machinePgnReplies);
   initMachineOutputs();
 
+  mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
+  mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
 
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);
