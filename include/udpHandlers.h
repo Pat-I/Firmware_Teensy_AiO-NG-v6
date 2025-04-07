@@ -449,7 +449,7 @@ void rtcmHandler(struct mg_connection *rtcm, int ev, void *ev_data, void *fn_dat
     return; // Check if IP stack is up.
   if (ev == MG_EV_READ && mg_ntohs(rtcm->rem.port) == 9999 && rtcm->recv.len >= 5)
   {
-    for (int i = 0; i <= rtcm->recv.len; i++)
+    for (size_t i = 0; i <= rtcm->recv.len; i++)
     {
       if (!USB1DTR)
         SerialGPS1.write(rtcm->recv.buf[i]);
@@ -516,7 +516,8 @@ void udpSetup()
   strcat(agioURL, ".255:9999");
 
   sendAgio = mg_connect(&g_mgr, agioURL, NULL, NULL);
-  if (sendAgio == !NULL)
+  //if (sendAgio == !NULL)
+  if (sendAgio->is_writable)
   {
     //agioConnect = true;
     MG_DEBUG(("Connected to AgIO"));

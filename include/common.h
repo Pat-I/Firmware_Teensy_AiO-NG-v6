@@ -26,7 +26,7 @@ char inoVersion[] = "AiO-NG-v6.0.0";
 // Networking variables
 struct NetConfigStruct
 {
-  static const uint8_t defaultIP[5] = {192, 168, 5, 126};
+  static constexpr uint8_t defaultIP[5] = {192, 168, 5, 126};
   uint8_t currentIP[5] = {192, 168, 5, 126};
   uint8_t gatewayIP[5] = {192, 168, 5, 1};
   uint8_t broadcastIP[5] = {192, 168, 5, 255};
