@@ -14,7 +14,7 @@
    Like all Arduino code - copied from somewhere else :)
    So don't claim it as your own
 */
-const uint8_t PWM_Frequency = 3;
+const uint8_t PWM_Frequency = 4;//3;
 const float LOW_HIGH_DEGREES = 3.0; // How many degrees before decreasing Max PWM
 
 bool testBothWasSensors = false;
@@ -111,6 +111,11 @@ void autosteerSetup()
     analogWriteFrequency(PWM1_PIN, 9155);
     analogWriteFrequency(PWM2_PIN, 9155);
   }
+  else if (PWM_Frequency == 4) 
+  {
+    analogWriteFrequency(PWM1_PIN, 18310);
+    analogWriteFrequency(PWM2_PIN, 18310);
+  }
 
   pinMode(SLEEP_PIN, OUTPUT);
   digitalWrite(SLEEP_PIN, LOW); // keep DRV8701 Cytron asleep
@@ -173,6 +178,7 @@ void autoSteerUpdate()
       if (steerReading == LOW)
       {                            // switching OFF
         steerState = steerReading; // set OFF
+        steerStateONTime = 0;
         if (prevSteerReading != steerState)
         {
           //char msg[] = "AutoSteer Switch OFF";
@@ -183,6 +189,7 @@ void autoSteerUpdate()
       else if (steerReading == HIGH && prevSteerReading == LOW)
       {                            // switch ON after prev being OFF
         steerState = steerReading; // set ON
+        steerStateONTime = millis();
         //char msg[] = "AutoSteer Switch ON";
         //char msgTime = 2;
         LEDs.activateBlueFlash(LED_ID::STEER);
@@ -195,6 +202,18 @@ void autoSteerUpdate()
       if (steerReading == HIGH && prevSteerReading == LOW)
       { // button is pressed
         steerState = !steerState;
+        if (steerState)
+        {
+          steerStateONTime = millis(); // set ON time
+          //char msg[] = "AutoSteer Btn ON";
+          //char msgTime = 2;
+        }
+        else
+        {
+          steerStateONTime = 0; // set OFF time
+          //char msg[] = "AutoSteer Btn OFF";
+          //char msgTime = 2;
+        }
         LEDs.activateBlueFlash(LED_ID::STEER);
         /*char *msg;
         if (steerState)
@@ -208,6 +227,8 @@ void autoSteerUpdate()
 
       if (guidanceStatusChanged)
         steerState = guidanceStatus; // allows AoG to turn AS on/off in parallel with Btn
+      if (steerState) {steerStateONTime = millis();}
+      else{steerStateONTime = 0;}
     }
 
     else // No steer switch or button
@@ -217,6 +238,7 @@ void autoSteerUpdate()
       {
         prevSteerReading = steerState;
         steerState = 1;
+        steerStateONTime = millis();
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
 
@@ -225,6 +247,7 @@ void autoSteerUpdate()
       {
         prevSteerReading = steerState;
         steerState = 0;
+        steerStateONTime = 0;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
     }
@@ -252,6 +275,7 @@ void autoSteerUpdate()
       if (pulseCount >= steerConfig.PulseCountMax)
       {
         steerState = 0; // reset values like it turned off
+        steerStateONTime = 0;
         prevSteerReading = !steerState;
       }
     }
@@ -267,6 +291,7 @@ void autoSteerUpdate()
       if (sensorReading >= steerConfig.PulseCountMax)
       {                 // if reading exceeds kickout setpoint
         steerState = 0; // turn OFF autoSteer
+        steerStateONTime = 0;
         prevSteerReading = !steerState;
       }
     }
@@ -276,19 +301,31 @@ void autoSteerUpdate()
     {
       if (keyaDetected)
       {
-        sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
+        //debug MTZ8302
+        //Serial.printf("\r\nKeya current: %i", KeyaCurrentSensorReading);
+        sensorReading = sensorReading * 0.7 + float(abs(KeyaCurrentSensorReading)) * 0.3; // then use keya current data
+        //sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
       }
       else
       { // otherwise continue using analog input on PCB
         sensorSample = (float)analogRead(CURRENT_PIN);
         //Serial << "\r\n" << sensorSample - 45.0;
-        sensorSample -= 45.0;     // zero current offset
+       // Serial.println(pwmDrive);
+        //ERROR: pwmDrive is here always pos, no idea why
+        if (pwmDrive<0) {sensorSample += 60.0;Serial.println("pwm neg");}     // zero current offset // mtz8302: only in one direction +60 instead of always -45
+        
+        sensorSample = sensorSample*sensorMultiplyer;
         //sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
-        sensorReading = sensorReading * 0.7 + sensorSample * 0.3;
+        
+        // set motor current in relation to PWM: PWM 100 = 1
+        sensorReadingByPWM = sensorSample / (0.75 + (float(abs(pwmDrive)) / 400));
+        sensorReading = sensorReading * 0.75 + sensorReadingByPWM * 0.25;
+        //sensorReading = sensorReading * 0.75 + sensorSample * 0.25;
         //Serial << " " << sensorReading << " max:" << steerConfig.PulseCountMax;
         if (sensorReading >= steerConfig.PulseCountMax)
         {
           steerState = 0; // turn OFF autoSteer
+          steerStateONTime = 0;
           prevSteerReading = !steerState;
         }
       }
@@ -369,6 +406,39 @@ void autoSteerUpdate()
 #endif
 
       calcSteeringPID(); // do the pid
+
+      if (pwmDebug)
+      {
+        Serial.print("PWM (av.): ");
+        Serial.print(pwmDrive);
+        Serial.print(" PWMDispl(abs, unfilt.): ");
+        Serial.print(pwmDisplay);
+        Serial.print(" kickout current: ");
+        Serial.print(steerConfig.PulseCountMax);
+        Serial.print(" cur sensor(unfilt.): ");
+        Serial.print(sensorSample);
+        Serial.print(" sens by PWM: ");
+        Serial.print(sensorReadingByPWM);
+        Serial.print(" sens by PWM av: ");
+        Serial.println(sensorReading);
+      }
+
+      // ramp up PWM at first start for about 1 sec, set in HW. Very usefull when using auto move line to center when engageing steering
+      if (steerStateONTime != 0)
+      {
+        float steerTimeSinceStart = millis() - steerStateONTime;
+        if ((steerTimeSinceStart < SteerPWMonStartRampTime) && (!steerConfig.IsDanfoss))
+        {
+          pwmDrive = pwmDrive * (steerTimeSinceStart / SteerPWMonStartRampTime);
+        }
+        else
+          steerStateONTime = 0;
+      }
+
+      if (gpsSpeed < 7) {
+          if (abs(steerAngleError) < 0.1) { pwmDrive = 0; } // do not run steering wheel when angle error is less then 0.1 deg
+          if (gpsSpeed < 0.18) { pwmDrive = 0; } // do not turn steering wheel under 1.8 km/h
+      }
       motorDrive();      // out to motors the pwm value
 
       LEDs.set(LED_ID::STEER, STEER_STATE::AUTOSTEER_ACTIVE, true);
