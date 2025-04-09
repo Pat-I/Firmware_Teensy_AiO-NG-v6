@@ -9,7 +9,8 @@ static uint64_t s_action_timeout_save;  // Time when save ends
 bool glue_check_save(void) {
   return s_action_timeout_save > mg_now(); // Return true if save is in progress
 }
-void glue_start_save(void) {
+void glue_start_save(struct mg_str params) {
+  MG_DEBUG(("Passed parameters: [%.*s]", params.len, params.buf));
   s_action_timeout_save = mg_now() + 1000; // Start save, finish after 1 second
 }
 
@@ -17,7 +18,8 @@ static uint64_t s_action_timeout_reboot;  // Time when reboot ends
 bool glue_check_reboot(void) {
   return s_action_timeout_reboot > mg_now(); // Return true if reboot is in progress
 }
-void glue_start_reboot(void) {
+void glue_start_reboot(struct mg_str params) {
+  MG_DEBUG(("Passed parameters: [%.*s]", params.len, params.buf));
   s_action_timeout_reboot = mg_now() + 1000; // Start reboot, finish after 1 second
 }
 

@@ -404,7 +404,7 @@ void HPR_Handler()
   }
   else
   {
-    if (GGA.fixQuality == 4)
+    if (*GGA.fixQuality == 4)
     {
       ubxParser.ubxData.baseRelRoll = atof(HPR.roll);
     }

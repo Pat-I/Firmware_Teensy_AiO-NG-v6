@@ -83,12 +83,12 @@ void ipSetup()
     }
 }
 
-static uint32_t ipv4str(const char *str)
-{
-    struct mg_addr a = {};
-    mg_aton(mg_str(str), &a);
-    return *(uint32_t *)&a.ip;
-}
+// static uint32_t ipv4str(const char *str)
+// {
+//     struct mg_addr a = {};
+//     mg_aton(mg_str(str), &a);
+//     return *(uint32_t *)&a.ip;
+// }
 
 static uint32_t ipv4ary(const uint8_t input[])
 {
