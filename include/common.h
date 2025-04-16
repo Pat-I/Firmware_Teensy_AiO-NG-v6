@@ -179,6 +179,46 @@ struct GPSConfigStruct
 GPSConfigStruct gpsConfig;
 GPSConfigStruct defaultGPS = { "10ms-UM98x", 0};
 
+struct INSConfigStruct
+{
+  bool insEnable = 0;
+  float insInstallAngle = 0.0;
+  u_int16_t insTimeOut = 1;
+  float insAlignVelocity = 0.5;
+  struct insLeverArmStruct
+    {
+      float x = 0;
+      float y = 0;
+      float z = 0;
+      float a = 0;
+      float b = 0;
+      float c = 0;
+    }insLeverArm;
+  struct insPosOffsetStruct
+    {
+      float x = 0;
+      float y = 0;
+      float z = 0;
+    }insPosOffset;
+  struct insInitAzimuthStruct
+    {
+      float azimuth = 0;
+      float stdAzi = 0;
+    }insInitAzimuth;
+  struct insInitAttitudeStruct
+    {
+      float pitch = 0;
+      float roll = 0;
+      float azimuth = 0;
+      float stdPitch = 0;
+      float stdRoll = 0;
+      float stdAzi = 0;
+    }insInitAttitude;
+  char insVehicleDir[9] = "auto";
+  byte insHotInfo[80];
+};
+INSConfigStruct insConfig;
+
 const uint8_t syncLUT[12] = {10,9,8,7,6,5,4,3,2,1,0};
 
 bool gotCR = false;
@@ -187,7 +227,6 @@ bool gotDollar = false;
 char msgBuf[254];
 int msgBufLen = 0;
 // End
-
 // GUI variables
 settings aio_settings;
 #include "configFuncs.h"

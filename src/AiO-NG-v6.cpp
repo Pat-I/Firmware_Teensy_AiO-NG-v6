@@ -35,7 +35,6 @@ void setup()
   ethernet_init();                // Bring up the ethernet hardware
   mongoose_init();                // Bring up the mongoose services
   udpSetup();                     // Bring up the UDP connections to/from AgIO
-
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);
 
