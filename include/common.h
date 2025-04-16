@@ -155,12 +155,7 @@ const uint8_t ANALOG_TRIG_HYST = 10;
 // GNSS processing and variables
 #include "NMEA.h"
 NMEAParser<5> nmeaParser;
-bool nmeaDebug = 0, nmeaDebug2 = 0, extraCRLF, isGPS = 0, isINS = 0;
-
-// UM98x message porocessing
-#include "UM982_Parser.h"
-#include "calc_crc32.h"
-UM982Parser<3> umParser;
+bool nmeaDebug = 0, nmeaDebug2 = 0, extraCRLF;
 
 #include "UBXParser.h"
 UBX_Parser ubxParser;

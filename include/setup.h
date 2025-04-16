@@ -44,18 +44,12 @@ void serialSetup()
 void parserSetup()
 {
   // the dash means wildcard
-  // NMEA GPS handlers
   nmeaParser.setErrorHandler(errorHandler);
   nmeaParser.addHandler("G-GGA", GGA_Handler);
   nmeaParser.addHandler("G-GNS", GNS_Handler);
   nmeaParser.addHandler("G-VTG", VTG_Handler);
   nmeaParser.addHandler("G-HPR", HPR_Handler);
   nmeaParser.addHandler("KSXT", KSXT_Handler);
-
-  // Unicore specific handlers
-  umParser.setErrorHandler(errorHandler);
-  umParser.addHandler("INSPVAXA", INSPVAXA_Handler);
-
 }
 
 void resetStartingTimersBuffers()

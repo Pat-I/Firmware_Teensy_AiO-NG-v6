@@ -439,12 +439,23 @@ void KSXT_Handler()
   if (convertedPosQual == 2) convertedPosQual = 5;  // convert UM982 "KSXT FLOAT" to "GGA FLOAT"
   if (convertedPosQual == 3) convertedPosQual = 4;  // convert UM982 "KSXT RTK FIX" to "GGA RTK FIX"
   LEDs.setGpsLED(convertedPosQual, true);
-  LEDs.toggleTeensyLED();
-}
+  
+  /*Serial.print("\r\nKSXT Pos Qual: ");
+  Serial.print(KSXTposqual);
 
-void INSPVAXA_Handler()
-{
-  Serial.println("Got INSPVAXA message");
+  nmeaParser.getArg(10, KSXTposqual);    // KSXT Heading Quality
+  Serial.print(" Hdg Qual: ");
+  Serial.print(KSXTposqual);
+
+  nmeaParser.getArg(11, KSXTposqual);    // KSXT Num Slave SVs
+  Serial.print(" Slave SVs: ");
+  Serial.print(KSXTposqual);
+
+  nmeaParser.getArg(12, KSXTposqual);    // KSXT Num Master SVs
+  Serial.print(" Master SVs: ");
+  Serial.print(KSXTposqual);*/
+
+  LEDs.toggleTeensyLED();
 }
 
 

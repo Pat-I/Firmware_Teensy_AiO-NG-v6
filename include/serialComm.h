@@ -76,39 +76,7 @@ void gpsPoll()
       }
       else
       {
-        switch (gps1Read)
-        {
-          case '$':
-            isGPS = 1;
-            nmeaParser << gps1Read;
-            break;
-          case '#':
-            isINS = 1;
-            umParser << gps1Read;
-            break;
-          case '\n':
-            if (isGPS)
-            {
-              nmeaParser << gps1Read;
-              isGPS = 0;
-            }
-            if (isINS)
-            {
-              umParser << gps1Read;
-              isINS = 0;
-            }
-            break;
-          default:
-            if (isGPS)
-            {
-              nmeaParser << gps1Read;
-            }
-            if (isINS)
-            {
-              umParser << gps1Read;
-            }
-            break;
-        }
+      nmeaParser << gps1Read;   // process after UDP passthrough check to send data to AgIO first
       }
 
       GPS1usage.timeOut();
