@@ -177,7 +177,7 @@ void GGA_GNS_PostProcess() // called by either GGA or GNS handler
   gps1Stats.incHzCount();
   LEDs.setGpsLED(atoi(GGA.fixQuality), true);
   aogGpsToAutoSteerLoopTimer = 0;
-  if (!ubxParser.useDual)
+   if (!ubxParser.useDual)
   { // if not using Dual
     if (BNO.isActive)
     {

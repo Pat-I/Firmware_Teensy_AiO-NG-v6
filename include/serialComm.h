@@ -174,8 +174,9 @@ void serialESP32()
     //}
     if (incomingBytes[incomingIndex - 2] == 13 && incomingBytes[incomingIndex - 1] == 10)
     {
-      if (incomingBytes[0] == 128 && incomingBytes[1] == 129)
-      {
+     // EVERY data everwhere!! remote control via WiFi will be blocked by checking PGN
+     // if (incomingBytes[0] == 128 && incomingBytes[1] == 129)
+     // {
 
         // Modules--Wifi:9999-->ESP32--serial-->Teensy--ethernet:9999-->AgIO
         sendUDPbytes(incomingBytes, incomingIndex - 2);
@@ -187,7 +188,7 @@ void serialESP32()
           Serial.print(" ");
         }
         Serial.print((String)" (" + SerialESP32.available() + ")");*/
-      }
+      /*}
       else
       {
         Serial.print("\r\n\n*** ESP32 Serial CR/LF detected but NOT a valid PGN ([0]/[1] bytes != 128/129) ***");
@@ -195,7 +196,7 @@ void serialESP32()
         for (uint8_t i = 0; i < incomingIndex - 2; i++) {
           Serial.printf("%3i ", incomingBytes[i]);
         }
-      }
+      }*/
       incomingIndex = 0;
     }
   }

@@ -343,7 +343,9 @@ void KeyaBus_Receive()
           Serial.print(sensorReading / 2.5); // to print ave in "amps"
         }
         keyaTime = time;
-        KeyaCurrentSensorReading = KeyaBusReceiveData.buf[4] * 2.5; // so that AoG's display shows "amps"
+        //KeyaCurrentSensorReading = KeyaBusReceiveData.buf[4] * 2.5; // so that AoG's display shows "amps"
+        //mtz8302 
+        KeyaCurrentSensorReading = float(KeyaBusReceiveData.buf[4]) * 25; // so that AoG's display shows "amps"
         keyaCurrentUpdateTimer -= 100;
       }
 

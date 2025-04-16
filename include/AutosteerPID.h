@@ -6,6 +6,7 @@
 
 #ifndef AUTOSTEERPID_H_
 #define AUTOSTEERPID_H_
+#include "common.h"
 
 void calcSteeringPID(void)
 {
@@ -17,7 +18,7 @@ void calcSteeringPID(void)
   float errorAbs = abs(steerAngleError);
 #endif
 
-  pwmDrive = (int16_t)pValue;
+  //pwmDrive = (int16_t)pValue; //use global, as used in other places too
 
   // add min throttle factor so no delay from motor resistance.
   if (pwmDrive < 0)
@@ -44,6 +45,43 @@ void calcSteeringPID(void)
 
   if (steerConfig.MotorDriveDirection)
     pwmDrive *= -1;
+   // mtz8302
+   pwmDisplay = abs(pwmDrive);
+   // do average to reduce pwm spikes
+   if (pwmDrive > 0)
+   {
+       if (pwmDriveFloat < 0)
+       {
+           pwmDriveFloat = 1;
+           pwmDrive = 1;
+       } // change direction
+       else
+       {
+           if (pwmDrive > pwmDriveFloat)
+           { // accellerate softer
+               pwmDriveFloat = pwmDriveFloat * 0.7 + float(pwmDrive) * 0.3;
+               pwmDrive = int(pwmDriveFloat);
+           }
+           else
+               pwmDriveFloat = pwmDrive; // keep value
+       }
+   }
+   else
+   {
+       if (pwmDriveFloat > 0)
+       {
+           pwmDriveFloat = -1;
+           pwmDrive = 1;
+       } // change direction
+       else if (pwmDrive < pwmDriveFloat)
+       { // accellerate softer
+           pwmDriveFloat = pwmDriveFloat * 0.7 + float(pwmDrive) * 0.3;
+           pwmDrive = int(pwmDriveFloat);
+       }
+       else
+           pwmDriveFloat = pwmDrive; // keep value
+   }
+   // end mtz8302
 
   // *** This needs testing, so far it's the only alternative steering output this board should support (Cytron or Danfoss only, or can bus Keya)
   if (steerConfig.IsDanfoss)
