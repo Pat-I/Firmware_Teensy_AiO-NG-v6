@@ -127,7 +127,9 @@ struct attribute s_settings_attributes[] = {
 };
 struct attribute s_ins_config_attributes[] = {
   {"insEnable", "string", NULL, offsetof(struct ins_config, insEnable), 8, false},
-  {"insInstAngle", "double", NULL, offsetof(struct ins_config, insInstAngle), 0, false},
+  {"insInstAngleX", "double", NULL, offsetof(struct ins_config, insInstAngleX), 0, false},
+  {"insInstAngleY", "double", NULL, offsetof(struct ins_config, insInstAngleY), 0, false},
+  {"insInstAngleZ", "double", NULL, offsetof(struct ins_config, insInstAngleZ), 0, false},
   {"insTimeOut", "double", NULL, offsetof(struct ins_config, insTimeOut), 0, false},
   {"insAlignVel", "double", NULL, offsetof(struct ins_config, insAlignVel), 0, false},
   {"insLeverX", "double", NULL, offsetof(struct ins_config, insLeverX), 0, false},
@@ -139,8 +141,6 @@ struct attribute s_ins_config_attributes[] = {
   {"insPosOffsetX", "double", NULL, offsetof(struct ins_config, insPosOffsetX), 0, false},
   {"insPosOffsetY", "double", NULL, offsetof(struct ins_config, insPosOffsetY), 0, false},
   {"insPosOffsetZ", "double", NULL, offsetof(struct ins_config, insPosOffsetZ), 0, false},
-  {"insInitAziAzimuth", "double", NULL, offsetof(struct ins_config, insInitAziAzimuth), 0, false},
-  {"insInitAziStdAzi", "double", NULL, offsetof(struct ins_config, insInitAziStdAzi), 0, false},
   {"insInitAttPitch", "double", NULL, offsetof(struct ins_config, insInitAttPitch), 0, false},
   {"insInitAttRoll", "double", NULL, offsetof(struct ins_config, insInitAttRoll), 0, false},
   {"insInitAttAzimuth", "double", NULL, offsetof(struct ins_config, insInitAttAzimuth), 0, false},

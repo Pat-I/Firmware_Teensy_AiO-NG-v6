@@ -182,7 +182,12 @@ GPSConfigStruct defaultGPS = { "10ms-UM98x", 0};
 struct INSConfigStruct
 {
   char insEnable[8] = "enabled";
-  float insInstallAngle = 0.0;
+  struct insInstallAngleStruct
+    {
+      float x = 0;
+      float y = 0;
+      float z = 0;
+    }insInstallAngle;
   u_int16_t insTimeOut = 1;
   float insAlignVelocity = 0.5;
   struct insLeverArmStruct
@@ -200,11 +205,6 @@ struct INSConfigStruct
       float y = 0;
       float z = 0;
     }insPosOffset;
-  struct insInitAzimuthStruct
-    {
-      float azimuth = 0;
-      float stdAzi = 0;
-    }insInitAzimuth;
   struct insInitAttitudeStruct
     {
       float pitch = 0;

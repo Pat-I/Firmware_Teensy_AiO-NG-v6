@@ -31,4 +31,4 @@
     mac[3] = ((MG_OCOTP_FUSES[0] >> 19) ^ (MG_OCOTP_FUSES[4] >> 19)) & 255; \
     mac[4] = (MG_OCOTP_FUSES[4] >> 10) & 255;                               \
     mac[5] = (MG_OCOTP_FUSES[4] >> 0) & 255;                                \
-  } while (0)
+  } while (0)                                                               
