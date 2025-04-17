@@ -181,7 +181,7 @@ GPSConfigStruct defaultGPS = { "10ms-UM98x", 0};
 
 struct INSConfigStruct
 {
-  bool insEnable = 0;
+  char insEnable[8] = "enabled";
   float insInstallAngle = 0.0;
   u_int16_t insTimeOut = 1;
   float insAlignVelocity = 0.5;
