@@ -40,7 +40,7 @@ const uint16_t EE_ver = 2404; // if value in eeprom does not match, overwrite wi
 // Led indicators. 1000ms RGB update, 255/64/127 RGB brightness balance levels for v5.0a
 #include "LEDS.h"
 //#include "LEDS_old.h"
-LEDS LEDs = LEDS(1000, 255, 64, 127);
+LEDS LEDs = LEDS(1000, 16, 4, 8);
 // End
 
 // Usage stats
@@ -216,6 +216,8 @@ struct INSConfigStruct
     }insInitAttitude;
   char insVehicleDir[9] = "auto";
   byte insHotInfo[80];
+  float wheelbase = 2.4;
+  float configFlag = 0.01;
 };
 INSConfigStruct insConfig;
 
