@@ -53,8 +53,30 @@ struct IMU_DATA
 };
 IMU_DATA IMU;
 
+struct INS_DATA
+{
+  char status[23];
+  char latitude[16];
+  char longitude [17];
+  char roll[6];
+  char pitch[6];
+  char heading[6];
+};
+INS_DATA INS;
+
 elapsedMicros aogGpsToAutoSteerLoopTimer;
 bool aogGpsToAutoSteerLoopTimerEnabled;
+
+ // Convert decimal degress to degress, meniutes, seconds
+void DegreesToDegMinSec(double x, char* result, int resultSize)
+{
+  int deg = x;
+  double minutesRemainder = abs(x - deg) * 60;
+  if(minutesRemainder<10)
+    snprintf(result, resultSize, "%02d0%.8f", deg, minutesRemainder);
+  else
+  snprintf(result, resultSize, "%02d%.8f", deg, minutesRemainder);
+}
 
 // If odd characters showed up
 void errorHandler()
@@ -456,6 +478,12 @@ void KSXT_Handler()
   Serial.print(KSXTposqual);*/
 
   LEDs.toggleTeensyLED();
+}
+
+void INSPVAXA_Handler()
+{
+  Serial.println("Got INSPVAXA message");
+  
 }
 
 
