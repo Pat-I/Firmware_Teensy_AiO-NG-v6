@@ -21,7 +21,7 @@
 #include "RingBuf.h"
 
 // Firmware version variable
-char inoVersion[] = "AiO-NG-v6.0.1<br>2025-04-05 Motor soft acceleration, Sections active or not";
+char inoVersion[] = "AiO-NG-v6.0.1";
 
 // Networking variables
 struct NetConfigStruct
