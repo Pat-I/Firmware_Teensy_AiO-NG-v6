@@ -19,7 +19,7 @@
 
 void setup()
 {
-  delay(4000);              // Delay for tesing to allow opening serial terminal to see output
+  delay(10000);              // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");
@@ -59,8 +59,6 @@ void setup()
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);
   resetStartingTimersBuffers();         // setup.ino
-  //debug
-  gpsConfig.gpsPass=false;
 }
 
 void loop()

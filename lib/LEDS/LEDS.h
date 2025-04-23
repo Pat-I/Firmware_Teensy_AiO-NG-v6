@@ -54,7 +54,7 @@ typedef enum {
 
 class LEDS {
 #define GGA_LED 13 // Teensy built-in LED
-#define MAX_LED_BRIGHTNESS 150//255
+#define MAX_LED_BRIGHTNESS 255
 #define MAX_LED_PWM 4095
 #define LED_INVERT true
 

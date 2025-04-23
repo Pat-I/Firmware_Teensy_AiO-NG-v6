@@ -21,7 +21,11 @@
 #include "RingBuf.h"
 
 // Firmware version variable
+<<<<<<< HEAD
 char inoVersion[] = "AiO-NG-v6.0.1";
+=======
+char inoVersion[] = "AiO-NG-v6.0.0";
+>>>>>>> parent of b57dbf4 (PWM ramp, current sense by PWM)
 
 // Networking variables
 struct NetConfigStruct
@@ -115,8 +119,7 @@ uint8_t xte = 0;
 
 // pwm variables
 int16_t pwmDrive = 0, pwmDisplay = 0;
-float highLowPerDeg = 0, pwmDriveFloat = 0;
-bool pwmDebug=false;
+float highLowPerDeg = 0;
 
 // Variables for settings
 struct SteerSettingsStruct
@@ -138,15 +141,11 @@ int16_t lastEnc = -999;
 bool autoSteerEnabled = false;
 float steerAngleActual = 0;
 int16_t steeringPosition = 0; // from steering sensor (WAS)
-int16_t SteerPWMonStartRampTime = 1000; // 1 sec ramp up time for PWM on steerings start
 // End
 
 // Switches/Sensors
 uint8_t kickoutInput = 0, workInput = 0, steerState = 0, switchByte = 0;
-uint32_t steerStateONTime = 0;//autoSteerLastTime, currentTime, 
-float sensorReading, sensorReadingByPWM, sensorSample;
-
-float sensorMultiplyer = 0.8; //multiypler for current sensor
+float sensorReading, sensorSample;
 
 const int16_t ANALOG_TRIG_THRES = 100;
 const uint8_t ANALOG_TRIG_HYST = 10;
@@ -212,7 +211,10 @@ BNO_RVC_DATA bnoRingData;
 // Keya CANBus steer motor
 #include <FlexCAN_T4.h>
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
+<<<<<<< HEAD
 //FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
+=======
+>>>>>>> parent of b57dbf4 (PWM ramp, current sense by PWM)
 int8_t KeyaCurrentSensorReading = 0;
 bool keyaDetected = false;
 // End

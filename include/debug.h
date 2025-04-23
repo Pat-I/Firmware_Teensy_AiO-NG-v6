@@ -6,7 +6,6 @@
 
 #ifndef DEBUG_H
 #define DEBUG_H
-#include "common.h"
 
 void printCpuPercent(uint32_t _time)
 {
@@ -86,12 +85,6 @@ void checkUSBSerial()
       }
     }
 
-    else if (usbRead == 'p') // output PWM and current sensor data
-    {
-      pwmDebug = !pwmDebug;
-      Serial.print("\r\nSetting PWM / current sensor debug: ");
-      Serial.print(pwmDebug);
-    }
 
     else if (usbRead == 'r')
     {
