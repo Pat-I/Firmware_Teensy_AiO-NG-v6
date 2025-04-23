@@ -21,11 +21,7 @@
 #include "RingBuf.h"
 
 // Firmware version variable
-<<<<<<< HEAD
 char inoVersion[] = "AiO-NG-v6.0.1";
-=======
-char inoVersion[] = "AiO-NG-v6.0.0";
->>>>>>> parent of b57dbf4 (PWM ramp, current sense by PWM)
 
 // Networking variables
 struct NetConfigStruct
@@ -211,10 +207,7 @@ BNO_RVC_DATA bnoRingData;
 // Keya CANBus steer motor
 #include <FlexCAN_T4.h>
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
-<<<<<<< HEAD
 //FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
-=======
->>>>>>> parent of b57dbf4 (PWM ramp, current sense by PWM)
 int8_t KeyaCurrentSensorReading = 0;
 bool keyaDetected = false;
 // End
