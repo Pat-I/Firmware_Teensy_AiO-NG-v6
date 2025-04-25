@@ -14,12 +14,17 @@
 void save_default_net()
 {
     // IP stored in 300
-    EEPROM.put(300, defaultNet);
+    EEPROM.put(ipStore, defaultNet);
 }
 
 void save_default_GPS()
 {
-    EEPROM.put(400, defaultGPS);
+    EEPROM.put(gpsStore, defaultGPS);
+}
+
+void save_default_INS()
+{
+    EEPROM.put(insStore, defaultIns);
 }
 
 // Write current IP to EEPROM
@@ -36,45 +41,62 @@ void save_current_net()
     netConfig.broadcastIP[2] = netConfig.currentIP[2];
     netConfig.broadcastIP[3] = 255; // same subnet as module's IP but use broadcast
 
-    EEPROM.put(300, netConfig);
+    EEPROM.put(ipStore, netConfig);
 }
 
 // Load current IP from EEPROM
 void load_current_net()
 {
     // IP loaded from 300
-    EEPROM.get(300, netConfig);
+    EEPROM.get(ipStore, netConfig);
 }
 
 // Save GPS settings to EEPROM
 void save_gps()
 {
     // GPS saved to 400
-    EEPROM.put(400, gpsConfig);
+    EEPROM.put(gpsStore, gpsConfig);
 }
 
 // load GPS settings from EEPROM
 void load_gps()
 {
     // GPS read from 400
-    EEPROM.get(400, gpsConfig);
+    EEPROM.get(gpsStore, gpsConfig);
+}
+
+// Save INS data
+void save_ins()
+{
+    // Save INS to 600
+    EEPROM.put(insStore, insConfig);
+}
+
+// Load INS data
+void load_ins()
+{
+    // Load INS to 600
+    EEPROM.get(insStore, insConfig);
 }
 
 // Load the IP address from EEPROM
 void ipSetup()
 {
     uint16_t eth_ee_read;
-    EEPROM.get(1, eth_ee_read);
+    EEPROM.get(eeVersionStore, eth_ee_read);
 
     if (eth_ee_read != EE_ver)
     { // if EE is out of sync, write defaults to EE
-        EEPROM.put(1, EE_ver);
+        EEPROM.put(eeVersionStore, EE_ver);
         save_default_net();
         load_current_net();
         Serial.print("\r\n\nWriting IP address defaults to EEPROM\r\n");
 
         save_default_GPS();
         Serial.print("\r\n\nWriting GPS defaults to EEPROM\r\n");
+
+        save_default_INS();
+        Serial.print("\r\n\nWriting INS defaults to EEPROM\r\n");
     }
     else
     {

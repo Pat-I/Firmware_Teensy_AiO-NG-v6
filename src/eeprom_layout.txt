@@ -5,8 +5,8 @@ Address             Purpose
 300 - 399           IP address
 400 - 499           GPS options
 500 - 599           Machine settings
-600 - 699
-700 - 799
+600 - 699           INS config & init data
+700 - 799           INS config & init data
 800 - 899
 900 - 999
 1000 - 1099

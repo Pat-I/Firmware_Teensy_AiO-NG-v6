@@ -5,12 +5,14 @@
 #include "mongoose.h"
 #include "mongoose_glue.h"
 
+#if !defined(HTTP_URL) && !defined(HTTPS_URL)
 #if MG_ARCH == MG_ARCH_UNIX || MG_ARCH == MG_ARCH_WIN32
 #define HTTP_URL "http://0.0.0.0:8080"
 #define HTTPS_URL "https://0.0.0.0:8443"
 #else
 #define HTTP_URL "http://0.0.0.0:80"
 #define HTTPS_URL "https://0.0.0.0:443"
+#endif
 #endif
 
 #ifndef offsetof
@@ -127,15 +129,17 @@ struct attribute s_settings_attributes[] = {
 };
 struct attribute s_ins_config_attributes[] = {
   {"insEnable", "string", NULL, offsetof(struct ins_config, insEnable), 8, false},
+  {"insTimeOut", "double", NULL, offsetof(struct ins_config, insTimeOut), 0, false},
+  {"insAlignVel", "double", NULL, offsetof(struct ins_config, insAlignVel), 0, false},
+  {"insWheelbase", "double", NULL, offsetof(struct ins_config, insWheelbase), 0, false},
+  {"insVehDir", "string", NULL, offsetof(struct ins_config, insVehDir), 9, false},
   {"insInstAngleX", "double", NULL, offsetof(struct ins_config, insInstAngleX), 0, false},
   {"insInstAngleY", "double", NULL, offsetof(struct ins_config, insInstAngleY), 0, false},
   {"insInstAngleZ", "double", NULL, offsetof(struct ins_config, insInstAngleZ), 0, false},
-  {"insTimeOut", "double", NULL, offsetof(struct ins_config, insTimeOut), 0, false},
-  {"insAlignVel", "double", NULL, offsetof(struct ins_config, insAlignVel), 0, false},
   {"insLeverX", "double", NULL, offsetof(struct ins_config, insLeverX), 0, false},
   {"insLeverY", "double", NULL, offsetof(struct ins_config, insLeverY), 0, false},
   {"insLeverZ", "double", NULL, offsetof(struct ins_config, insLeverZ), 0, false},
-  {"insleverA", "double", NULL, offsetof(struct ins_config, insleverA), 0, false},
+  {"insLeverA", "double", NULL, offsetof(struct ins_config, insLeverA), 0, false},
   {"insLeverB", "double", NULL, offsetof(struct ins_config, insLeverB), 0, false},
   {"insLeverC", "double", NULL, offsetof(struct ins_config, insLeverC), 0, false},
   {"insPosOffsetX", "double", NULL, offsetof(struct ins_config, insPosOffsetX), 0, false},
@@ -147,7 +151,6 @@ struct attribute s_ins_config_attributes[] = {
   {"insInitAttStdPitch", "double", NULL, offsetof(struct ins_config, insInitAttStdPitch), 0, false},
   {"insInitAttStdRoll", "double", NULL, offsetof(struct ins_config, insInitAttStdRoll), 0, false},
   {"insInitAttStdAzi", "double", NULL, offsetof(struct ins_config, insInitAttStdAzi), 0, false},
-  {"insVehDir", "string", NULL, offsetof(struct ins_config, insVehDir), 9, false},
   {NULL, NULL, NULL, 0, 0, false}
 };
 

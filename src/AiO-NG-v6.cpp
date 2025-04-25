@@ -43,7 +43,7 @@ void setup()
   BNO.begin(SerialIMU);           // Start the IMU
   autosteerSetup();               // Initialize autosteer
   CAN_Setup();                    // Start CAN3 for Keya
-
+  
   outputsInit();                  // Initialize PCA9685 for LOCK, AUX & Sections/Machine outputs, enable AUX output but leave others Hi-Z
   machinePTR = new MACHINE;       // need to use pointer otherwise Mongoose has a seizure
   machinePTR->init(500);          // 500 is starting address for machine EEPROM storage
@@ -52,8 +52,11 @@ void setup()
   machinePTR->setUdpReplyHandler(machinePgnReplies);
   initMachineOutputs();
 
+  load_ins();                     // Load INS data from EEPROM
+
   mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
   mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
+  mongoose_set_http_handlers("ins_config", fw_get_ins_config, fw_set_ins_config);
 
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);

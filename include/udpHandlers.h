@@ -287,7 +287,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
       Serial.print("\r\nMinSpeed "); Serial.print(steerConfig.MinSpeed);
       Serial.println();
 
-      EEPROM.put(200, steerConfig);
+      EEPROM.put(steerCfgStore, steerConfig);
       steerConfigInit();
       return; // no further PGN processing needed, skip the rest of the checks
     } // 0xFB (251) - SteerConfig
@@ -330,7 +330,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
       Serial.print("\r\n wasOffset "); Serial.print(steerSettings.wasOffset);
       Serial.print("\r\n AckermanFix "); Serial.print(steerSettings.AckermanFix);
 
-      EEPROM.put(100, steerSettings);
+      EEPROM.put(steerSetStore, steerSettings);
       steerSettingsInit();
       return; // no further PGN processing needed, skip the rest of the checks
     } // 0xFC (252) - Steer Settings

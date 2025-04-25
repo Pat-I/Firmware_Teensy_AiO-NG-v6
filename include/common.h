@@ -23,6 +23,15 @@
 // Firmware version variable
 char inoVersion[] = "AiO-NG-v6.0.1";
 
+// EEPROM storage layout
+#define eeVersionStore 1    //100 bytes
+#define steerSetStore 100   //100 bytes
+#define steerCfgStore 200   //100 bytes
+#define ipStore 300         //100 bytes
+#define gpsStore 400        //100 bytes
+#define machineStore 500    //100 bytes
+#define insStore 600        //200 bytes
+
 // Networking variables
 struct NetConfigStruct
 {
@@ -35,7 +44,7 @@ NetConfigStruct const defaultNet;
 NetConfigStruct netConfig = defaultNet;
 
 struct mg_connection *sendAgio;
-const uint16_t EE_ver = 2404; // if value in eeprom does not match, overwrite with defaults
+const uint16_t EE_ver = 2406; // if value in eeprom does not match, overwrite with defaults
 
 // Led indicators. 1000ms RGB update, 255/64/127 RGB brightness balance levels for v5.0a
 #include "LEDS.h"
@@ -179,48 +188,6 @@ struct GPSConfigStruct
 GPSConfigStruct gpsConfig;
 GPSConfigStruct defaultGPS = { "10ms-UM98x", 0};
 
-struct INSConfigStruct
-{
-  char insEnable[8] = "enabled";
-  struct insInstallAngleStruct
-    {
-      float x = 0;
-      float y = 0;
-      float z = 0;
-    }insInstallAngle;
-  u_int16_t insTimeOut = 1;
-  float insAlignVelocity = 0.5;
-  struct insLeverArmStruct
-    {
-      float x = 0;
-      float y = 0;
-      float z = 0;
-      float a = 0;
-      float b = 0;
-      float c = 0;
-    }insLeverArm;
-  struct insPosOffsetStruct
-    {
-      float x = 0;
-      float y = 0;
-      float z = 0;
-    }insPosOffset;
-  struct insInitAttitudeStruct
-    {
-      float pitch = 0;
-      float roll = 0;
-      float azimuth = 0;
-      float stdPitch = 0;
-      float stdRoll = 0;
-      float stdAzi = 0;
-    }insInitAttitude;
-  char insVehicleDir[9] = "auto";
-  byte insHotInfo[80];
-  float wheelbase = 2.4;
-  float configFlag = 0.01;
-};
-INSConfigStruct insConfig;
-
 const uint8_t syncLUT[12] = {10,9,8,7,6,5,4,3,2,1,0};
 
 bool gotCR = false;
@@ -229,6 +196,47 @@ bool gotDollar = false;
 char msgBuf[254];
 int msgBufLen = 0;
 // End
+
+// INS Variables
+struct INSConfigStruct
+{
+  char enable[8];
+  u_int16_t timeOut;
+  float alignVelocity;
+  char vehicleDir[9];
+  float wheelbase;
+  
+  float installAngleX;
+  float installAngleY;
+  float installAngleZ;
+
+  float leverArmX;
+  float leverArmY;
+  float leverArmZ;
+  float leverArmA;
+  float leverArmB;
+  float leverArmC;
+  
+  float posOffsetX;
+  float posOffsetY;
+  float posOffsetZ;
+  
+  float initAttitudePitch;
+  float initAttitudeRoll;
+  float initAttitudeAzimuth;
+  float initAttitudeStdPitch;
+  float initAttitudeStdRoll;
+  float initAttitudeStdAzimuth;
+};
+INSConfigStruct insConfig;
+// INSConfigStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.4, 0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+INSConfigStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+byte hotInfo[80]; // Hotstart data blob. Using this reduces start up time unitl INS is ready.
+float configFlag; // Holds value of flag indicating the INS has been comfigured.
+
+// End
+
 // GUI variables
 settings aio_settings;
 #include "configFuncs.h"

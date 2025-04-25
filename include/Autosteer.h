@@ -124,19 +124,19 @@ void autosteerSetup()
   pinMode(CURRENT_PIN, INPUT_DISABLE);  // input driven by MCP6002 opamp
 
   uint16_t as_ee_read = EE_ver;
-  EEPROM.get(1, as_ee_read);
+  EEPROM.get(eeVersionStore, as_ee_read);
 
   if (as_ee_read != EE_ver)
   { // if value in eeprom does not match, overwrite with defaults
-    EEPROM.put(1, EE_ver);
-    EEPROM.put(100, steerSettings);
-    EEPROM.put(200, steerConfig);
+    EEPROM.put(eeVersionStore, EE_ver);
+    EEPROM.put(steerSetStore, steerSettings);
+    EEPROM.put(steerCfgStore, steerConfig);
     Serial.print("\r\n- ** EEPROM reset to defaults! **");
   }
   else
   {
-    EEPROM.get(100, steerSettings); // read the Settings
-    EEPROM.get(200, steerConfig);
+    EEPROM.get(steerSetStore, steerSettings); // read the Settings
+    EEPROM.get(steerCfgStore, steerConfig);
     Serial.print("\r\n- loaded settings/config from EEPROM");
   }
 

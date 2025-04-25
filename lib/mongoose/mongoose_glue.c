@@ -45,7 +45,7 @@ void glue_set_settings(struct settings *data) {
   s_settings = *data; // Sync with your device
 }
 
-static struct ins_config s_ins_config = {"enable", 0, 0, 0, 1, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "auto"};
+static struct ins_config s_ins_config = {"enable", 1, 1, 2, "auto", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 void glue_get_ins_config(struct ins_config *data) {
   *data = s_ins_config;  // Sync with your device
 }

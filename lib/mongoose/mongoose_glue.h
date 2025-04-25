@@ -108,15 +108,17 @@ void glue_set_settings(struct settings *);
 
 struct ins_config {
   char insEnable[8];
+  double insTimeOut;
+  double insAlignVel;
+  double insWheelbase;
+  char insVehDir[9];
   double insInstAngleX;
   double insInstAngleY;
   double insInstAngleZ;
-  double insTimeOut;
-  double insAlignVel;
   double insLeverX;
   double insLeverY;
   double insLeverZ;
-  double insleverA;
+  double insLeverA;
   double insLeverB;
   double insLeverC;
   double insPosOffsetX;
@@ -128,7 +130,6 @@ struct ins_config {
   double insInitAttStdPitch;
   double insInitAttStdRoll;
   double insInitAttStdAzi;
-  char insVehDir[9];
 };
 void glue_get_ins_config(struct ins_config *);
 void glue_set_ins_config(struct ins_config *);
