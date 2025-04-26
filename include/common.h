@@ -229,12 +229,25 @@ struct INSConfigStruct
   float initAttitudeStdAzimuth;
 };
 INSConfigStruct insConfig;
-// INSConfigStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.4, 0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 INSConfigStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 byte hotInfo[80]; // Hotstart data blob. Using this reduces start up time unitl INS is ready.
 float configFlag; // Holds value of flag indicating the INS has been comfigured.
+// End
 
+// Kalman Filter Variables
+struct KALConfigStruct
+{
+  bool using2serialGPS=true;
+  bool usingWT61=false;
+  float intervalINS=0.1; // 0.1 or 0.05 -> 10 or 20 Hz
+  bool useKalmanForSensor=true;
+  float minSpeedKalman=0.5; //m /s
+  float secondsVarianceBuffer=3; // pay attention to max varianceBuffer len in zKalmanKeya
+  float kalmanR=0.1;
+  float kalmanQ=0.0001;
+};
+KALConfigStruct kalConfig;
 // End
 
 // GUI variables

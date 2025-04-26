@@ -234,7 +234,12 @@ struct user {
   int level;       // Access level
 };
 
+static int (*s_auth)(const char *, const char *) = glue_authenticate;
 static struct user *s_users;  // List of authenticated users
+
+void mongoose_set_auth_handler(int (*fn)(const char *, const char *)) {
+  s_auth = fn;
+}
 
 // Parse HTTP requests, return authenticated user or NULL
 static struct user *authenticate(struct mg_http_message *hm) {
@@ -244,7 +249,7 @@ static struct user *authenticate(struct mg_http_message *hm) {
 
   if (user[0] != '\0' && pass[0] != '\0') {
     // Both user and password is set, auth by user/password via glue API
-    int level = glue_authenticate(user, pass);
+    int level = s_auth(user, pass);
     MG_DEBUG(("user %s, level: %d", user, level));
     if (level > 0) {  // Proceed only if the firmware authenticated us
       // uint64_t uid = hash(3, mg_str(user), mg_str(":"), mg_str(pass));
