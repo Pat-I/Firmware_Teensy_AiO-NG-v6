@@ -136,6 +136,9 @@ struct SteerSettingsStruct
   uint8_t highPWM = 150; // max PWM value
   float steerSensorCounts = 120;
   float AckermanFix = 1; // sent as percent
+  // KWAS settings additions
+  uint16_t keyaDirOffset = 360;
+  uint8_t keyaAckermanFix = 100; // stored as percent
 };
 SteerSettingsStruct defaultSteerSettings;                        // 11 bytes
 struct SteerSettingsStruct steerSettings = defaultSteerSettings; // don't need 'struct' in front?
@@ -249,6 +252,36 @@ struct KALConfigStruct
 };
 KALConfigStruct kalConfig;
 // End
+
+// Keya as WAS (KWAS) variables
+
+float steerAngleSens = 0;
+float keyaEncoder = 0;
+float keyaEncoderSpeed = 0;
+float insWheelAngle = 0;
+int8_t workingDir = 1; // 1 forward, -1 reverse
+float dualWheelAngleWT61 = 0;
+float XTE = 0;
+bool useADS = false;
+float steerAngleActualOld = 0;
+float insSpeed=0;
+float keyaSteerSensorCounts = 100;
+uint8_t keyaAckermanFix = 100; // stored as percent
+uint16_t keyaDirOffset = 360;
+uint32_t keyaCommandTime=0;
+uint8_t keyaCommandState=0;
+int32_t keyaEncoderValue = 0;
+int32_t keyaEncoderValueOld = 0;
+int8_t keyaDir = 0;
+uint8_t keyaState = 0; // 0 -> 4
+int32_t keyaEncoderValueFreeze = 0;
+int32_t keyaEncoderVirtual = 0;
+float KeyaCurrentReport = 0;
+float KeyaCurrentReportSmooth = 0;
+int32_t keyaEncoderFinalOld = 0;
+int32_t keyaEncoderDiff = 0;
+
+// end
 
 // GUI variables
 settings aio_settings;

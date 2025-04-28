@@ -71,6 +71,7 @@ void loop()
 
   gpsPoll();                            // check for data on GPS1 & GPS2 UARTs
   serialESP32();                        // check for PGN replies on ESP32 UART
+  readKeyaEncoder();                    // Read encoder count & speed and current
   KeyaBus_Receive();                    // check for Keya data on can bus 3
   autoSteerUpdate();                    // run autosteer loop
   serialRTCM();                         // check for RTCM data on Xbee/Radio UART

@@ -11,6 +11,8 @@
 "Barrowed" Keya code from Matt Elias @ https://github.com/m-elias/AgOpenGPS_Boards/tree/575R-Keya/TeensyModules/V4.1"
 */
 
+#include "common.h"
+
 #define lowByte(w) ((uint8_t)((w) & 0xFF))
 #define highByte(w) ((uint8_t)((w) >> 8))
 
@@ -38,6 +40,12 @@ uint8_t keyaTemperatureResponse[] = {0x60, 0x0F, 0x21, 0x01};
 
 uint8_t keyaVersionQuery[] = {0x40, 0x01, 0x11, 0x11};
 uint8_t keyaVersionResponse[] = {0x60, 0x01, 0x11, 0x11};
+
+uint8_t keyaEncoderQuery[] = {0x40, 0x04, 0x21, 0x01};
+uint8_t keyaEncoderResponse[] = {0x60, 0x04, 0x21, 0x01};
+
+uint8_t keyaEncoderSpeedQuery[] = {0x60, 0x03, 0x21, 0x01};
+uint8_t keyaEncoderSpeedResponse[] = {0x60, 0x03, 0x21, 0x01};
 
 uint64_t KeyaID = 0x06000001; // 0x01 is default ID
 
@@ -91,6 +99,27 @@ void keyaCommand(uint8_t command[])
     KeyaBusSendData.len = 8;
     memcpy(KeyaBusSendData.buf, command, 4);
     Keya_Bus.write(KeyaBusSendData);
+  }
+}
+
+// KWAS read encoder
+void readKeyaEncoder()
+{
+  if(keyaDetected)
+  {
+    uint8_t remain = (systick_millis_count - keyaCommandTime)%30;
+    if(remain < 10 && keyaCommandState==0){
+      keyaCommand(keyaEncoderSpeedQuery);
+      keyaCommandState++;
+    }
+    else if(remain > 10 && keyaCommandState==1){
+      keyaCommand(keyaCurrentQuery);
+      keyaCommandState++;
+    }
+    else if(remain > 20 && keyaCommandState==2){
+      keyaCommand(keyaEncoderQuery);
+      keyaCommandState=0;
+    }
   }
 }
 
@@ -291,7 +320,7 @@ void KeyaBus_Receive()
         }
         else if (bitRead(KeyaBusReceiveData.buf[6], 6))
         {
-          Serial.println("\r\nCAN disconnected");
+          Serial.println("\r\nCAN disconnected. Normal at startup.");
         }
         else if (bitRead(KeyaBusReceiveData.buf[6], 7))
         {
@@ -347,6 +376,102 @@ void KeyaBus_Receive()
         keyaCurrentUpdateTimer -= 100;
       }
 
+      // Encoder query response
+      else if (isPatternMatch(KeyaBusReceiveData, keyaEncoderResponse, sizeof(keyaEncoderResponse)))
+      {
+        keyaEncoderValue = KeyaBusReceiveData.buf[7] << 24 | 
+        KeyaBusReceiveData.buf[6] << 16 | 
+        KeyaBusReceiveData.buf[5] << 8 | 
+        KeyaBusReceiveData.buf[4];
+        //so right is positive
+        keyaEncoderValue=keyaEncoderValue*-1;
+
+        if(keyaEncoderValueOld>keyaEncoderValue)
+          keyaDir=-1;
+        else if(keyaEncoderValueOld<keyaEncoderValue)
+          keyaDir=1;
+        keyaEncoderValueOld = keyaEncoderValue;
+
+
+        switch (keyaState)
+        {
+        case 0:       //start point
+          if(keyaDir==1)
+            keyaState=1;
+          else
+            keyaState=3;
+          break;
+        
+        case 1:     //giro a dx - turn right
+          if(keyaDir==-1)
+            keyaState=2;
+          else{
+            keyaEncoderValueFreeze=keyaEncoderValue;
+          }
+          break;
+        
+        case 2:     //cambio verso sx - turn left
+          if(keyaEncoderValueFreeze-keyaEncoderValue>steerSettings.keyaDirOffset)
+            keyaState=3;
+          else if(keyaEncoderValue>keyaEncoderValueFreeze)
+            keyaState=1;
+          keyaEncoderValue=keyaEncoderValueFreeze;
+          break;
+        
+        case 3:     //giro a sx - turn right
+          keyaEncoderValue += steerSettings.keyaDirOffset;
+          if(keyaDir==1)
+            keyaState=4;
+          else{
+            keyaEncoderValueFreeze=keyaEncoderValue;
+          }
+          break;
+        
+        case 4:     //cambio a dx - turn right
+          keyaEncoderValue += steerSettings.keyaDirOffset;
+          if(keyaEncoderValue-keyaEncoderValueFreeze>steerSettings.keyaDirOffset)
+            keyaState=1;
+          else if(keyaEncoderValue<keyaEncoderValueFreeze)
+            keyaState=3;
+
+          keyaEncoderValue=keyaEncoderValueFreeze;
+          break;
+        
+        default:
+          keyaState=0;
+          break;
+        }
+
+        if(steerSettings.keyaAckermanFix != 100){
+          keyaEncoderDiff = keyaEncoderValue - keyaEncoderFinalOld;
+          
+          if(keyaDir==1) // turning right
+            keyaEncoderDiff *= steerSettings.keyaAckermanFix;
+          else
+            keyaEncoderDiff *= 100;
+          
+          keyaEncoderVirtual += keyaEncoderDiff;
+          keyaEncoder = (float)keyaEncoderVirtual / 600.0f;
+          keyaEncoderFinalOld = keyaEncoderValue;
+        }
+        else
+          keyaEncoder = (float)keyaEncoderValue / 6.0f;
+      }
+
+      // Encoder speed query response
+      else if (isPatternMatch(KeyaBusReceiveData, keyaEncoderSpeedResponse, sizeof(keyaEncoderSpeedResponse)))
+      {
+        keyaEncoderSpeed = KeyaBusReceiveData.buf[5] << 8 | KeyaBusReceiveData.buf[4];
+        if(keyaEncoderSpeed>65000)
+          keyaEncoderSpeed=keyaEncoderSpeed-65536;
+        
+        if(keyaEncoderSpeed!=0){
+          KeyaCurrentReport = KeyaCurrentSensorReading/abs(keyaEncoderSpeed)*200;
+          KeyaCurrentReportSmooth = KeyaCurrentReportSmooth*0.7 + KeyaCurrentReport*0.3;
+
+        }
+      }
+      
       // Fault query response
       else if (isPatternMatch(KeyaBusReceiveData, keyaFaultResponse, sizeof(keyaFaultResponse)))
       {
