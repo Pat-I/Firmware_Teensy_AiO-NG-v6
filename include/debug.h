@@ -19,14 +19,12 @@ void checkUSBSerial()
   {
     uint8_t usbRead = Serial.read();
 
-
     if (usbRead == 'c') // output cpu usage stats
     {
       printCpuUsages = !printCpuUsages;
       Serial.print("\r\nSetting CPU usage debug: ");
       Serial.print(printCpuUsages);
     }
-
 
     else if (usbRead == 'g' && Serial.available() > 0) // temporarily set GPS fix state according to standard GGA fix numbers (see LEDS.h, setGpsLED())
     {
@@ -36,7 +34,6 @@ void checkUSBSerial()
         LEDs.setGpsLED(usbRead - '0', true);
       }
     }
-
 
     else if (usbRead == 'l' && Serial.available() > 0) // set RGB brightness
     {
@@ -49,7 +46,6 @@ void checkUSBSerial()
       }
     }
 
-
     else if (usbRead == 'm' && Serial.available() > 0) // set machine debug level
     {
       usbRead = Serial.read();
@@ -57,9 +53,8 @@ void checkUSBSerial()
       {
         machinePTR->debugLevel = usbRead - '0'; // convert ASCII numerical char to byte
       }
-      Serial.print((String)"\r\nMachine debugLevel: " + machinePTR->debugLevel);
+      Serial.print((String) "\r\nMachine debugLevel: " + machinePTR->debugLevel);
     }
-
 
     else if (usbRead == 'n') // output realtime GPS position update data
     {
@@ -85,7 +80,6 @@ void checkUSBSerial()
       }
     }
 
-
     else if (usbRead == 'r')
     {
       Serial.print("\r\n\n* Resetting hi/lo stats *");
@@ -96,7 +90,6 @@ void checkUSBSerial()
       bnoStats.resetAll();
     }
 
-
     else if (usbRead == 's') // output GPS, BNO update freq & buffer stats
     {
       printStats = !printStats;
@@ -104,26 +97,29 @@ void checkUSBSerial()
       Serial.print(printStats);
     }
 
-
     else if (usbRead == 'R')
     {
-      SCB_AIRCR = 0x05FA0004;   // Teensy Reboot
+      SCB_AIRCR = 0x05FA0004; // Teensy Reboot
     }
 
-
-    else if (usbRead == '1')      // drv8243 testing, cycle LOCK through sleep, standby, active
+    else if (usbRead == '1') // drv8243 testing, cycle LOCK through sleep, standby, active
     {
       uint32_t t1 = micros();
       static uint8_t state = 0; // sleep
-      if (state == 0){
+      if (state == 0)
+      {
         Serial << "\r\nLOCK is in Sleep mode, sending wake signal";
         outputs.setPin(15, 0, 1); // sets PCA9685 pin HIGH 5V, init Wake, after 1ms should be in Standby
         state = 1;
-      } else if (state == 1){
+      }
+      else if (state == 1)
+      {
         Serial << "\r\nLOCK is in Standby mode, waiting for reset, sending reset pulse";
-        outputs.setPin(15, 237, 1);  // Sleep reset pulse
+        outputs.setPin(15, 237, 1); // Sleep reset pulse
         state = 2;
-      } else if (state ==2) {
+      }
+      else if (state == 2)
+      {
         Serial << "\r\nLOCK is in Active mode, issuing Sleep signal";
         outputs.setPin(15, 0, 0); // sets PCA9685 pin LOW 0V, Deep Sleep
         state = 0;
@@ -132,20 +128,24 @@ void checkUSBSerial()
       Serial << "\r\nLOCK " << t2 - t1 << "uS";
     }
 
-
-    else if (usbRead == '2')      // drv8243 testing, cycle AUX through sleep, standby, active
+    else if (usbRead == '2') // drv8243 testing, cycle AUX through sleep, standby, active
     {
       uint32_t t1 = micros();
       static uint8_t state = 0; // sleep
-      if (state == 0){
+      if (state == 0)
+      {
         Serial << "\r\nAUX is in Sleep mode, sending wake signal";
         outputs.setPin(14, 0, 1); // sets PCA9685 pin HIGH 5V, init Wake, after 1ms should be in Standby
         state = 1;
-      } else if (state == 1){
+      }
+      else if (state == 1)
+      {
         Serial << "\r\nAUX is in Standby mode, waiting for reset, sending reset pulse";
-        outputs.setPin(14, 237, 1);  // Sleep reset pulse
+        outputs.setPin(14, 237, 1); // Sleep reset pulse
         state = 2;
-      } else if (state ==2) {
+      }
+      else if (state == 2)
+      {
         Serial << "\r\nAUX is in Active mode, issuing Sleep signal";
         outputs.setPin(14, 0, 0); // sets PCA9685 pin LOW 0V, Deep Sleep
         state = 0;
@@ -154,49 +154,47 @@ void checkUSBSerial()
       Serial << "\r\nAUX " << t2 - t1 << "uS";
     }
 
-
-    else if (usbRead == '3')      // drv8243 testing, turn on sec2
+    else if (usbRead == '3') // drv8243 testing, turn on sec2
     {
       outputs.setPin(1, 0, 0);
     }
 
-
-    else if (usbRead == '4')      // drv8243 testing, turn off sec2
+    else if (usbRead == '4') // drv8243 testing, turn off sec2
     {
       outputs.setPin(1, 0, 1);
     }
 
-
-    else if (usbRead == '5')      // drv8243 testing, Sleep all DRVs (no LEDs)
+    else if (usbRead == '5') // drv8243 testing, Sleep all DRVs (no LEDs)
     {
-      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
+      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++)
+      {
         outputs.setPin(drvSleepPins[drvNum], 0, 0);
       }
     }
 
-
-    else if (usbRead == '6')      // drv8243 testing, Standby all DRVs (red LEDs on LOCK & AUX)
+    else if (usbRead == '6') // drv8243 testing, Standby all DRVs (red LEDs on LOCK & AUX)
     {
-      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
+      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++)
+      {
         outputs.setPin(drvSleepPins[drvNum], 0, 1); // sets PCA9685 pin HIGH 5V, initiate wake-up -> Standby state
       }
     }
 
-
-    else if (usbRead == '7')      // drv8243 testing, Active all DRVs, AUX green LED, the others white LED if output is active
+    else if (usbRead == '7') // drv8243 testing, Active all DRVs, AUX green LED, the others white LED if output is active
     {
-      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
-        outputs.setPin(drvSleepPins[drvNum], 187, 1);  // Sleep reset pulse
+      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++)
+      {
+        outputs.setPin(drvSleepPins[drvNum], 187, 1); // Sleep reset pulse
       }
     }
 
-
-    else if (usbRead == '8')      // drv8243, sleep, wake, activate all DRVs
+    else if (usbRead == '8') // drv8243, sleep, wake, activate all DRVs
     {
-      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
+      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++)
+      {
         outputs.setPin(drvSleepPins[drvNum], 0, 0); // sets PCA9685 pin LOW 0V, put DRVs to sleep
       }
-      delayMicroseconds(150);  // wait max tSLEEP (120uS) for Sleep mode
+      delayMicroseconds(150); // wait max tSLEEP (120uS) for Sleep mode
 
       // this isn't necessary
       /*for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
@@ -205,24 +203,23 @@ void checkUSBSerial()
       delayMicroseconds(1000);  // wait tREADY (1000uS) for Standby
       */
 
-      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
+      for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++)
+      {
         outputs.setPin(drvSleepPins[drvNum], 187, 1); // LOW pulse, 187/4096 is 30uS at 1532hz, send nSLEEP reset pulse
       }
-      //delayMicroseconds(1000);  // wait tREADY (1000uS) for Standby
-      // doesn't seem necessary to wait 500uS to set all nSLEEP lines HIGH, just leave them pulsing the Reset pulse
-      // This follow setPin isn't needed then either
+      // delayMicroseconds(1000);  // wait tREADY (1000uS) for Standby
+      //  doesn't seem necessary to wait 500uS to set all nSLEEP lines HIGH, just leave them pulsing the Reset pulse
+      //  This follow setPin isn't needed then either
       /*for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
         outputs.setPin(drvSleepPins[drvNum], 0, 1); // sets PCA9685 pin HIGH 5V, initiate wake-up -> Standby state
       }*/
-
 
       /*(for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
         outputs.setPin(drvSleepPins[drvNum], 0, 1); // sets PCA9685 pin HIGH 5V, hold nSLEEP HIGh to maintain Active state
       }*/
     }
 
-
-    else if (usbRead == '9')      // drv8243 searching
+    else if (usbRead == '9') // drv8243 searching
     {
       I2C_WIRE.beginTransmission(0x44);
       Serial.print("\r\n- Section DRV8243 ");
@@ -239,12 +236,10 @@ void checkUSBSerial()
         Serial.print("*NOT found!*");
     }
 
-
-    else if (usbRead == '0')      // Sections drv8243 reset
+    else if (usbRead == '0') // Sections drv8243 reset
     {
-      //outputs.reset();
+      // outputs.reset();
     }
-
 
     else if (usbRead == 13 || usbRead == 10) // ignore CR or LF
     {
@@ -362,7 +357,7 @@ void printTelem()
     Serial.print(testCounter / bufferStatsTimer);
     Serial.print("kHz");
     // 300,000+ hits/s (300+ khz loop() speed) on prev generation non-UI dev firmware
-    // new Mongoose UI based firmware runs at 100+ khz 
+    // new Mongoose UI based firmware runs at 100+ khz
 
     Serial.print("\r\nGUI    cpu: ");
     printCpuPercent(GUIusage.reportAve(baselineProcUsage));
@@ -378,8 +373,8 @@ void printTelem()
     printCpuPercent(ASusage.reportAve(dacReport)); // dac update loop is inside AS update loop (don't want to double count CPU time)
     Serial.print("\r\nNTRIP  cpu: ");
     printCpuPercent(NTRIPusage.reportAve()); // uses a timed update, virtually no extra time penalty
-    //Serial.print("\r\nIMU_H  cpu: ");
-    //printCpuPercent(IMU_Husage.reportAve());
+    // Serial.print("\r\nIMU_H  cpu: ");
+    // printCpuPercent(IMU_Husage.reportAve());
     Serial.print("\r\nNMEA_P cpu: ");
     printCpuPercent(NMEA_Pusage.reportAve());
     Serial.print("\r\nUBX_P  cpu: ");
@@ -390,7 +385,7 @@ void printTelem()
     printCpuPercent(LEDSusage.reportAve(baselineProcUsage));
     Serial.print("\r\nMach   cpu: ");
     printCpuPercent(MACHusage.reportAve(baselineProcUsage));
-    //printCpuPercent(MACHusage.reportAve());
+    // printCpuPercent(MACHusage.reportAve());
     Serial.print("\r\nESP32  cpu: ");
     printCpuPercent(ESP32usage.reportAve(baselineProcUsage));
     Serial.print("\r\nKEYA   cpu: ");

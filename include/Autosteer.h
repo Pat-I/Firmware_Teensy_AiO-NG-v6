@@ -19,7 +19,7 @@ const float LOW_HIGH_DEGREES = 3.0; // How many degrees before decreasing Max PW
 
 bool testBothWasSensors = false;
 bool adcDebug = false;
-bool useInternalADC = true;   // v5.0 Proto only uses Teensy ADC
+bool useInternalADC = true; // v5.0 Proto only uses Teensy ADC
 bool useExternalADS = false;
 
 #include <EEPROM.h>
@@ -52,7 +52,7 @@ void adcSetup()
     LEDs.set(LED_ID::STEER, STEER_STATE::WAS_READY);
   }*/
 
-  autoSteerEnabled = true;    // need other checks for valid WAS input but for now enable AS anyways
+  autoSteerEnabled = true; // need other checks for valid WAS input but for now enable AS anyways
 
 } // end adcSetup()
 
@@ -105,8 +105,8 @@ void autosteerSetup()
   {
     analogWriteFrequency(PWM1_PIN, 3921);
     analogWriteFrequency(PWM2_PIN, 3921);
-  } 
-  else if (PWM_Frequency == 3) 
+  }
+  else if (PWM_Frequency == 3)
   {
     analogWriteFrequency(PWM1_PIN, 9155);
     analogWriteFrequency(PWM2_PIN, 9155);
@@ -120,8 +120,8 @@ void autosteerSetup()
   pinMode(KICKOUT_D_PIN, INPUT_PULLUP); // also set by Encoder library
 
   // Disable pullup/down resistors for analog input pins
-  pinMode(WORK_PIN, INPUT_DISABLE);     // input driven by MCP6002 opamp
-  pinMode(CURRENT_PIN, INPUT_DISABLE);  // input driven by MCP6002 opamp
+  pinMode(WORK_PIN, INPUT_DISABLE);    // input driven by MCP6002 opamp
+  pinMode(CURRENT_PIN, INPUT_DISABLE); // input driven by MCP6002 opamp
 
   uint16_t as_ee_read = EE_ver;
   EEPROM.get(eeVersionStore, as_ee_read);
@@ -175,16 +175,16 @@ void autoSteerUpdate()
         steerState = steerReading; // set OFF
         if (prevSteerReading != steerState)
         {
-          //char msg[] = "AutoSteer Switch OFF";
-          //char msgTime = 2;
+          // char msg[] = "AutoSteer Switch OFF";
+          // char msgTime = 2;
           LEDs.activateBlueFlash(LED_ID::STEER);
         }
       }
       else if (steerReading == HIGH && prevSteerReading == LOW)
       {                            // switch ON after prev being OFF
         steerState = steerReading; // set ON
-        //char msg[] = "AutoSteer Switch ON";
-        //char msgTime = 2;
+        // char msg[] = "AutoSteer Switch ON";
+        // char msgTime = 2;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
       prevSteerReading = steerReading;
@@ -281,11 +281,11 @@ void autoSteerUpdate()
       else
       { // otherwise continue using analog input on PCB
         sensorSample = (float)analogRead(CURRENT_PIN);
-        //Serial << "\r\n" << sensorSample - 45.0;
-        sensorSample -= 45.0;     // zero current offset
-        //sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
+        // Serial << "\r\n" << sensorSample - 45.0;
+        sensorSample -= 45.0; // zero current offset
+        // sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
         sensorReading = sensorReading * 0.7 + sensorSample * 0.3;
-        //Serial << " " << sensorReading << " max:" << steerConfig.PulseCountMax;
+        // Serial << " " << sensorReading << " max:" << steerConfig.PulseCountMax;
         if (sensorReading >= steerConfig.PulseCountMax)
         {
           steerState = 0; // turn OFF autoSteer
@@ -294,7 +294,7 @@ void autoSteerUpdate()
       }
     }
 
-    uint16_t read = analogRead(WORK_PIN) > ANALOG_TRIG_THRES + ANALOG_TRIG_HYST ? LOW : HIGH;  // read work input
+    uint16_t read = analogRead(WORK_PIN) > ANALOG_TRIG_THRES + ANALOG_TRIG_HYST ? LOW : HIGH; // read work input
 
     if (read != workInput)
     {
@@ -385,9 +385,9 @@ void autoSteerUpdate()
       jdDac.steerEnable(false);
       // jdDac.ch4Enable(false);
 #else
-      digitalWrite(SLEEP_PIN, LOW);   // sleep mode
-      //digitalWrite(PWM1_PIN, LOW);    // if both PWM pins are low, even if !sleep, the outputs are Hi-Z
-      //digitalWrite(PWM2_PIN, LOW);
+      digitalWrite(SLEEP_PIN, LOW); // sleep mode
+                                    // digitalWrite(PWM1_PIN, LOW);    // if both PWM pins are low, even if !sleep, the outputs are Hi-Z
+      // digitalWrite(PWM2_PIN, LOW);
 #endif
 
       motorDrive(); // out to motors the pwm value

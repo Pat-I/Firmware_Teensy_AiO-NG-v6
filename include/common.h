@@ -24,13 +24,13 @@
 char inoVersion[] = "AiO-NG-v6.0.1";
 
 // EEPROM storage layout
-#define eeVersionStore 1    //100 bytes
-#define steerSetStore 100   //100 bytes
-#define steerCfgStore 200   //100 bytes
-#define ipStore 300         //100 bytes
-#define gpsStore 400        //100 bytes
-#define machineStore 500    //100 bytes
-#define insStore 600        //200 bytes
+#define eeVersionStore 1  // 100 bytes
+#define steerSetStore 100 // 100 bytes
+#define steerCfgStore 200 // 100 bytes
+#define ipStore 300       // 100 bytes
+#define gpsStore 400      // 100 bytes
+#define machineStore 500  // 100 bytes
+#define insStore 600      // 200 bytes
 
 // Networking variables
 struct NetConfigStruct
@@ -48,7 +48,7 @@ const uint16_t EE_ver = 2406; // if value in eeprom does not match, overwrite wi
 
 // Led indicators. 1000ms RGB update, 255/64/127 RGB brightness balance levels for v5.0a
 #include "LEDS.h"
-//#include "LEDS_old.h"
+// #include "LEDS_old.h"
 LEDS LEDs = LEDS(1000, 16, 4, 8);
 // End
 
@@ -189,9 +189,9 @@ struct GPSConfigStruct
   bool gpsPass = false; // False = GPS neeeds to send GGA, VTG & HPR messages. True = GPS needs to send KSXT messages only.
 };
 GPSConfigStruct gpsConfig;
-GPSConfigStruct defaultGPS = { "10ms-UM98x", 0};
+GPSConfigStruct defaultGPS = {"10ms-UM98x", 0};
 
-const uint8_t syncLUT[12] = {10,9,8,7,6,5,4,3,2,1,0};
+const uint8_t syncLUT[12] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
 bool gotCR = false;
 bool gotLF = false;
@@ -208,7 +208,7 @@ struct INSConfigStruct
   float alignVelocity;
   char vehicleDir[9];
   float wheelbase;
-  
+
   float installAngleX;
   float installAngleY;
   float installAngleZ;
@@ -219,11 +219,11 @@ struct INSConfigStruct
   float leverArmA;
   float leverArmB;
   float leverArmC;
-  
+
   float posOffsetX;
   float posOffsetY;
   float posOffsetZ;
-  
+
   float initAttitudePitch;
   float initAttitudeRoll;
   float initAttitudeAzimuth;
@@ -241,14 +241,14 @@ float configFlag; // Holds value of flag indicating the INS has been comfigured.
 // Kalman Filter Variables
 struct KALConfigStruct
 {
-  bool using2serialGPS=true;
-  bool usingWT61=false;
-  float intervalINS=0.1; // 0.1 or 0.05 -> 10 or 20 Hz
-  bool useKalmanForSensor=true;
-  float minSpeedKalman=0.5; //m /s
-  float secondsVarianceBuffer=3; // pay attention to max varianceBuffer len in zKalmanKeya
-  float kalmanR=0.1;
-  float kalmanQ=0.0001;
+  bool using2serialGPS = true;
+  bool usingWT61 = false;
+  float intervalINS = 0.1; // 0.1 or 0.05 -> 10 or 20 Hz
+  bool useKalmanForSensor = true;
+  float minSpeedKalman = 0.5;      // m /s
+  float secondsVarianceBuffer = 3; // pay attention to max varianceBuffer len in zKalmanKeya
+  float kalmanR = 0.1;
+  float kalmanQ = 0.0001;
 };
 KALConfigStruct kalConfig;
 // End
@@ -264,12 +264,12 @@ float dualWheelAngleWT61 = 0;
 float XTE = 0;
 bool useADS = false;
 float steerAngleActualOld = 0;
-float insSpeed=0;
+float insSpeed = 0;
 float keyaSteerSensorCounts = 100;
 uint8_t keyaAckermanFix = 100; // stored as percent
 uint16_t keyaDirOffset = 360;
-uint32_t keyaCommandTime=0;
-uint8_t keyaCommandState=0;
+uint32_t keyaCommandTime = 0;
+uint8_t keyaCommandState = 0;
 int32_t keyaEncoderValue = 0;
 int32_t keyaEncoderValueOld = 0;
 int8_t keyaDir = 0;
@@ -302,17 +302,17 @@ BNO_RVC_DATA bnoRingData;
 // Keya CANBus steer motor
 #include <FlexCAN_T4.h>
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
-//FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
+// FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
 int8_t KeyaCurrentSensorReading = 0;
 bool keyaDetected = false;
 // End
 
 #include "Machine.h"
-MACHINE* machinePTR;
+MACHINE *machinePTR;
 
 // for enabling & controlling AUX, LOCK & Section/Machine outputs
-#define I2C_WIRE       Wire           // used for PCA9685 aux, lock & section outputs (0x44), & RGB LEDs (0x70) in LEDS.h
-#include "Adafruit_PWMServoDriver.h"  // https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
+#define I2C_WIRE Wire                                                      // used for PCA9685 aux, lock & section outputs (0x44), & RGB LEDs (0x70) in LEDS.h
+#include "Adafruit_PWMServoDriver.h"                                       // https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
 Adafruit_PWMServoDriver outputs = Adafruit_PWMServoDriver(0x44, I2C_WIRE); // RGB instance is 0x44 unless A2 Low solder jumper is closed, then 0x40
 #include "outputs.h"
 

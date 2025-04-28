@@ -17,11 +17,10 @@ void fw_set_settings(struct settings *data)
 
     MG_DEBUG(("set_settings: %s,%d,%d,%d,%d,%s,%d", data->fversion, data->bd_ip1, data->bd_ip2, data->bd_ip3, data->bd_ip4, data->gps_sync, data->gps_pass));
     MG_DEBUG(("fw_settings: %s,%d,%d,%d,%d,%s,%d", inoVersion, netConfig.currentIP[0], netConfig.currentIP[1], netConfig.currentIP[2], netConfig.currentIP[3], gpsConfig.gpsSync, gpsConfig.gpsPass));
-
 }
 
 void fw_get_settings(struct settings *data)
-{ 
+{
     load_current_net();
     load_gps();
     MG_DEBUG(("fw_settings: %s,%d,%d,%d,%d,%s,%d", inoVersion, netConfig.currentIP[0], netConfig.currentIP[1], netConfig.currentIP[2], netConfig.currentIP[3], gpsConfig.gpsSync, gpsConfig.gpsPass));
@@ -42,7 +41,7 @@ void fw_set_ins_config(struct ins_config *data)
     insConfig.alignVelocity = data->insAlignVel;
     strcpy(insConfig.vehicleDir, data->insVehDir);
     insConfig.wheelbase = data->insWheelbase;
-   
+
     insConfig.installAngleX = data->insInstAngleX;
     insConfig.installAngleY = data->insInstAngleY;
     insConfig.installAngleZ = data->insInstAngleZ;
@@ -66,13 +65,13 @@ void fw_set_ins_config(struct ins_config *data)
     insConfig.initAttitudeStdAzimuth = data->insInitAttStdAzi;
 
     MG_DEBUG(("set_ins_config: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEnable, data->insTimeOut, data->insAlignVel, data->insVehDir, data->insWheelbase,
-         data->insInstAngleX, data->insInstAngleY, data->insInstAngleZ, data->insLeverX, data->insLeverY, data->insLeverZ, data->insLeverA, data->insLeverB, data->insLeverC,
-         data->insPosOffsetX, data->insPosOffsetY, data->insPosOffsetZ, data->insInitAttPitch, data->insInitAttRoll, data->insInitAttAzimuth, data->insInitAttStdPitch, data->insInitAttStdRoll, data->insInitAttStdAzi));
-    
+              data->insInstAngleX, data->insInstAngleY, data->insInstAngleZ, data->insLeverX, data->insLeverY, data->insLeverZ, data->insLeverA, data->insLeverB, data->insLeverC,
+              data->insPosOffsetX, data->insPosOffsetY, data->insPosOffsetZ, data->insInitAttPitch, data->insInitAttRoll, data->insInitAttAzimuth, data->insInitAttStdPitch, data->insInitAttStdRoll, data->insInitAttStdAzi));
+
     MG_DEBUG(("fw_insConfig: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insConfig.enable, insConfig.timeOut, insConfig.alignVelocity, insConfig.vehicleDir, insConfig.wheelbase,
-        insConfig.installAngleX, insConfig.installAngleY, insConfig.installAngleZ, insConfig.leverArmX, insConfig.leverArmY, insConfig.leverArmZ, insConfig.leverArmA, insConfig.leverArmB, insConfig.leverArmC,
-        insConfig.posOffsetX, insConfig.posOffsetY, insConfig.posOffsetZ, insConfig.initAttitudePitch, insConfig.initAttitudeRoll, insConfig.initAttitudeAzimuth,
-        insConfig.initAttitudeStdPitch, insConfig.initAttitudeStdRoll, insConfig.initAttitudeStdAzimuth));
+              insConfig.installAngleX, insConfig.installAngleY, insConfig.installAngleZ, insConfig.leverArmX, insConfig.leverArmY, insConfig.leverArmZ, insConfig.leverArmA, insConfig.leverArmB, insConfig.leverArmC,
+              insConfig.posOffsetX, insConfig.posOffsetY, insConfig.posOffsetZ, insConfig.initAttitudePitch, insConfig.initAttitudeRoll, insConfig.initAttitudeAzimuth,
+              insConfig.initAttitudeStdPitch, insConfig.initAttitudeStdRoll, insConfig.initAttitudeStdAzimuth));
 
     save_ins();
 }
@@ -81,16 +80,16 @@ void fw_get_ins_config(struct ins_config *data)
 {
     load_ins();
     MG_DEBUG(("fw_insConfig: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insConfig.enable, insConfig.timeOut, insConfig.alignVelocity, insConfig.vehicleDir, insConfig.wheelbase,
-         insConfig.installAngleX, insConfig.installAngleY, insConfig.installAngleZ, insConfig.leverArmX, insConfig.leverArmY, insConfig.leverArmZ, insConfig.leverArmA, insConfig.leverArmB, insConfig.leverArmC,
-         insConfig.posOffsetX, insConfig.posOffsetY, insConfig.posOffsetZ, insConfig.initAttitudePitch, insConfig.initAttitudeRoll, insConfig.initAttitudeAzimuth,
-         insConfig.initAttitudeStdPitch, insConfig.initAttitudeStdRoll, insConfig.initAttitudeStdAzimuth));
+              insConfig.installAngleX, insConfig.installAngleY, insConfig.installAngleZ, insConfig.leverArmX, insConfig.leverArmY, insConfig.leverArmZ, insConfig.leverArmA, insConfig.leverArmB, insConfig.leverArmC,
+              insConfig.posOffsetX, insConfig.posOffsetY, insConfig.posOffsetZ, insConfig.initAttitudePitch, insConfig.initAttitudeRoll, insConfig.initAttitudeAzimuth,
+              insConfig.initAttitudeStdPitch, insConfig.initAttitudeStdRoll, insConfig.initAttitudeStdAzimuth));
 
     strcpy(data->insEnable, insConfig.enable);
     data->insTimeOut = insConfig.timeOut;
     data->insAlignVel = insConfig.alignVelocity;
     strcpy(data->insVehDir, insConfig.vehicleDir);
     data->insWheelbase = insConfig.wheelbase;
-    
+
     data->insInstAngleX = insConfig.installAngleX;
     data->insInstAngleY = insConfig.installAngleY;
     data->insInstAngleZ = insConfig.installAngleZ;
@@ -114,9 +113,8 @@ void fw_get_ins_config(struct ins_config *data)
     data->insInitAttStdAzi = insConfig.initAttitudeStdAzimuth;
 
     MG_DEBUG(("get_ins_config: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEnable, data->insTimeOut, data->insAlignVel, data->insVehDir, data->insWheelbase,
-        data->insInstAngleX, data->insInstAngleY, data->insInstAngleZ, data->insLeverX, data->insLeverY, data->insLeverZ, data->insLeverA, data->insLeverB, data->insLeverC,
-        data->insPosOffsetX, data->insPosOffsetY, data->insPosOffsetZ, data->insInitAttPitch, data->insInitAttRoll, data->insInitAttAzimuth, data->insInitAttStdPitch, data->insInitAttStdRoll, data->insInitAttStdAzi));
-
+              data->insInstAngleX, data->insInstAngleY, data->insInstAngleZ, data->insLeverX, data->insLeverY, data->insLeverZ, data->insLeverA, data->insLeverB, data->insLeverC,
+              data->insPosOffsetX, data->insPosOffsetY, data->insPosOffsetZ, data->insInitAttPitch, data->insInitAttRoll, data->insInitAttAzimuth, data->insInitAttStdPitch, data->insInitAttStdRoll, data->insInitAttStdAzi));
 }
 
 void teensyReboot(void *param)

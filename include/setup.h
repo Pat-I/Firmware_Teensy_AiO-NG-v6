@@ -16,7 +16,7 @@ void setCpuFrequency(uint32_t _freq)
 void serialSetup()
 {
   pinMode(BUZZER, OUTPUT);
-  digitalWrite(BUZZER, LOW);  // disables the buzzer's FET driver
+  digitalWrite(BUZZER, LOW); // disables the buzzer's FET driver
 
   // setup GPS serial ports here
   SerialGPS1.begin(baudGPS);
@@ -62,7 +62,7 @@ void resetStartingTimersBuffers()
 #ifdef AIOv50a
   SerialESP32.clear();
 #endif
-  //machinePTR->watchdogTimer = 0;
+  // machinePTR->watchdogTimer = 0;
   startup = true;
 }
 

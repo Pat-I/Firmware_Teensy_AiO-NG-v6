@@ -83,21 +83,17 @@ void motorDrive(void)
   if (pwmDrive > 0)
   {
     analogWrite(PWM2_PIN, 255); // Turn off before other one on
-    analogWrite(PWM1_PIN, 255-pwmDrive);
+    analogWrite(PWM1_PIN, 255 - pwmDrive);
   }
   else
   {
     pwmDrive = -1 * pwmDrive;
     analogWrite(PWM1_PIN, 255); // Turn off before other one on
-    analogWrite(PWM2_PIN, 255-pwmDrive);
+    analogWrite(PWM2_PIN, 255 - pwmDrive);
   }
 
   pwmDisplay = pwmDrive;
 #endif
-
-
-
-
 }
 
 #endif /* AUTOSTEERPID_H_ */

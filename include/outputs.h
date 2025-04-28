@@ -6,21 +6,22 @@ const uint8_t drvCnt = 5;
 
 // these pins needs a DRV8243 sleep reset pulse before they activate
 const uint8_t drvSleepPins[drvCnt] = {
-  15, // AUX nSLEEP
-  14, // LOCK nSLEEP
-  13, // Section 1/2 nSLEEP
-   3, // Section 3/4 nSLEEP
-   7  // Section 5/6 nSLEEP
+    15, // AUX nSLEEP
+    14, // LOCK nSLEEP
+    13, // Section 1/2 nSLEEP
+    3,  // Section 3/4 nSLEEP
+    7   // Section 5/6 nSLEEP
 };
 
 // set/leave these PCA pins LOW(default) to allow DRV operation or HIGH to for Standby (Hi-Z outputs)
 const uint8_t drvOffPins[3] = {
-  2,  // Sec 1/2 DRVOFF
-  6,  // Sec 3/4 DRVOFF
-  8   // Sec 5/6 DRVOFF
+    2, // Sec 1/2 DRVOFF
+    6, // Sec 3/4 DRVOFF
+    8  // Sec 5/6 DRVOFF
 };
 
-typedef enum {
+typedef enum
+{
   LOCK_DRV,
   AUX_DRV,
   SEC12_DRV,
@@ -28,12 +29,13 @@ typedef enum {
   SEC56_DRV,
 } DRV_ID;
 
-void outputsInit() {
+void outputsInit()
+{
   Serial.print("\r\nInitializing Machine/Section Outputs");
   Serial.print("\r\n- v5.0d PCA9685 I2C PWM IO extender controls (5) DRV8243 for Section/Lock/Aux outputs");
   // only nSLEEP pin is controlled on Aux & Lock by PCA9685
 
-  outputs.begin();              // Adafruit_PWMServoDriver 
+  outputs.begin(); // Adafruit_PWMServoDriver
 
   I2C_WIRE.beginTransmission(0x44);
   Serial.print("\r\n  - Sections/Lock/Aux PCA9685 ");
@@ -43,36 +45,38 @@ void outputsInit() {
     Serial.print("*NOT found!*");
 
   I2C_WIRE.setClock(1000000);
-  outputs.setPWMFreq(1526);     // the maximum, to hopefully mitigate switching/frequency noise
-  outputs.setOutputMode(true);  // false: open drain, true: totempole (push/pull)
-  
+  outputs.setPWMFreq(1526);    // the maximum, to hopefully mitigate switching/frequency noise
+  outputs.setOutputMode(true); // false: open drain, true: totempole (push/pull)
+
   // put all DRVs to sleep (Hi-Z outputs & they're ready to wake up)
   Serial.print("\r\n    - All LOCK/AUX/Section DRVs set to sleep (Hi-Z outputs)");
-  for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++){
+  for (uint8_t drvNum = 0; drvNum < drvCnt; drvNum++)
+  {
     outputs.setPin(drvSleepPins[drvNum], 0, 0); // sets PCA9685 pin LOW 0V, puts DRV in Sleep mode
   }
 
-  delayMicroseconds(150);  // wait max tSLEEP (120uS) for Sleep mode to settle in
+  delayMicroseconds(150); // wait max tSLEEP (120uS) for Sleep mode to settle in
 
   // wake/activate LOCK & AUX
   // LOCK still needs signal from Autosteer code before its output is HIGH
   Serial.print("\r\n- Enabling LOCK DRV, output controlled by Autosteer/Lock Btn");
   outputs.setPin(drvSleepPins[DRV_ID::LOCK_DRV], 187, 1); // LOW pulse, 187/4096 is 30uS at 1532hz, send nSLEEP reset pulse
-  
+
   // AUX's output is HIGH as soon as it wakes up
   Serial.print("\r\n- Enabling AUX Output");
   outputs.setPin(drvSleepPins[DRV_ID::AUX_DRV], 187, 1); // LOW pulse, 187/4096 is 30uS at 1532hz, send nSLEEP reset pulse
 }
 
-
 const uint8_t numMachineOutputs = 6;
-const uint8_t machinePCA9685OutputPins[numMachineOutputs] = { 0, 1, 4, 5, 10, 9 };
-//const uint8_t Machine_PCA9685_DRV_OFF_Pins[3] = { 2, 6, 8 };
-//const uint8_t Machine_PCA9685_DRV_Sleep_Pins[3] = { 13, 3, 7 };
+const uint8_t machinePCA9685OutputPins[numMachineOutputs] = {0, 1, 4, 5, 10, 9};
+// const uint8_t Machine_PCA9685_DRV_OFF_Pins[3] = { 2, 6, 8 };
+// const uint8_t Machine_PCA9685_DRV_Sleep_Pins[3] = { 13, 3, 7 };
 
-void initMachineOutputs() {
+void initMachineOutputs()
+{
   // set all DRV signals HIGH before waking so that outputs are Hi-Z (PWM bridge mode)
-  for (uint8_t i = 0; i < numMachineOutputs; i++) {
+  for (uint8_t i = 0; i < numMachineOutputs; i++)
+  {
     // Set the pins to 0v (gnd) if not inverted, +12v (board power) if inverted
     outputs.setPin(machinePCA9685OutputPins[i], 0, machinePTR->config.isPinActiveHigh);
   }
@@ -89,8 +93,9 @@ void initMachineOutputs() {
 void updateMachineOutputs()
 {
   Serial.print("\r\nMachine Outputs update");
-  for (uint8_t i = 1; i <= numMachineOutputs; i++) {
-    Serial.printf("\r\n- Pin %2i: %i ", machinePCA9685OutputPins[i-1], machinePTR->states.functions[machinePTR->config.pinFunction[i]]);
+  for (uint8_t i = 1; i <= numMachineOutputs; i++)
+  {
+    Serial.printf("\r\n- Pin %2i: %i ", machinePCA9685OutputPins[i - 1], machinePTR->states.functions[machinePTR->config.pinFunction[i]]);
     Serial.print(machinePTR->functionNames[machinePTR->config.pinFunction[i]]);
 
     // Control the "invert" flag of setPin function
@@ -102,9 +107,9 @@ void updateMachineOutputs()
     //     0             1             Low            1
     //     0             0             High           0
     outputs.setPin(
-      machinePCA9685OutputPins[i-1], // pin
-      0, // val
-      machinePTR->states.functions[machinePTR->config.pinFunction[i]] != machinePTR->config.isPinActiveHigh // invert
+        machinePCA9685OutputPins[i - 1],                                                                      // pin
+        0,                                                                                                    // val
+        machinePTR->states.functions[machinePTR->config.pinFunction[i]] != machinePTR->config.isPinActiveHigh // invert
     );
   }
   Serial.println();

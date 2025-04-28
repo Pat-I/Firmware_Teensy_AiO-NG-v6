@@ -105,20 +105,23 @@ void keyaCommand(uint8_t command[])
 // KWAS read encoder
 void readKeyaEncoder()
 {
-  if(keyaDetected)
+  if (keyaDetected)
   {
-    uint8_t remain = (systick_millis_count - keyaCommandTime)%30;
-    if(remain < 10 && keyaCommandState==0){
+    uint8_t remain = (systick_millis_count - keyaCommandTime) % 30;
+    if (remain < 10 && keyaCommandState == 0)
+    {
       keyaCommand(keyaEncoderSpeedQuery);
       keyaCommandState++;
     }
-    else if(remain > 10 && keyaCommandState==1){
+    else if (remain > 10 && keyaCommandState == 1)
+    {
       keyaCommand(keyaCurrentQuery);
       keyaCommandState++;
     }
-    else if(remain > 20 && keyaCommandState==2){
+    else if (remain > 20 && keyaCommandState == 2)
+    {
       keyaCommand(keyaEncoderQuery);
-      keyaCommandState=0;
+      keyaCommandState = 0;
     }
   }
 }
@@ -175,9 +178,10 @@ void KeyaBus_Receive()
 {
   static uint32_t keyaCheckTime;
   uint32_t millisNow = millis();
-  if (millisNow < keyaCheckTime) return;   // only need to check for new data every ms, not 100s of times per ms
-  //Serial.print((String)"\r\n" + millisNow + " KEYA check " + keyaCheckTime);
-  keyaCheckTime = millisNow + 1;     // allow check every ms
+  if (millisNow < keyaCheckTime)
+    return; // only need to check for new data every ms, not 100s of times per ms
+  // Serial.print((String)"\r\n" + millisNow + " KEYA check " + keyaCheckTime);
+  keyaCheckTime = millisNow + 1; // allow check every ms
 
   KEYAusage.timeIn();
   CAN_message_t KeyaBusReceiveData;
@@ -379,77 +383,79 @@ void KeyaBus_Receive()
       // Encoder query response
       else if (isPatternMatch(KeyaBusReceiveData, keyaEncoderResponse, sizeof(keyaEncoderResponse)))
       {
-        keyaEncoderValue = KeyaBusReceiveData.buf[7] << 24 | 
-        KeyaBusReceiveData.buf[6] << 16 | 
-        KeyaBusReceiveData.buf[5] << 8 | 
-        KeyaBusReceiveData.buf[4];
-        //so right is positive
-        keyaEncoderValue=keyaEncoderValue*-1;
+        keyaEncoderValue = KeyaBusReceiveData.buf[7] << 24 |
+                           KeyaBusReceiveData.buf[6] << 16 |
+                           KeyaBusReceiveData.buf[5] << 8 |
+                           KeyaBusReceiveData.buf[4];
+        // so right is positive
+        keyaEncoderValue = keyaEncoderValue * -1;
 
-        if(keyaEncoderValueOld>keyaEncoderValue)
-          keyaDir=-1;
-        else if(keyaEncoderValueOld<keyaEncoderValue)
-          keyaDir=1;
+        if (keyaEncoderValueOld > keyaEncoderValue)
+          keyaDir = -1;
+        else if (keyaEncoderValueOld < keyaEncoderValue)
+          keyaDir = 1;
         keyaEncoderValueOld = keyaEncoderValue;
-
 
         switch (keyaState)
         {
-        case 0:       //start point
-          if(keyaDir==1)
-            keyaState=1;
+        case 0: // start point
+          if (keyaDir == 1)
+            keyaState = 1;
           else
-            keyaState=3;
+            keyaState = 3;
           break;
-        
-        case 1:     //giro a dx - turn right
-          if(keyaDir==-1)
-            keyaState=2;
-          else{
-            keyaEncoderValueFreeze=keyaEncoderValue;
-          }
-          break;
-        
-        case 2:     //cambio verso sx - turn left
-          if(keyaEncoderValueFreeze-keyaEncoderValue>steerSettings.keyaDirOffset)
-            keyaState=3;
-          else if(keyaEncoderValue>keyaEncoderValueFreeze)
-            keyaState=1;
-          keyaEncoderValue=keyaEncoderValueFreeze;
-          break;
-        
-        case 3:     //giro a sx - turn right
-          keyaEncoderValue += steerSettings.keyaDirOffset;
-          if(keyaDir==1)
-            keyaState=4;
-          else{
-            keyaEncoderValueFreeze=keyaEncoderValue;
-          }
-          break;
-        
-        case 4:     //cambio a dx - turn right
-          keyaEncoderValue += steerSettings.keyaDirOffset;
-          if(keyaEncoderValue-keyaEncoderValueFreeze>steerSettings.keyaDirOffset)
-            keyaState=1;
-          else if(keyaEncoderValue<keyaEncoderValueFreeze)
-            keyaState=3;
 
-          keyaEncoderValue=keyaEncoderValueFreeze;
+        case 1: // giro a dx - turn right
+          if (keyaDir == -1)
+            keyaState = 2;
+          else
+          {
+            keyaEncoderValueFreeze = keyaEncoderValue;
+          }
           break;
-        
+
+        case 2: // cambio verso sx - turn left
+          if (keyaEncoderValueFreeze - keyaEncoderValue > steerSettings.keyaDirOffset)
+            keyaState = 3;
+          else if (keyaEncoderValue > keyaEncoderValueFreeze)
+            keyaState = 1;
+          keyaEncoderValue = keyaEncoderValueFreeze;
+          break;
+
+        case 3: // giro a sx - turn right
+          keyaEncoderValue += steerSettings.keyaDirOffset;
+          if (keyaDir == 1)
+            keyaState = 4;
+          else
+          {
+            keyaEncoderValueFreeze = keyaEncoderValue;
+          }
+          break;
+
+        case 4: // cambio a dx - turn right
+          keyaEncoderValue += steerSettings.keyaDirOffset;
+          if (keyaEncoderValue - keyaEncoderValueFreeze > steerSettings.keyaDirOffset)
+            keyaState = 1;
+          else if (keyaEncoderValue < keyaEncoderValueFreeze)
+            keyaState = 3;
+
+          keyaEncoderValue = keyaEncoderValueFreeze;
+          break;
+
         default:
-          keyaState=0;
+          keyaState = 0;
           break;
         }
 
-        if(steerSettings.keyaAckermanFix != 100){
+        if (steerSettings.keyaAckermanFix != 100)
+        {
           keyaEncoderDiff = keyaEncoderValue - keyaEncoderFinalOld;
-          
-          if(keyaDir==1) // turning right
+
+          if (keyaDir == 1) // turning right
             keyaEncoderDiff *= steerSettings.keyaAckermanFix;
           else
             keyaEncoderDiff *= 100;
-          
+
           keyaEncoderVirtual += keyaEncoderDiff;
           keyaEncoder = (float)keyaEncoderVirtual / 600.0f;
           keyaEncoderFinalOld = keyaEncoderValue;
@@ -462,16 +468,16 @@ void KeyaBus_Receive()
       else if (isPatternMatch(KeyaBusReceiveData, keyaEncoderSpeedResponse, sizeof(keyaEncoderSpeedResponse)))
       {
         keyaEncoderSpeed = KeyaBusReceiveData.buf[5] << 8 | KeyaBusReceiveData.buf[4];
-        if(keyaEncoderSpeed>65000)
-          keyaEncoderSpeed=keyaEncoderSpeed-65536;
-        
-        if(keyaEncoderSpeed!=0){
-          KeyaCurrentReport = KeyaCurrentSensorReading/abs(keyaEncoderSpeed)*200;
-          KeyaCurrentReportSmooth = KeyaCurrentReportSmooth*0.7 + KeyaCurrentReport*0.3;
+        if (keyaEncoderSpeed > 65000)
+          keyaEncoderSpeed = keyaEncoderSpeed - 65536;
 
+        if (keyaEncoderSpeed != 0)
+        {
+          KeyaCurrentReport = KeyaCurrentSensorReading / abs(keyaEncoderSpeed) * 200;
+          KeyaCurrentReportSmooth = KeyaCurrentReportSmooth * 0.7 + KeyaCurrentReport * 0.3;
         }
       }
-      
+
       // Fault query response
       else if (isPatternMatch(KeyaBusReceiveData, keyaFaultResponse, sizeof(keyaFaultResponse)))
       {

@@ -19,7 +19,7 @@
 
 void setup()
 {
-  delay(10000);              // Delay for tesing to allow opening serial terminal to see output
+  delay(10000); // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");
@@ -28,31 +28,31 @@ void setup()
   setCpuFrequency(600 * 1000000); // Set CPU speed, default is 600mhz, setup.ino
 
   // ** IP loading & Mongoose/Eth init needs to be first **
-  ipSetup();                      // Load the IP address from EEPROM and setup the gateway & broadcast addresses
-  load_gps();                     // Load the GPS settings from EEPROM
-  //load_config();                  // Sync the firmware EEPROM values to the GUI
-  //set_settings();
-  ethernet_init();                // Bring up the ethernet hardware
-  mongoose_init();                // Bring up the mongoose services
-  udpSetup();                     // Bring up the UDP connections to/from AgIO
+  ipSetup();  // Load the IP address from EEPROM and setup the gateway & broadcast addresses
+  load_gps(); // Load the GPS settings from EEPROM
+  // load_config();                  // Sync the firmware EEPROM values to the GUI
+  // set_settings();
+  ethernet_init(); // Bring up the ethernet hardware
+  mongoose_init(); // Bring up the mongoose services
+  udpSetup();      // Bring up the UDP connections to/from AgIO
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);
 
-  serialSetup();                  // Configure the Serial comms
-  parserSetup();                  // Load the NMEA parser callbacks
-  BNO.begin(SerialIMU);           // Start the IMU
-  autosteerSetup();               // Initialize autosteer
-  CAN_Setup();                    // Start CAN3 for Keya
-  
-  outputsInit();                  // Initialize PCA9685 for LOCK, AUX & Sections/Machine outputs, enable AUX output but leave others Hi-Z
-  machinePTR = new MACHINE;       // need to use pointer otherwise Mongoose has a seizure
-  machinePTR->init(500);          // 500 is starting address for machine EEPROM storage
-  //machinePTR.setSectionOutputsHandler(updateSectionOutputs);
+  serialSetup();        // Configure the Serial comms
+  parserSetup();        // Load the NMEA parser callbacks
+  BNO.begin(SerialIMU); // Start the IMU
+  autosteerSetup();     // Initialize autosteer
+  CAN_Setup();          // Start CAN3 for Keya
+
+  outputsInit();            // Initialize PCA9685 for LOCK, AUX & Sections/Machine outputs, enable AUX output but leave others Hi-Z
+  machinePTR = new MACHINE; // need to use pointer otherwise Mongoose has a seizure
+  machinePTR->init(500);    // 500 is starting address for machine EEPROM storage
+  // machinePTR.setSectionOutputsHandler(updateSectionOutputs);
   machinePTR->setMachineOutputsHandler(updateMachineOutputs);
   machinePTR->setUdpReplyHandler(machinePgnReplies);
   initMachineOutputs();
 
-  load_ins();                     // Load INS data from EEPROM
+  load_ins(); // Load INS data from EEPROM
 
   mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
   mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
@@ -60,28 +60,28 @@ void setup()
 
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);
-  resetStartingTimersBuffers();         // setup.ino
+  resetStartingTimersBuffers(); // setup.ino
 }
 
 void loop()
 {
-  GUIusage.timeIn();                    // *usage objects are used to track cpu usage on certain sections of code, see debug.h or misc.h
-  mongoose_poll();                      // update all Mongoose processes, UDP/PGN/Web UI
+  GUIusage.timeIn(); // *usage objects are used to track cpu usage on certain sections of code, see debug.h or misc.h
+  mongoose_poll();   // update all Mongoose processes, UDP/PGN/Web UI
   GUIusage.timeOut();
 
-  gpsPoll();                            // check for data on GPS1 & GPS2 UARTs
-  serialESP32();                        // check for PGN replies on ESP32 UART
-  readKeyaEncoder();                    // Read encoder count & speed and current
-  KeyaBus_Receive();                    // check for Keya data on can bus 3
-  autoSteerUpdate();                    // run autosteer loop
-  serialRTCM();                         // check for RTCM data on Xbee/Radio UART
+  gpsPoll();         // check for data on GPS1 & GPS2 UARTs
+  serialESP32();     // check for PGN replies on ESP32 UART
+  readKeyaEncoder(); // Read encoder count & speed and current
+  KeyaBus_Receive(); // check for Keya data on can bus 3
+  autoSteerUpdate(); // run autosteer loop
+  serialRTCM();      // check for RTCM data on Xbee/Radio UART
 
   LEDSusage.timeIn();
-  LEDs.updateLoop();                    // update frontplate RGB LEDs
+  LEDs.updateLoop(); // update frontplate RGB LEDs
   LEDSusage.timeOut();
 
   MACHusage.timeIn();
-  machinePTR->watchdogCheck();          // update machine safety timeout
+  machinePTR->watchdogCheck(); // update machine safety timeout
   MACHusage.timeOut();
 
   BNOusage.timeIn();
@@ -93,14 +93,15 @@ void loop()
   }
   BNOusage.timeOut();
 
-  checkUSBSerial();                     // Check for & process debug cmds
+  checkUSBSerial(); // Check for & process debug cmds
 
-  if (bufferStatsTimer > 5000) printTelem(); // Print telemetry
+  if (bufferStatsTimer > 5000)
+    printTelem(); // Print telemetry
 
   LOOPusage.timeIn();
-  testCounter++;                        // to count loop hz & get baseline cpu "idle" time
+  testCounter++; // to count loop hz & get baseline cpu "idle" time
   LOOPusage.timeOut();
 
-  if (SerialRS232.available()) Serial.write(SerialRS232.read()); // just print to USB for testing
-
+  if (SerialRS232.available())
+    Serial.write(SerialRS232.read()); // just print to USB for testing
 }

@@ -57,7 +57,7 @@ struct INS_DATA
 {
   char status[23];
   char latitude[16];
-  char longitude [17];
+  char longitude[17];
   char roll[6];
   char pitch[6];
   char heading[6];
@@ -67,21 +67,22 @@ INS_DATA INS;
 elapsedMicros aogGpsToAutoSteerLoopTimer;
 bool aogGpsToAutoSteerLoopTimerEnabled;
 
- // Convert decimal degress to degress, meniutes, seconds
-void DegreesToDegMinSec(double x, char* result, int resultSize)
+// Convert decimal degress to degress, meniutes, seconds
+void DegreesToDegMinSec(double x, char *result, int resultSize)
 {
   int deg = x;
   double minutesRemainder = abs(x - deg) * 60;
-  if(minutesRemainder<10)
+  if (minutesRemainder < 10)
     snprintf(result, resultSize, "%02d0%.8f", deg, minutesRemainder);
   else
-  snprintf(result, resultSize, "%02d%.8f", deg, minutesRemainder);
+    snprintf(result, resultSize, "%02d%.8f", deg, minutesRemainder);
 }
 
 // If odd characters showed up
 void errorHandler()
 {
-  if (startup) {
+  if (startup)
+  {
     Serial.print("\r\n*Unexpected characters in NMEA parser - Normal at startup*\r\n - NMEA Parser ErrorCode: ");
     Serial.print(nmeaParser.mError);
   }
@@ -205,7 +206,7 @@ void GGA_GNS_PostProcess() // called by either GGA or GNS handler
     {
       int syncTmp = atoi(gpsConfig.gpsSync) * 0.1;
       bnoRing.peek(bnoRingData, syncLUT[syncTmp]); // 10=0ms ago, 9=10ms ago, 8=20ms ago, 7=30ms ago, 6=40ms ago, 5=50ms ago, 4=60ms ago, 3=70ms ago, 2=80ms ago, 1=90ms ago, 0=100ms ago
-      itoa(bnoRingData.yawX10, IMU.heading, 10);    // format IMU data for Panda Sentence - Heading
+      itoa(bnoRingData.yawX10, IMU.heading, 10);   // format IMU data for Panda Sentence - Heading
 
       if (BNO.isSwapXY)
       {
@@ -243,14 +244,16 @@ void GGA_GNS_PostProcess() // called by either GGA or GNS handler
       IMU.yawRate[0] = 0;
     }
 
-    if (!gpsConfig.gpsPass) buildPandaOrPaogi(PANDA_SINGLE); // build the PANDA sentence right away
+    if (!gpsConfig.gpsPass)
+      buildPandaOrPaogi(PANDA_SINGLE); // build the PANDA sentence right away
     posReady = false;
   }
   else
   { // Dual is in use
     if (ubxParser.relPosNedReady && posReady)
-    {                                   // if both GGA & relposNED are ready
-      if (!gpsConfig.gpsPass) buildPandaOrPaogi(PAOGI_DUAL);    // build a PAOGI msg
+    { // if both GGA & relposNED are ready
+      if (!gpsConfig.gpsPass)
+        buildPandaOrPaogi(PAOGI_DUAL);  // build a PAOGI msg
       ubxParser.relPosNedReady = false; // reset for next relposned trigger
       ubxParser.relPosNedRcvd = false;
       posReady = false;
@@ -373,7 +376,8 @@ void VTG_Handler()
 
 void PVT_Handler()
 {
-  Serial << "\r\n" << millis() << " PVT received\r\n";
+  Serial << "\r\n"
+         << millis() << " PVT received\r\n";
 }
 
 void HPR_Handler()
@@ -454,14 +458,16 @@ void HPR_Handler()
 void KSXT_Handler()
 {
   char KSXTposqual[3];
-  nmeaParser.getArg(9, KSXTposqual);    // KSXT Position Quality
+  nmeaParser.getArg(9, KSXTposqual); // KSXT Position Quality
   uint8_t convertedPosQual = atoi(KSXTposqual);
 
   // UM982 KSXT Pos Qual needs converting to GGA numbering scheme
-  if (convertedPosQual == 2) convertedPosQual = 5;  // convert UM982 "KSXT FLOAT" to "GGA FLOAT"
-  if (convertedPosQual == 3) convertedPosQual = 4;  // convert UM982 "KSXT RTK FIX" to "GGA RTK FIX"
+  if (convertedPosQual == 2)
+    convertedPosQual = 5; // convert UM982 "KSXT FLOAT" to "GGA FLOAT"
+  if (convertedPosQual == 3)
+    convertedPosQual = 4; // convert UM982 "KSXT RTK FIX" to "GGA RTK FIX"
   LEDs.setGpsLED(convertedPosQual, true);
-  
+
   /*Serial.print("\r\nKSXT Pos Qual: ");
   Serial.print(KSXTposqual);
 
@@ -483,8 +489,6 @@ void KSXT_Handler()
 void INSPVAXA_Handler()
 {
   Serial.println("Got INSPVAXA message");
-  
 }
-
 
 #endif // GNSSHANDLERS_H_

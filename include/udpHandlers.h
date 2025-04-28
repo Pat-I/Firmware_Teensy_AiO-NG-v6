@@ -8,7 +8,7 @@
 #define UDPHANDLERS_H_
 #include "Arduino.h"
 #include "mongoose_glue.h"
-//#include "machine.h"
+// #include "machine.h"
 #include "Autosteer.h"
 #include "common.h"
 
@@ -40,22 +40,28 @@ void sendUDPchars(char *stuff)
   UDP_Susage.timeOut();
 }
 
-void printPgnAnnoucement(struct mg_connection *udpPacket, char* _pgnName)
+void printPgnAnnoucement(struct mg_connection *udpPacket, char *_pgnName)
 {
   // One line PGN data display
-  Serial.print("\r\n0x"); Serial.print(udpPacket->recv.buf[3], HEX);
-  Serial.print("("); Serial.print(udpPacket->recv.buf[3]); Serial.print(")-");
+  Serial.print("\r\n0x");
+  Serial.print(udpPacket->recv.buf[3], HEX);
+  Serial.print("(");
+  Serial.print(udpPacket->recv.buf[3]);
+  Serial.print(")-");
   Serial.print(_pgnName);
-  for (uint8_t i = strlen(_pgnName); i < 20; i++) Serial.print(" ");  // to align PGN name length for PGN data dump
+  for (uint8_t i = strlen(_pgnName); i < 20; i++)
+    Serial.print(" "); // to align PGN name length for PGN data dump
   Serial.printf(" %2i Data>", udpPacket->recv.len);
-  //Serial.print(millis());
+  // Serial.print(millis());
 
-  //Serial.print(" Data: ");
-  for (byte i = 4; i < udpPacket->recv.len - 1; i++) {      // -1 skips printing CRC
-    Serial.printf("%3i", udpPacket->recv.buf[i]); Serial.print(" ");    // aligns all data bytes using empty/leading whitespace
-    //Serial.print(packet.data()[i]); Serial.print(" ");          // no data byte alignment
+  // Serial.print(" Data: ");
+  for (byte i = 4; i < udpPacket->recv.len - 1; i++)
+  { // -1 skips printing CRC
+    Serial.printf("%3i", udpPacket->recv.buf[i]);
+    Serial.print(" "); // aligns all data bytes using empty/leading whitespace
+    // Serial.print(packet.data()[i]); Serial.print(" ");          // no data byte alignment
   }
-  
+
   // Two line PGN data display
   /*Serial.print("\r\n0x"); Serial.print(udpPacket->recv.buf[3], HEX);
   Serial.print(" ("); Serial.print(udpPacket->recv.buf[3]); Serial.print(") - ");
@@ -84,16 +90,17 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
 
   if (ev == MG_EV_READ && mg_ntohs(udpPacket->rem.port) == 9999 && udpPacket->recv.len >= 5)
   {
-    //printPgnAnnoucement(udpPacket, (char*)"All PGNs");
+    // printPgnAnnoucement(udpPacket, (char*)"All PGNs");
 
     // Verify first 3 PGN header bytes
     if (udpPacket->recv.buf[0] != 128 || udpPacket->recv.buf[1] != 129 || udpPacket->recv.buf[2] != 127)
       return;
 
     ESP32usage.timeIn();
-    if (udpPacket->recv.buf[3] != 201) {    // do not forward Subnet Change PGN
+    if (udpPacket->recv.buf[3] != 201)
+    { // do not forward Subnet Change PGN
       SerialESP32.write(udpPacket->recv.buf, udpPacket->recv.len);
-      SerialESP32.println();   // to signal end of PGN
+      SerialESP32.println(); // to signal end of PGN
       /*Serial.print("\r\nAgIO-e:8888->T41-s->E32 ");
       for (uint8_t i = 0; i < len; i++) {
         Serial.print(udpData[i]); Serial.print(" ");
@@ -101,34 +108,33 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
     }
     ESP32usage.timeOut();
 
-
-    #ifdef MACHINE_H
-      MACHusage.timeIn();
-      // 0xE5 (229) - 64 Section Data
-      // 0xEB (235) - Section Dimensions
-      // 0xEC (236) - Machine Pin Config
-      // 0xEE (238) - Machine Config
-      // 0xEF (239) - Machine Data
-      if (machinePTR->parsePGN(udpPacket->recv.buf, udpPacket->recv.len, udpPacket->rem.ip, netConfig.currentIP))     // look for Machine PGNs, return TRUE if machine specific PGN was found
-      {
-        return;   // abort further PGN processing if machine specific PGN as received/parsed
-      }
-      MACHusage.timeOut();
-    #endif
+#ifdef MACHINE_H
+    MACHusage.timeIn();
+    // 0xE5 (229) - 64 Section Data
+    // 0xEB (235) - Section Dimensions
+    // 0xEC (236) - Machine Pin Config
+    // 0xEE (238) - Machine Config
+    // 0xEF (239) - Machine Data
+    if (machinePTR->parsePGN(udpPacket->recv.buf, udpPacket->recv.len, udpPacket->rem.ip, netConfig.currentIP)) // look for Machine PGNs, return TRUE if machine specific PGN was found
+    {
+      return; // abort further PGN processing if machine specific PGN as received/parsed
+    }
+    MACHusage.timeOut();
+#endif
 
     PGNusage.timeIn();
 
     // 0x64 (100) - Corrected Position
     if (udpPacket->recv.buf[3] == 100 && udpPacket->recv.len == 30)
     {
-      //printPgnAnnoucement(udpPacket, (char*)"Corrected Position");
+      // printPgnAnnoucement(udpPacket, (char*)"Corrected Position");
       return; // no further PGN processing needed, skip the rest of the checks
     }
 
     // 0xC8 (200) - Hello from AgIO
     if (udpPacket->recv.buf[3] == 200 && udpPacket->recv.len == 9)
     {
-      //printPgnAnnoucement(udpPacket, (char*)"Hello from AgIO");
+      // printPgnAnnoucement(udpPacket, (char*)"Hello from AgIO");
       LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::AGIO_CONNECTED, true);
       uint8_t helloFromAutoSteer[] = {128, 129, 126, 126, 5, 0, 0, 0, 0, 0, 71};
       if (autoSteerEnabled)
@@ -153,22 +159,22 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
         sendUDPbytes(helloFromIMU, sizeof(helloFromIMU));
       }
 
-/*#ifdef MACHINE_H
-      if (machinePTR->isInit)
-      {
-        uint8_t helloFromMachine[] = {0x80, 0x81, 123, 123, 5, 0, 0, 0, 0, 0, 71};
-        helloFromMachine[5] = B10101010; // should be changed to read actual machine output states
-        helloFromMachine[6] = B01010101;
-        sendUDPbytes(helloFromMachine, sizeof(helloFromMachine));
-      }
-#endif*/
+      /*#ifdef MACHINE_H
+            if (machinePTR->isInit)
+            {
+              uint8_t helloFromMachine[] = {0x80, 0x81, 123, 123, 5, 0, 0, 0, 0, 0, 71};
+              helloFromMachine[5] = B10101010; // should be changed to read actual machine output states
+              helloFromMachine[6] = B01010101;
+              sendUDPbytes(helloFromMachine, sizeof(helloFromMachine));
+            }
+      #endif*/
       return; // no further PGN processing needed, skip the rest of the checks
     }
 
     // Subnet Change
     if (udpPacket->recv.buf[3] == 201 && udpPacket->recv.len == 11)
     {
-      printPgnAnnoucement(udpPacket, (char*)"Subnet Change");
+      printPgnAnnoucement(udpPacket, (char *)"Subnet Change");
 
       if (udpPacket->recv.buf[4] == 5 && udpPacket->recv.buf[5] == 201 && udpPacket->recv.buf[6] == 201) // save in EEPROM and restart
       {
@@ -192,7 +198,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
     {
       if (udpPacket->recv.buf[4] == 3 && udpPacket->recv.buf[5] == 202 && udpPacket->recv.buf[6] == 202)
       {
-        printPgnAnnoucement(udpPacket, (char*)"Scan Request");
+        printPgnAnnoucement(udpPacket, (char *)"Scan Request");
 
         uint8_t scanReplySteer[] = {128, 129, 126, 203, 7,
                                     netConfig.currentIP[0], netConfig.currentIP[1], netConfig.currentIP[2], netConfig.currentIP[3],
@@ -250,41 +256,91 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
     // 0xFB (251) - SteerConfig
     if (udpPacket->recv.buf[3] == 251 && udpPacket->recv.len == 14)
     {
-      printPgnAnnoucement(udpPacket, (char*)"Steer Config");
+      printPgnAnnoucement(udpPacket, (char *)"Steer Config");
 
       uint8_t sett = udpPacket->recv.buf[5]; // setting0
-      if (bitRead(sett, 0)) steerConfig.InvertWAS = 1; else steerConfig.InvertWAS = 0;
-      if (bitRead(sett, 1)) steerConfig.IsRelayActiveHigh = 1; else steerConfig.IsRelayActiveHigh = 0;
-      if (bitRead(sett, 2)) steerConfig.MotorDriveDirection = 1; else steerConfig.MotorDriveDirection = 0;
-      if (bitRead(sett, 3)) steerConfig.SingleInputWAS = 1; else steerConfig.SingleInputWAS = 0;
-      if (bitRead(sett, 4)) steerConfig.CytronDriver = 1; else steerConfig.CytronDriver = 0;
-      if (bitRead(sett, 5)) steerConfig.SteerSwitch = 1; else steerConfig.SteerSwitch = 0;
-      if (bitRead(sett, 6)) steerConfig.SteerButton = 1; else steerConfig.SteerButton = 0;
-      if (bitRead(sett, 7)) steerConfig.ShaftEncoder = 1; else steerConfig.ShaftEncoder = 0;
+      if (bitRead(sett, 0))
+        steerConfig.InvertWAS = 1;
+      else
+        steerConfig.InvertWAS = 0;
+      if (bitRead(sett, 1))
+        steerConfig.IsRelayActiveHigh = 1;
+      else
+        steerConfig.IsRelayActiveHigh = 0;
+      if (bitRead(sett, 2))
+        steerConfig.MotorDriveDirection = 1;
+      else
+        steerConfig.MotorDriveDirection = 0;
+      if (bitRead(sett, 3))
+        steerConfig.SingleInputWAS = 1;
+      else
+        steerConfig.SingleInputWAS = 0;
+      if (bitRead(sett, 4))
+        steerConfig.CytronDriver = 1;
+      else
+        steerConfig.CytronDriver = 0;
+      if (bitRead(sett, 5))
+        steerConfig.SteerSwitch = 1;
+      else
+        steerConfig.SteerSwitch = 0;
+      if (bitRead(sett, 6))
+        steerConfig.SteerButton = 1;
+      else
+        steerConfig.SteerButton = 0;
+      if (bitRead(sett, 7))
+        steerConfig.ShaftEncoder = 1;
+      else
+        steerConfig.ShaftEncoder = 0;
 
       steerConfig.PulseCountMax = udpPacket->recv.buf[6];
       steerConfig.MinSpeed = udpPacket->recv.buf[7];
 
       sett = udpPacket->recv.buf[8]; // setting1 - Danfoss valve etc
-      if (bitRead(sett, 0)) steerConfig.IsDanfoss = 1; else steerConfig.IsDanfoss = 0;
-      if (bitRead(sett, 1)) steerConfig.PressureSensor = 1; else steerConfig.PressureSensor = 0;
-      if (bitRead(sett, 2)) steerConfig.CurrentSensor = 1; else steerConfig.CurrentSensor = 0;
-      if (bitRead(sett, 3)) steerConfig.IsUseY_Axis = 1; else steerConfig.IsUseY_Axis = 0;
+      if (bitRead(sett, 0))
+        steerConfig.IsDanfoss = 1;
+      else
+        steerConfig.IsDanfoss = 0;
+      if (bitRead(sett, 1))
+        steerConfig.PressureSensor = 1;
+      else
+        steerConfig.PressureSensor = 0;
+      if (bitRead(sett, 2))
+        steerConfig.CurrentSensor = 1;
+      else
+        steerConfig.CurrentSensor = 0;
+      if (bitRead(sett, 3))
+        steerConfig.IsUseY_Axis = 1;
+      else
+        steerConfig.IsUseY_Axis = 0;
 
-      Serial.print("\r\nInvertWAS "); Serial.print(steerConfig.InvertWAS);
-      Serial.print("\r\nIsRelayActiveHigh "); Serial.print(steerConfig.IsRelayActiveHigh);
-      Serial.print("\r\nMotorDriveDirection "); Serial.print(steerConfig.MotorDriveDirection);
-      Serial.print("\r\nSingleInputWAS "); Serial.print(steerConfig.SingleInputWAS);
-      Serial.print("\r\nCytronDriver "); Serial.print(steerConfig.CytronDriver);
-      Serial.print("\r\nSteerSwitch "); Serial.print(steerConfig.SteerSwitch);
-      Serial.print("\r\nSteerButton "); Serial.print(steerConfig.SteerButton);
-      Serial.print("\r\nShaftEncoder "); Serial.print(steerConfig.ShaftEncoder);
-      Serial.print("\r\nIsDanfoss "); Serial.print(steerConfig.IsDanfoss);
-      Serial.print("\r\nPressureSensor "); Serial.print(steerConfig.PressureSensor);
-      Serial.print("\r\nCurrentSensor "); Serial.print(steerConfig.CurrentSensor);
-      Serial.print("\r\nIsUseY_Axis "); Serial.print(steerConfig.IsUseY_Axis);
-      Serial.print("\r\nPulseCountMax "); Serial.print(steerConfig.PulseCountMax);
-      Serial.print("\r\nMinSpeed "); Serial.print(steerConfig.MinSpeed);
+      Serial.print("\r\nInvertWAS ");
+      Serial.print(steerConfig.InvertWAS);
+      Serial.print("\r\nIsRelayActiveHigh ");
+      Serial.print(steerConfig.IsRelayActiveHigh);
+      Serial.print("\r\nMotorDriveDirection ");
+      Serial.print(steerConfig.MotorDriveDirection);
+      Serial.print("\r\nSingleInputWAS ");
+      Serial.print(steerConfig.SingleInputWAS);
+      Serial.print("\r\nCytronDriver ");
+      Serial.print(steerConfig.CytronDriver);
+      Serial.print("\r\nSteerSwitch ");
+      Serial.print(steerConfig.SteerSwitch);
+      Serial.print("\r\nSteerButton ");
+      Serial.print(steerConfig.SteerButton);
+      Serial.print("\r\nShaftEncoder ");
+      Serial.print(steerConfig.ShaftEncoder);
+      Serial.print("\r\nIsDanfoss ");
+      Serial.print(steerConfig.IsDanfoss);
+      Serial.print("\r\nPressureSensor ");
+      Serial.print(steerConfig.PressureSensor);
+      Serial.print("\r\nCurrentSensor ");
+      Serial.print(steerConfig.CurrentSensor);
+      Serial.print("\r\nIsUseY_Axis ");
+      Serial.print(steerConfig.IsUseY_Axis);
+      Serial.print("\r\nPulseCountMax ");
+      Serial.print(steerConfig.PulseCountMax);
+      Serial.print("\r\nMinSpeed ");
+      Serial.print(steerConfig.MinSpeed);
       Serial.println();
 
       EEPROM.put(steerCfgStore, steerConfig);
@@ -295,7 +351,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
     // 0xFC (252) - Steer Settings
     if (udpPacket->recv.buf[3] == 252 && udpPacket->recv.len == 14)
     {
-      printPgnAnnoucement(udpPacket, (char*)"Steer Settings");
+      printPgnAnnoucement(udpPacket, (char *)"Steer Settings");
 
       // PID values
       steerSettings.Kp = ((float)udpPacket->recv.buf[5]);   // read Kp from AgOpenGPS
@@ -322,13 +378,20 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
       steerSettings.wasOffset = newWasOffset;
       steerSettings.AckermanFix = (float)udpPacket->recv.buf[12] * 0.01;
 
-      Serial.print("\r\n Kp "); Serial.print(steerSettings.Kp);
-      Serial.print("\r\n highPWM "); Serial.print(steerSettings.highPWM);
-      Serial.print("\r\n lowPWM "); Serial.print(steerSettings.lowPWM);
-      Serial.print("\r\n minPWM "); Serial.print(steerSettings.minPWM);
-      Serial.print("\r\n steerSensorCounts "); Serial.print(steerSettings.steerSensorCounts);
-      Serial.print("\r\n wasOffset "); Serial.print(steerSettings.wasOffset);
-      Serial.print("\r\n AckermanFix "); Serial.print(steerSettings.AckermanFix);
+      Serial.print("\r\n Kp ");
+      Serial.print(steerSettings.Kp);
+      Serial.print("\r\n highPWM ");
+      Serial.print(steerSettings.highPWM);
+      Serial.print("\r\n lowPWM ");
+      Serial.print(steerSettings.lowPWM);
+      Serial.print("\r\n minPWM ");
+      Serial.print(steerSettings.minPWM);
+      Serial.print("\r\n steerSensorCounts ");
+      Serial.print(steerSettings.steerSensorCounts);
+      Serial.print("\r\n wasOffset ");
+      Serial.print(steerSettings.wasOffset);
+      Serial.print("\r\n AckermanFix ");
+      Serial.print(steerSettings.AckermanFix);
 
       EEPROM.put(steerSetStore, steerSettings);
       steerSettingsInit();
@@ -338,7 +401,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
     // 0xFE (254) - Steer Data (sent at GPS freq, ie 10hz (100ms))
     if (udpPacket->recv.buf[3] == 254 && udpPacket->recv.len == 14)
     {
-      //printPgnAnnoucement(udpPacket, (char*)"Steer Data");
+      // printPgnAnnoucement(udpPacket, (char*)"Steer Data");
 
       gpsSpeed = ((float)(udpPacket->recv.buf[5] | udpPacket->recv.buf[6] << 8)) * 0.1; // speed data comes in as km/hr x10
       speedPulse.updateSpeed(gpsSpeed);
@@ -438,7 +501,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
   {
     mg_iobuf_del(&udpPacket->recv, 0, udpPacket->recv.len);
   }
-  PGNusage.timeOut();   // ensure we stop counting cpu time
+  PGNusage.timeOut(); // ensure we stop counting cpu time
 }
 
 // Process data received on port 2233
@@ -481,13 +544,13 @@ void udpSetup()
   // Serial.println(steerListen);
   mg_snprintf(rtcmListen, sizeof(rtcmListen), "udp://%d.%d.%d.126:2233", netConfig.currentIP[0], netConfig.currentIP[1], netConfig.currentIP[2]);
   // Serial.println(rtcmListen);
-  //bool listenPGNs = false;
-  //bool listenRtcm = false;
-  //bool agioConnect = false;
+  // bool listenPGNs = false;
+  // bool listenRtcm = false;
+  // bool agioConnect = false;
 
   if (mg_listen(&g_mgr, pgnListenURL, pgnHandler, NULL) != NULL)
   {
-    //listenPGNs = true;
+    // listenPGNs = true;
     MG_DEBUG(("Listening for AgIO on UDP 8888"));
   }
   else
@@ -497,7 +560,7 @@ void udpSetup()
 
   if (mg_listen(&g_mgr, rtcmListen, rtcmHandler, NULL) != NULL)
   {
-    //listenRtcm = true;
+    // listenRtcm = true;
     MG_DEBUG(("Listening for RTCM on UDP 2233"));
   }
   else
@@ -516,10 +579,10 @@ void udpSetup()
   strcat(agioURL, ".255:9999");
 
   sendAgio = mg_connect(&g_mgr, agioURL, NULL, NULL);
-  //if (sendAgio == !NULL)
+  // if (sendAgio == !NULL)
   if (sendAgio->is_writable)
   {
-    //agioConnect = true;
+    // agioConnect = true;
     MG_DEBUG(("Connected to AgIO"));
   }
   else
