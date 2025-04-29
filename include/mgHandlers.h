@@ -34,87 +34,87 @@ void fw_get_settings(struct settings *data)
     MG_DEBUG(("get_settings: %s,%d,%d,%d,%d,%s,%d", data->fversion, data->bd_ip1, data->bd_ip2, data->bd_ip3, data->bd_ip4, data->gps_sync, data->gps_pass));
 }
 
-void fw_set_ins_config(struct ins_config *data)
+void fw_set_ins_cfg(struct ins_cfg *data)
 {
-    strcpy(insConfig.enable, data->insEnable);
-    insConfig.timeOut = data->insTimeOut;
-    insConfig.alignVelocity = data->insAlignVel;
-    strcpy(insConfig.vehicleDir, data->insVehDir);
-    insConfig.wheelbase = data->insWheelbase;
+    strcpy(insCfg.enable, data->insEn);
+    insCfg.timeOut = data->insTOut;
+    insCfg.alVel = data->insAlVel;
+    strcpy(insCfg.vehDir, data->insVehDir);
+    insCfg.whlBase = data->insWhlbase;
 
-    insConfig.installAngleX = data->insInstAngleX;
-    insConfig.installAngleY = data->insInstAngleY;
-    insConfig.installAngleZ = data->insInstAngleZ;
+    insCfg.instAglX = data->insInstAngX;
+    insCfg.instAglY = data->insInstAngY;
+    insCfg.instAglZ = data->insInstAngZ;
 
-    insConfig.leverArmX = data->insLeverX;
-    insConfig.leverArmY = data->insLeverY;
-    insConfig.leverArmZ = data->insLeverZ;
-    insConfig.leverArmA = data->insLeverA;
-    insConfig.leverArmB = data->insLeverB;
-    insConfig.leverArmC = data->insLeverC;
+    insCfg.levArmX = data->insLevX;
+    insCfg.levArmY = data->insLevY;
+    insCfg.levArmZ = data->insLevZ;
+    insCfg.levArmA = data->insLevA;
+    insCfg.levArmB = data->insLevB;
+    insCfg.levArmC = data->insLevC;
 
-    insConfig.posOffsetX = data->insPosOffsetX;
-    insConfig.posOffsetY = data->insPosOffsetY;
-    insConfig.posOffsetZ = data->insPosOffsetZ;
+    insCfg.posOffX = data->insPosOffX;
+    insCfg.posOffY = data->insPosOffY;
+    insCfg.posOffZ = data->insPosOffZ;
 
-    insConfig.initAttitudePitch = data->insInitAttPitch;
-    insConfig.initAttitudeRoll = data->insInitAttRoll;
-    insConfig.initAttitudeAzimuth = data->insInitAttAzimuth;
-    insConfig.initAttitudeStdPitch = data->insInitAttStdPitch;
-    insConfig.initAttitudeStdRoll = data->insInitAttStdRoll;
-    insConfig.initAttitudeStdAzimuth = data->insInitAttStdAzi;
+    insCfg.iniAttPch = data->insIniAttPch;
+    insCfg.iniAttRol = data->insIniAttRol;
+    insCfg.iniAttAzi = data->insIniAttAzi;
+    insCfg.iniAttSdPch = data->insIniAttSdPch;
+    insCfg.iniAttSdRol = data->insIniAttSdRol;
+    insCfg.iniAttSdAz = data->insIniAttSdAzi;
 
-    MG_DEBUG(("set_ins_config: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEnable, data->insTimeOut, data->insAlignVel, data->insVehDir, data->insWheelbase,
-              data->insInstAngleX, data->insInstAngleY, data->insInstAngleZ, data->insLeverX, data->insLeverY, data->insLeverZ, data->insLeverA, data->insLeverB, data->insLeverC,
-              data->insPosOffsetX, data->insPosOffsetY, data->insPosOffsetZ, data->insInitAttPitch, data->insInitAttRoll, data->insInitAttAzimuth, data->insInitAttStdPitch, data->insInitAttStdRoll, data->insInitAttStdAzi));
+    MG_DEBUG(("set_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
+              data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
+              data->insPosOffX, data->insPosOffY, data->insPosOffZ, data->insIniAttPch, data->insIniAttRol, data->insIniAttAzi, data->insIniAttSdPch, data->insIniAttSdRol, data->insIniAttSdAzi));
 
-    MG_DEBUG(("fw_insConfig: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insConfig.enable, insConfig.timeOut, insConfig.alignVelocity, insConfig.vehicleDir, insConfig.wheelbase,
-              insConfig.installAngleX, insConfig.installAngleY, insConfig.installAngleZ, insConfig.leverArmX, insConfig.leverArmY, insConfig.leverArmZ, insConfig.leverArmA, insConfig.leverArmB, insConfig.leverArmC,
-              insConfig.posOffsetX, insConfig.posOffsetY, insConfig.posOffsetZ, insConfig.initAttitudePitch, insConfig.initAttitudeRoll, insConfig.initAttitudeAzimuth,
-              insConfig.initAttitudeStdPitch, insConfig.initAttitudeStdRoll, insConfig.initAttitudeStdAzimuth));
+    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
+              insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
+              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ, insCfg.iniAttPch, insCfg.iniAttRol, insCfg.iniAttAzi,
+              insCfg.iniAttSdPch, insCfg.iniAttSdRol, insCfg.iniAttSdAz));
 
     save_ins();
 }
 
-void fw_get_ins_config(struct ins_config *data)
+void fw_get_ins_cfg(struct ins_cfg *data)
 {
     load_ins();
-    MG_DEBUG(("fw_insConfig: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insConfig.enable, insConfig.timeOut, insConfig.alignVelocity, insConfig.vehicleDir, insConfig.wheelbase,
-              insConfig.installAngleX, insConfig.installAngleY, insConfig.installAngleZ, insConfig.leverArmX, insConfig.leverArmY, insConfig.leverArmZ, insConfig.leverArmA, insConfig.leverArmB, insConfig.leverArmC,
-              insConfig.posOffsetX, insConfig.posOffsetY, insConfig.posOffsetZ, insConfig.initAttitudePitch, insConfig.initAttitudeRoll, insConfig.initAttitudeAzimuth,
-              insConfig.initAttitudeStdPitch, insConfig.initAttitudeStdRoll, insConfig.initAttitudeStdAzimuth));
+    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
+              insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
+              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ, insCfg.iniAttPch, insCfg.iniAttRol, insCfg.iniAttAzi,
+              insCfg.iniAttSdPch, insCfg.iniAttSdRol, insCfg.iniAttSdAz));
 
-    strcpy(data->insEnable, insConfig.enable);
-    data->insTimeOut = insConfig.timeOut;
-    data->insAlignVel = insConfig.alignVelocity;
-    strcpy(data->insVehDir, insConfig.vehicleDir);
-    data->insWheelbase = insConfig.wheelbase;
+    strcpy(data->insEn, insCfg.enable);
+    data->insTOut = insCfg.timeOut;
+    data->insAlVel = insCfg.alVel;
+    strcpy(data->insVehDir, insCfg.vehDir);
+    data->insWhlbase = insCfg.whlBase;
 
-    data->insInstAngleX = insConfig.installAngleX;
-    data->insInstAngleY = insConfig.installAngleY;
-    data->insInstAngleZ = insConfig.installAngleZ;
+    data->insInstAngX = insCfg.instAglX;
+    data->insInstAngY = insCfg.instAglY;
+    data->insInstAngZ = insCfg.instAglZ;
 
-    data->insLeverX = insConfig.leverArmX;
-    data->insLeverY = insConfig.leverArmY;
-    data->insLeverZ = insConfig.leverArmZ;
-    data->insLeverA = insConfig.leverArmA;
-    data->insLeverB = insConfig.leverArmB;
-    data->insLeverC = insConfig.leverArmC;
+    data->insLevX = insCfg.levArmX;
+    data->insLevY = insCfg.levArmY;
+    data->insLevZ = insCfg.levArmZ;
+    data->insLevA = insCfg.levArmA;
+    data->insLevB = insCfg.levArmB;
+    data->insLevC = insCfg.levArmC;
 
-    data->insPosOffsetX = insConfig.posOffsetX;
-    data->insPosOffsetY = insConfig.posOffsetY;
-    data->insPosOffsetZ = insConfig.posOffsetZ;
+    data->insPosOffX = insCfg.posOffX;
+    data->insPosOffY = insCfg.posOffY;
+    data->insPosOffZ = insCfg.posOffZ;
 
-    data->insInitAttPitch = insConfig.initAttitudePitch;
-    data->insInitAttRoll = insConfig.initAttitudeRoll;
-    data->insInitAttAzimuth = insConfig.initAttitudeAzimuth;
-    data->insInitAttStdPitch = insConfig.initAttitudeStdPitch;
-    data->insInitAttStdRoll = insConfig.initAttitudeStdRoll;
-    data->insInitAttStdAzi = insConfig.initAttitudeStdAzimuth;
+    data->insIniAttPch = insCfg.iniAttPch;
+    data->insIniAttRol = insCfg.iniAttRol;
+    data->insIniAttAzi = insCfg.iniAttAzi;
+    data->insIniAttSdPch = insCfg.iniAttSdPch;
+    data->insIniAttSdRol = insCfg.iniAttSdRol;
+    data->insIniAttSdAzi = insCfg.iniAttSdAz;
 
-    MG_DEBUG(("get_ins_config: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEnable, data->insTimeOut, data->insAlignVel, data->insVehDir, data->insWheelbase,
-              data->insInstAngleX, data->insInstAngleY, data->insInstAngleZ, data->insLeverX, data->insLeverY, data->insLeverZ, data->insLeverA, data->insLeverB, data->insLeverC,
-              data->insPosOffsetX, data->insPosOffsetY, data->insPosOffsetZ, data->insInitAttPitch, data->insInitAttRoll, data->insInitAttAzimuth, data->insInitAttStdPitch, data->insInitAttStdRoll, data->insInitAttStdAzi));
+    MG_DEBUG(("get_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
+              data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
+              data->insPosOffX, data->insPosOffY, data->insPosOffZ, data->insIniAttPch, data->insIniAttRol, data->insIniAttAzi, data->insIniAttSdPch, data->insIniAttSdRol, data->insIniAttSdAzi));
 }
 
 void teensyReboot(void *param)

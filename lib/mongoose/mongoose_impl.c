@@ -127,30 +127,30 @@ struct attribute s_settings_attributes[] = {
   {"fversion", "string", NULL, offsetof(struct settings, fversion), 50, false},
   {NULL, NULL, NULL, 0, 0, false}
 };
-struct attribute s_ins_config_attributes[] = {
-  {"insEnable", "string", NULL, offsetof(struct ins_config, insEnable), 8, false},
-  {"insTimeOut", "double", NULL, offsetof(struct ins_config, insTimeOut), 0, false},
-  {"insAlignVel", "double", NULL, offsetof(struct ins_config, insAlignVel), 0, false},
-  {"insWheelbase", "double", NULL, offsetof(struct ins_config, insWheelbase), 0, false},
-  {"insVehDir", "string", NULL, offsetof(struct ins_config, insVehDir), 9, false},
-  {"insInstAngleX", "double", NULL, offsetof(struct ins_config, insInstAngleX), 0, false},
-  {"insInstAngleY", "double", NULL, offsetof(struct ins_config, insInstAngleY), 0, false},
-  {"insInstAngleZ", "double", NULL, offsetof(struct ins_config, insInstAngleZ), 0, false},
-  {"insLeverX", "double", NULL, offsetof(struct ins_config, insLeverX), 0, false},
-  {"insLeverY", "double", NULL, offsetof(struct ins_config, insLeverY), 0, false},
-  {"insLeverZ", "double", NULL, offsetof(struct ins_config, insLeverZ), 0, false},
-  {"insLeverA", "double", NULL, offsetof(struct ins_config, insLeverA), 0, false},
-  {"insLeverB", "double", NULL, offsetof(struct ins_config, insLeverB), 0, false},
-  {"insLeverC", "double", NULL, offsetof(struct ins_config, insLeverC), 0, false},
-  {"insPosOffsetX", "double", NULL, offsetof(struct ins_config, insPosOffsetX), 0, false},
-  {"insPosOffsetY", "double", NULL, offsetof(struct ins_config, insPosOffsetY), 0, false},
-  {"insPosOffsetZ", "double", NULL, offsetof(struct ins_config, insPosOffsetZ), 0, false},
-  {"insInitAttPitch", "double", NULL, offsetof(struct ins_config, insInitAttPitch), 0, false},
-  {"insInitAttRoll", "double", NULL, offsetof(struct ins_config, insInitAttRoll), 0, false},
-  {"insInitAttAzimuth", "double", NULL, offsetof(struct ins_config, insInitAttAzimuth), 0, false},
-  {"insInitAttStdPitch", "double", NULL, offsetof(struct ins_config, insInitAttStdPitch), 0, false},
-  {"insInitAttStdRoll", "double", NULL, offsetof(struct ins_config, insInitAttStdRoll), 0, false},
-  {"insInitAttStdAzi", "double", NULL, offsetof(struct ins_config, insInitAttStdAzi), 0, false},
+struct attribute s_ins_cfg_attributes[] = {
+  {"insEn", "string", NULL, offsetof(struct ins_cfg, insEn), 8, false},
+  {"insTOut", "double", NULL, offsetof(struct ins_cfg, insTOut), 0, false},
+  {"insAlVel", "double", NULL, offsetof(struct ins_cfg, insAlVel), 0, false},
+  {"insWhlbase", "double", NULL, offsetof(struct ins_cfg, insWhlbase), 0, false},
+  {"insVehDir", "string", NULL, offsetof(struct ins_cfg, insVehDir), 9, false},
+  {"insInstAngX", "double", NULL, offsetof(struct ins_cfg, insInstAngX), 0, false},
+  {"insInstAngY", "double", NULL, offsetof(struct ins_cfg, insInstAngY), 0, false},
+  {"insInstAngZ", "double", NULL, offsetof(struct ins_cfg, insInstAngZ), 0, false},
+  {"insLevX", "double", NULL, offsetof(struct ins_cfg, insLevX), 0, false},
+  {"insLevY", "double", NULL, offsetof(struct ins_cfg, insLevY), 0, false},
+  {"insLevZ", "double", NULL, offsetof(struct ins_cfg, insLevZ), 0, false},
+  {"insLevA", "double", NULL, offsetof(struct ins_cfg, insLevA), 0, false},
+  {"insLevB", "double", NULL, offsetof(struct ins_cfg, insLevB), 0, false},
+  {"insLevC", "double", NULL, offsetof(struct ins_cfg, insLevC), 0, false},
+  {"insPosOffX", "double", NULL, offsetof(struct ins_cfg, insPosOffX), 0, false},
+  {"insPosOffY", "double", NULL, offsetof(struct ins_cfg, insPosOffY), 0, false},
+  {"insPosOffZ", "double", NULL, offsetof(struct ins_cfg, insPosOffZ), 0, false},
+  {"insIniAttPch", "double", NULL, offsetof(struct ins_cfg, insIniAttPch), 0, false},
+  {"insIniAttRol", "double", NULL, offsetof(struct ins_cfg, insIniAttRol), 0, false},
+  {"insIniAttAzi", "double", NULL, offsetof(struct ins_cfg, insIniAttAzi), 0, false},
+  {"insIniAttSdPch", "double", NULL, offsetof(struct ins_cfg, insIniAttSdPch), 0, false},
+  {"insIniAttSdRol", "double", NULL, offsetof(struct ins_cfg, insIniAttSdRol), 0, false},
+  {"insIniAttSdAzi", "double", NULL, offsetof(struct ins_cfg, insIniAttSdAzi), 0, false},
   {NULL, NULL, NULL, 0, 0, false}
 };
 
@@ -158,14 +158,14 @@ struct apihandler_action s_apihandler_save = {{"save", "action", false, 3, 7, 0U
 struct apihandler_action s_apihandler_reboot = {{"reboot", "action", false, 3, 7, 0UL}, glue_check_reboot, glue_start_reboot};
 struct apihandler_ota s_apihandler_firmware_update = {{"firmware_update", "ota", false, 3, 7, 0UL}, glue_ota_begin_firmware_update, glue_ota_end_firmware_update, glue_ota_write_firmware_update};
 struct apihandler_data s_apihandler_settings = {{"settings", "data", false, 3, 7, 0UL}, s_settings_attributes, sizeof(struct settings), (void (*)(void *)) glue_get_settings, (void (*)(void *)) glue_set_settings};
-struct apihandler_data s_apihandler_ins_config = {{"ins_config", "data", false, 0, 0, 0UL}, s_ins_config_attributes, sizeof(struct ins_config), (void (*)(void *)) glue_get_ins_config, (void (*)(void *)) glue_set_ins_config};
+struct apihandler_data s_apihandler_ins_cfg = {{"ins_cfg", "data", false, 0, 0, 0UL}, s_ins_cfg_attributes, sizeof(struct ins_cfg), (void (*)(void *)) glue_get_ins_cfg, (void (*)(void *)) glue_set_ins_cfg};
 
 static struct apihandler *s_apihandlers[] = {
   (struct apihandler *) &s_apihandler_save,
   (struct apihandler *) &s_apihandler_reboot,
   (struct apihandler *) &s_apihandler_firmware_update,
   (struct apihandler *) &s_apihandler_settings,
-  (struct apihandler *) &s_apihandler_ins_config
+  (struct apihandler *) &s_apihandler_ins_cfg
 };
 
 static struct apihandler *get_api_handler(struct mg_str name) {

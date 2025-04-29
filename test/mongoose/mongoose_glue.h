@@ -106,32 +106,32 @@ struct settings {
 void glue_get_settings(struct settings *);
 void glue_set_settings(struct settings *);
 
-struct ins_config {
-  char insEnable[8];
-  double insInstAngle;
-  double insTimeOut;
-  double insAlignVel;
-  double insLeverX;
-  double insLeverY;
-  double insLeverZ;
-  double insleverA;
-  double insLeverB;
-  double insLeverC;
-  double insPosOffsetX;
-  double insPosOffsetY;
-  double insPosOffsetZ;
+struct ins_cfg {
+  char insEn[8];
+  double insInstAng;
+  double insTOut;
+  double insAlVel;
+  double insLevX;
+  double insLevY;
+  double insLevZ;
+  double insLevA;
+  double insLevB;
+  double insLevC;
+  double insPosOffX;
+  double insPosOffY;
+  double insPosOffZ;
   double insInitAziAzimuth;
   double insInitAziStdAzi;
-  double insInitAttPitch;
-  double insInitAttRoll;
-  double insInitAttAzimuth;
-  double insInitAttStdPitch;
-  double insInitAttStdRoll;
-  double insInitAttStdAzi;
+  double insIniAttPch;
+  double insIniAttRol;
+  double insIniAttAzi;
+  double insIniAttSdPch;
+  double insIniAttSdRol;
+  double insIniAttSdAzi;
   char insVehDir[9];
 };
-void glue_get_ins_config(struct ins_config *);
-void glue_set_ins_config(struct ins_config *);
+void glue_get_ins_cfg(struct ins_cfg *);
+void glue_set_ins_cfg(struct ins_cfg *);
 
 
 #ifdef __cplusplus

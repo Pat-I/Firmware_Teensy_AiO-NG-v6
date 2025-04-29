@@ -69,14 +69,14 @@ void load_gps()
 void save_ins()
 {
     // Save INS to 600
-    EEPROM.put(insStore, insConfig);
+    EEPROM.put(insStore, insCfg);
 }
 
 // Load INS data
 void load_ins()
 {
     // Load INS to 600
-    EEPROM.get(insStore, insConfig);
+    EEPROM.get(insStore, insCfg);
 }
 
 // Load the IP address from EEPROM

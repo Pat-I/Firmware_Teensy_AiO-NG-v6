@@ -56,7 +56,7 @@ void setup()
 
   mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
   mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
-  mongoose_set_http_handlers("ins_config", fw_get_ins_config, fw_set_ins_config);
+  mongoose_set_http_handlers("ins_cfg", fw_get_ins_cfg, fw_set_ins_cfg);
 
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);

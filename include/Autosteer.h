@@ -387,7 +387,7 @@ void autoSteerUpdate()
 #else
       digitalWrite(SLEEP_PIN, LOW); // sleep mode
                                     // digitalWrite(PWM1_PIN, LOW);    // if both PWM pins are low, even if !sleep, the outputs are Hi-Z
-      // digitalWrite(PWM2_PIN, LOW);
+                                    // digitalWrite(PWM2_PIN, LOW);
 #endif
 
       motorDrive(); // out to motors the pwm value

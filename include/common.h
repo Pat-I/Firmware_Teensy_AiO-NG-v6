@@ -201,41 +201,41 @@ int msgBufLen = 0;
 // End
 
 // INS Variables
-struct INSConfigStruct
+struct INSCfgStruct
 {
   char enable[8];
   u_int16_t timeOut;
-  float alignVelocity;
-  char vehicleDir[9];
-  float wheelbase;
+  float alVel;
+  char vehDir[9];
+  float whlBase;
 
-  float installAngleX;
-  float installAngleY;
-  float installAngleZ;
+  float instAglX;
+  float instAglY;
+  float instAglZ;
 
-  float leverArmX;
-  float leverArmY;
-  float leverArmZ;
-  float leverArmA;
-  float leverArmB;
-  float leverArmC;
+  float levArmX;
+  float levArmY;
+  float levArmZ;
+  float levArmA;
+  float levArmB;
+  float levArmC;
 
-  float posOffsetX;
-  float posOffsetY;
-  float posOffsetZ;
+  float posOffX;
+  float posOffY;
+  float posOffZ;
 
-  float initAttitudePitch;
-  float initAttitudeRoll;
-  float initAttitudeAzimuth;
-  float initAttitudeStdPitch;
-  float initAttitudeStdRoll;
-  float initAttitudeStdAzimuth;
+  float iniAttPch;
+  float iniAttRol;
+  float iniAttAzi;
+  float iniAttSdPch;
+  float iniAttSdRol;
+  float iniAttSdAz;
 };
-INSConfigStruct insConfig;
-INSConfigStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+INSCfgStruct insCfg;
+INSCfgStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 byte hotInfo[80]; // Hotstart data blob. Using this reduces start up time unitl INS is ready.
-float configFlag; // Holds value of flag indicating the INS has been comfigured.
+float cfgFlag;    // Holds value of flag indicating the INS has been comfigured.
 // End
 
 // Kalman Filter Variables
