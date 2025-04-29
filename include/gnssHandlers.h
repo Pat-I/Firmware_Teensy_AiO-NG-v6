@@ -489,6 +489,13 @@ void KSXT_Handler()
 void INSPVAXA_Handler()
 {
   Serial.println("Got INSPVAXA message");
+  umParser.getArg(9, INS.status);
+  umParser.getArg(11, INS.latitude);
+  umParser.getArg(12, INS.longitude);
+  umParser.getArg(18, INS.roll);
+  umParser.getArg(19, INS.pitch);
+  umParser.getArg(20, INS.heading);
+  Serial.println(atof(INS.latitude));
 }
 
 #endif // GNSSHANDLERS_H_

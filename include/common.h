@@ -200,6 +200,10 @@ char msgBuf[254];
 int msgBufLen = 0;
 // End
 
+// UM98x parser
+#include "UM982_Parser.h"
+UM982Parser<3> umParser;
+
 // INS Variables
 struct INSCfgStruct
 {

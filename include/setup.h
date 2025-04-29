@@ -52,6 +52,12 @@ void parserSetup()
   nmeaParser.addHandler("KSXT", KSXT_Handler);
 }
 
+void umparserSetup()
+{
+  umParser.setErrorHandler(errorHandler);
+
+}
+
 void resetStartingTimersBuffers()
 {
   if (BNO.isActive)
