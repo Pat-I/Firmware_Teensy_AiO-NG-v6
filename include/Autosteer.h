@@ -159,8 +159,8 @@ void autoSteerUpdate()
 {
   ASusage.timeIn();
 
-  if (autoSteerUpdateTimer > 9)
-  {                             // update AS loop every 10ms (100hz)
+  if (autoSteerUpdateTimer > 9)  // update AS loop every 10ms (100hz)
+  {
     autoSteerUpdateTimer -= 10; // or = 0?
 
     // ******************************* Steer Switch/Button *******************************
@@ -195,11 +195,7 @@ void autoSteerUpdate()
 
     // Arduino software button code
     if (reading == LOW && prevSteerReading == HIGH) {
-      if (steerState == 1) {
-        steerState = 0;
-      } else {
-        steerState = 1;
-      }
+      steerState = !steerState;
     }
     prevSteerReading = reading;
 
@@ -277,6 +273,7 @@ void autoSteerUpdate()
         pulseCount = encoder.readCount();
         if (pulseCount != lastEnc)
         {
+          //Serial << "\r\npulseCount:" << pulseCount;
           lastEnc = pulseCount;
         }
       }
@@ -291,23 +288,24 @@ void autoSteerUpdate()
       }
       if (pulseCount >= steerConfig.PulseCountMax)
       {
-        steerState = 0; // reset values like it turned off
-        prevSteerReading = !steerState;
+        steerState = 1; // reset values like it turned off
+        prevSteerReading = 1;
       }
+      //Serial << "\r\npulseCount:" << pulseCount << " limit:" << steerConfig.PulseCountMax;
     }
 
     // Pressure sensor?
     if (steerConfig.PressureSensor)
     {
-      sensorSample = (float)analogRead(KICKOUT_A_PIN);          // >> 4);    // to scale 12 bit down to 8 bit
+      float sensorSample = (float)analogRead(KICKOUT_A_PIN);    // >> 4);    // to scale 12 bit down to 8 bit
       sensorSample *= 0.15;                                     // for 5v sensor, scale down to try matching old AIO
       sensorSample = min(sensorSample, 255);                    // limit to 1 byte (0-255)
       sensorReading = sensorReading * 0.8 + sensorSample * 0.2; // filter
 
       if (sensorReading >= steerConfig.PulseCountMax)
       {                 // if reading exceeds kickout setpoint
-        steerState = 0; // turn OFF autoSteer
-        prevSteerReading = !steerState;
+        steerState = 1; // turn OFF autoSteer
+        prevSteerReading = 1;
       }
     }
 
@@ -316,20 +314,19 @@ void autoSteerUpdate()
     {
       if (keyaDetected)
       {
-        sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
+        float sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
       }
       else
       { // otherwise continue using analog input on PCB
-        sensorSample = (float)analogRead(CURRENT_PIN);
-        //Serial << "\r\n" << sensorSample - 45.0;
-        sensorSample -= 45.0;     // zero current offset
+        float sensorSample = (float)analogRead(CURRENT_PIN) - 90; // 0 current offset
+        //Serial << "\r\n" << sensorSample;
         //sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
         sensorReading = sensorReading * 0.7 + sensorSample * 0.3;
-        //Serial << " " << sensorReading << " max:" << steerConfig.PulseCountMax;
+        //Serial << " " << sensorReading << " limit:" << steerConfig.PulseCountMax;
         if (sensorReading >= steerConfig.PulseCountMax)
         {
-          steerState = 0; // turn OFF autoSteer
-          prevSteerReading = !steerState;
+          steerState = 1; // turn OFF autoSteer
+          prevSteerReading = steerState;
         }
       }
     }
@@ -399,7 +396,7 @@ void autoSteerUpdate()
       steerState = 1; // reset values like it turned off
     }
 
-    // Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
+    //Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
     if (watchdogTimer < WATCHDOG_THRESHOLD)
     {
       // Enable H Bridge for Cytron, or JD DAC (triple analog output)
