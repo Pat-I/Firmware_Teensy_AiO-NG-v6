@@ -159,13 +159,49 @@ void autoSteerUpdate()
 {
   ASusage.timeIn();
 
-  if (autoSteerUpdateTimer > 9)
-  {                             // update AS loop every 10ms (100hz)
+  if (autoSteerUpdateTimer > 9)  // update AS loop every 10ms (100hz)
+  {
     autoSteerUpdateTimer -= 10; // or = 0?
 
     // ******************************* Steer Switch/Button *******************************
+    // 1 PCB Button pressed?
+    uint8_t reading = digitalRead(STEER_PIN);
+
+    if (steerConfig.SteerSwitch == 1) {
+      // Switch is off so reset ready for next switch on
+      if (reading == HIGH) {
+        steerState = 1;
+        prevSteerReading = reading;
+      }
+    }
+
+    // 2 Has tablet button been pressed?
+    if (guidanceStatusChanged) {
+      if (guidanceStatus == 1) {  //Must have changed Off >> On
+        steerState = 0;
+      }
+    }
+
+    // If AOG has stopped steering, wait then turn off steerswitch ready for next engage.
+    static int switchCounter = 0;
+
+    if (steerState == 0 && guidanceStatus == 0) {
+      if (switchCounter++ > 30) {
+        steerState = 1;
+      }
+    } else {
+      switchCounter = 0;
+    }
+
+    // Arduino software button code
+    if (reading == LOW && prevSteerReading == HIGH) {
+      steerState = !steerState;
+    }
+    prevSteerReading = reading;
+
+
     // Steer input logic all setup so that '1' (HIGH) is ON, and '0' (LOW) is OFF
-    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
+/*    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
 
     if (steerConfig.SteerSwitch == 1) // steer "Switch" mode (on - off)
     {
@@ -196,12 +232,12 @@ void autoSteerUpdate()
       { // button is pressed
         steerState = !steerState;
         LEDs.activateBlueFlash(LED_ID::STEER);
-        /*char *msg;
-        if (steerState)
-          msg = (char *)"AutoSteer Btn ON";
-        else
-          msg = (char *)"AutoSteer Btn OFF";
-        char msgTime = 2;*/
+        //char *msg;
+        //if (steerState)
+          //msg = (char *)"AutoSteer Btn ON";
+        //else
+          //msg = (char *)"AutoSteer Btn OFF";
+        //char msgTime = 2;
         // UDP.SendUdpFreeForm(1, msg, strlen(msg), msgTime, UDP.broadcastIP, UDP.portAgIO_9999);
       }
       prevSteerReading = steerReading; // get ready to detect next press
@@ -227,7 +263,7 @@ void autoSteerUpdate()
         steerState = 0;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
-    }
+    }*/
 
     // ******************* Kickouts ( Encoders / Pressure / Current ) *******************
     if (steerConfig.ShaftEncoder)
@@ -237,6 +273,7 @@ void autoSteerUpdate()
         pulseCount = encoder.readCount();
         if (pulseCount != lastEnc)
         {
+          //Serial << "\r\npulseCount:" << pulseCount;
           lastEnc = pulseCount;
         }
       }
@@ -251,23 +288,24 @@ void autoSteerUpdate()
       }
       if (pulseCount >= steerConfig.PulseCountMax)
       {
-        steerState = 0; // reset values like it turned off
-        prevSteerReading = !steerState;
+        steerState = 1; // reset values like it turned off
+        prevSteerReading = 1;
       }
+      //Serial << "\r\npulseCount:" << pulseCount << " limit:" << steerConfig.PulseCountMax;
     }
 
     // Pressure sensor?
     if (steerConfig.PressureSensor)
     {
-      sensorSample = (float)analogRead(KICKOUT_A_PIN);          // >> 4);    // to scale 12 bit down to 8 bit
+      float sensorSample = (float)analogRead(KICKOUT_A_PIN);    // >> 4);    // to scale 12 bit down to 8 bit
       sensorSample *= 0.15;                                     // for 5v sensor, scale down to try matching old AIO
       sensorSample = min(sensorSample, 255);                    // limit to 1 byte (0-255)
       sensorReading = sensorReading * 0.8 + sensorSample * 0.2; // filter
 
       if (sensorReading >= steerConfig.PulseCountMax)
       {                 // if reading exceeds kickout setpoint
-        steerState = 0; // turn OFF autoSteer
-        prevSteerReading = !steerState;
+        steerState = 1; // turn OFF autoSteer
+        prevSteerReading = 1;
       }
     }
 
@@ -276,20 +314,19 @@ void autoSteerUpdate()
     {
       if (keyaDetected)
       {
-        sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
+        float sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
       }
       else
       { // otherwise continue using analog input on PCB
-        sensorSample = (float)analogRead(CURRENT_PIN);
-        //Serial << "\r\n" << sensorSample - 45.0;
-        sensorSample -= 45.0;     // zero current offset
+        float sensorSample = (float)analogRead(CURRENT_PIN) - 90; // 0 current offset
+        //Serial << "\r\n" << sensorSample;
         //sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
         sensorReading = sensorReading * 0.7 + sensorSample * 0.3;
-        //Serial << " " << sensorReading << " max:" << steerConfig.PulseCountMax;
+        //Serial << " " << sensorReading << " limit:" << steerConfig.PulseCountMax;
         if (sensorReading >= steerConfig.PulseCountMax)
         {
-          steerState = 0; // turn OFF autoSteer
-          prevSteerReading = !steerState;
+          steerState = 1; // turn OFF autoSteer
+          prevSteerReading = steerState;
         }
       }
     }
@@ -304,7 +341,7 @@ void autoSteerUpdate()
 
     switchByte = 0;
     switchByte |= (kickoutInput << 2); // put remote in bit 2, Matt - not exaclty sure what this does
-    switchByte |= (!steerState << 1);  // put inverted steerInput status in bit 1 position
+    switchByte |= (steerState << 1);  // put inverted steerInput status in bit 1 position
     switchByte |= !workInput;          // put inverted workInput into bit 0
 
     // ***************************** READ WAS *****************************
@@ -354,10 +391,12 @@ void autoSteerUpdate()
     // if (abs(steerAngleError)< steerSettings.lowPWM) steerAngleError = 0;
 
     // If connection lost to AgOpenGPS, the watchdog will count up and turn off steering
-    if (watchdogTimer++ > 250)
+    if (watchdogTimer++ > 250) {
       watchdogTimer = WATCHDOG_FORCE_VALUE;
+      steerState = 1; // reset values like it turned off
+    }
 
-    // Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
+    //Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
     if (watchdogTimer < WATCHDOG_THRESHOLD)
     {
       // Enable H Bridge for Cytron, or JD DAC (triple analog output)
