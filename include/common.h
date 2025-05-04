@@ -152,8 +152,8 @@ int16_t steeringPosition = 0; // from steering sensor (WAS)
 // End
 
 // Switches/Sensors
-uint8_t kickoutInput = 0, workInput = 0, steerState = 1, switchByte = 0;
-float sensorReading;
+uint8_t kickoutInput = 0, workInput = 0, steerState = 0, switchByte = 0;
+float sensorReading, sensorSample;
 
 const int16_t ANALOG_TRIG_THRES = 100;
 const uint8_t ANALOG_TRIG_HYST = 10;
