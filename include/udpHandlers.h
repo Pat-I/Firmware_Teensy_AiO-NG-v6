@@ -416,7 +416,7 @@ void pgnHandler(struct mg_connection *udpPacket, int ev, void *ev_data, void *fn
       // udpData[10] is XTE (cross track error)
       // udpData[11 & 12] is section 1-16
 
-      if ((bitRead(guidanceStatus, 0) == 0) || (steerState == 0))
+      if ((bitRead(guidanceStatus, 0) == 0) || (steerState == 1))
       {                                       // || (gpsSpeed < 0.1)) {
         watchdogTimer = WATCHDOG_FORCE_VALUE; // turn off steering motor
         // Serial.print(" OFF");
