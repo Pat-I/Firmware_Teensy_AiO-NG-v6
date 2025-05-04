@@ -216,9 +216,10 @@ bool keyaDetected = false;
 MACHINE* machinePTR;
 
 // for enabling & controlling AUX, LOCK & Section/Machine outputs
-#define I2C_WIRE       Wire           // used for PCA9685 aux, lock & section outputs (0x44), & RGB LEDs (0x70) in LEDS.h
+#define PCA_RGB_I2C_WIRE  Wire           // used for PCA9685 aux, lock & section outputs (0x44), & RGB LEDs (0x70) in LEDS.h
+#define EXP_I2C_WIRE      Wire2          // used for Expansion/Daughter board header
 #include "Adafruit_PWMServoDriver.h"  // https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
-Adafruit_PWMServoDriver outputs = Adafruit_PWMServoDriver(0x44, I2C_WIRE); // RGB instance is 0x44 unless A2 Low solder jumper is closed, then 0x40
+Adafruit_PWMServoDriver outputs = Adafruit_PWMServoDriver(0x44, PCA_RGB_I2C_WIRE); // RGB instance is 0x44 unless A2 Low solder jumper is closed, then 0x40
 #include "outputs.h"
 
 #endif // COMMON_H_

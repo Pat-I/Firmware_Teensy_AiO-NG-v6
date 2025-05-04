@@ -224,16 +224,16 @@ void checkUSBSerial()
 
     else if (usbRead == '9')      // drv8243 searching
     {
-      I2C_WIRE.beginTransmission(0x44);
+      PCA_RGB_I2C_WIRE.beginTransmission(0x44);
       Serial.print("\r\n- Section DRV8243 ");
-      if (I2C_WIRE.endTransmission() == 0)
+      if (PCA_RGB_I2C_WIRE.endTransmission() == 0)
         Serial.print("found");
       else
         Serial.print("*NOT found!*");
 
-      I2C_WIRE.beginTransmission(0x70);
+      PCA_RGB_I2C_WIRE.beginTransmission(0x70);
       Serial.print("\r\n- RGB DRV8243 ");
-      if (I2C_WIRE.endTransmission() == 0)
+      if (PCA_RGB_I2C_WIRE.endTransmission() == 0)
         Serial.print("found");
       else
         Serial.print("*NOT found!*");

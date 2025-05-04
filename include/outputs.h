@@ -35,14 +35,14 @@ void outputsInit() {
 
   outputs.begin();              // Adafruit_PWMServoDriver 
 
-  I2C_WIRE.beginTransmission(0x44);
+  PCA_RGB_I2C_WIRE.beginTransmission(0x44);
   Serial.print("\r\n  - Sections/Lock/Aux PCA9685 ");
-  if (I2C_WIRE.endTransmission() == 0)
+  if (PCA_RGB_I2C_WIRE.endTransmission() == 0)
     Serial.print("found");
   else
     Serial.print("*NOT found!*");
 
-  I2C_WIRE.setClock(1000000);
+  PCA_RGB_I2C_WIRE.setClock(1000000);
   outputs.setPWMFreq(1526);     // the maximum, to hopefully mitigate switching/frequency noise
   outputs.setOutputMode(true);  // false: open drain, true: totempole (push/pull)
   
