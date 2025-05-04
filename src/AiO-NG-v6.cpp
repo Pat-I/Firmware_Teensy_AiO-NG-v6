@@ -17,9 +17,12 @@
 #include "AutosteerPID.h"
 #include "serialComm.h"
 
+#include <JD_DAC.h>   // experimental JD 2 track DAC steering & SCV/remote hyd control
+JD_DAC jdDac(EXP_I2C_WIRE, 0x60, &Serial);
+
 void setup()
 {
-  delay(10000);              // Delay for tesing to allow opening serial terminal to see output
+  delay(2000);              // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");
