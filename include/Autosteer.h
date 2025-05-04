@@ -164,48 +164,8 @@ void autoSteerUpdate()
     autoSteerUpdateTimer -= 10; // or = 0?
 
     // ******************************* Steer Switch/Button *******************************
-    // 1 PCB Button pressed?
-    uint8_t reading = digitalRead(STEER_PIN);
-
-    if (steerConfig.SteerSwitch == 1) {
-      // Switch is off so reset ready for next switch on
-      if (reading == HIGH) {
-        steerState = 1;
-        prevSteerReading = reading;
-      }
-    }
-
-    // 2 Has tablet button been pressed?
-    if (guidanceStatusChanged) {
-      if (guidanceStatus == 1) {  //Must have changed Off >> On
-        steerState = 0;
-      }
-    }
-
-    // If AOG has stopped steering, wait then turn off steerswitch ready for next engage.
-    static int switchCounter = 0;
-
-    if (steerState == 0 && guidanceStatus == 0) {
-      if (switchCounter++ > 30) {
-        steerState = 1;
-      }
-    } else {
-      switchCounter = 0;
-    }
-
-    // Arduino software button code
-    if (reading == LOW && prevSteerReading == HIGH) {
-      if (steerState == 1) {
-        steerState = 0;
-      } else {
-        steerState = 1;
-      }
-    }
-    prevSteerReading = reading;
-
-
     // Steer input logic all setup so that '1' (HIGH) is ON, and '0' (LOW) is OFF
-/*    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
+    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
 
     if (steerConfig.SteerSwitch == 1) // steer "Switch" mode (on - off)
     {
@@ -236,12 +196,12 @@ void autoSteerUpdate()
       { // button is pressed
         steerState = !steerState;
         LEDs.activateBlueFlash(LED_ID::STEER);
-        //char *msg;
-        //if (steerState)
-          //msg = (char *)"AutoSteer Btn ON";
-        //else
-          //msg = (char *)"AutoSteer Btn OFF";
-        //char msgTime = 2;
+        /*char *msg;
+        if (steerState)
+          msg = (char *)"AutoSteer Btn ON";
+        else
+          msg = (char *)"AutoSteer Btn OFF";
+        char msgTime = 2;*/
         // UDP.SendUdpFreeForm(1, msg, strlen(msg), msgTime, UDP.broadcastIP, UDP.portAgIO_9999);
       }
       prevSteerReading = steerReading; // get ready to detect next press
@@ -267,7 +227,7 @@ void autoSteerUpdate()
         steerState = 0;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
-    }*/
+    }
 
     // ******************* Kickouts ( Encoders / Pressure / Current ) *******************
     if (steerConfig.ShaftEncoder)
@@ -344,7 +304,7 @@ void autoSteerUpdate()
 
     switchByte = 0;
     switchByte |= (kickoutInput << 2); // put remote in bit 2, Matt - not exaclty sure what this does
-    switchByte |= (steerState << 1);  // put inverted steerInput status in bit 1 position
+    switchByte |= (!steerState << 1);  // put inverted steerInput status in bit 1 position
     switchByte |= !workInput;          // put inverted workInput into bit 0
 
     // ***************************** READ WAS *****************************
@@ -394,10 +354,8 @@ void autoSteerUpdate()
     // if (abs(steerAngleError)< steerSettings.lowPWM) steerAngleError = 0;
 
     // If connection lost to AgOpenGPS, the watchdog will count up and turn off steering
-    if (watchdogTimer++ > 250) {
+    if (watchdogTimer++ > 250)
       watchdogTimer = WATCHDOG_FORCE_VALUE;
-      steerState = 1; // reset values like it turned off
-    }
 
     // Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
     if (watchdogTimer < WATCHDOG_THRESHOLD)
