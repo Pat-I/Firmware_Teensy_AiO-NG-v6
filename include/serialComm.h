@@ -23,7 +23,7 @@ void gpsPoll()
       if (gps1Available > sizeof(GPS1rxbuffer) - 10)
       { // this should not trigger except maybe at boot up
         SerialGPS1.clear();
-        Serial.print((String) "\r\n" + millis() + " *SerialGPS1 buffer cleared!-Normal at startup*");
+        Serial.print((String) "\r\n" + millis() + " *SerialGPS1 buffer cleared!- Normal at startup***********************************************************************************************");
         return;
       }
       gps1Stats.update(gps1Available);
@@ -32,56 +32,74 @@ void gpsPoll()
       if (nmeaDebug)
         Serial.write(gps1Read);
 
-      if (gpsConfig.gpsPass == true)
+      // LEDs.setGpsLED(9, true);
+      switch (gps1Read)
       {
-        LEDs.setGpsLED(9, true);
-        switch (gps1Read)
+      case '$':
+        msgBuf[msgBufLen] = gps1Read;
+        msgBufLen++;
+        gotDollar = true;
+        break;
+      case '#':
+        msgBuf[msgBufLen] = gps1Read;
+        msgBufLen++;
+        gotDollar = true;
+        break;
+      case '\r':
+        msgBuf[msgBufLen] = gps1Read;
+        msgBufLen++;
+        gotCR = true;
+        gotDollar = false;
+        break;
+      case '\n':
+        msgBuf[msgBufLen] = gps1Read;
+        msgBufLen++;
+        gotLF = true;
+        gotDollar = false;
+        break;
+      default:
+        if (gotDollar)
         {
-        case '$':
           msgBuf[msgBufLen] = gps1Read;
           msgBufLen++;
-          gotDollar = true;
-          break;
-        case '\r':
-          msgBuf[msgBufLen] = gps1Read;
-          msgBufLen++;
-          gotCR = true;
-          gotDollar = false;
-          break;
-        case '\n':
-          msgBuf[msgBufLen] = gps1Read;
-          msgBufLen++;
-          gotLF = true;
-          gotDollar = false;
-          break;
-        default:
-          if (gotDollar)
-          {
-            msgBuf[msgBufLen] = gps1Read;
-            msgBufLen++;
-          }
-          break;
         }
-        if (gotCR && gotLF)
+        break;
+      }
+      if (gotCR && gotLF)
+      {
+        if (gpsConfig.gpsPass)
         {
           sendUDPchars(msgBuf);
-          gotCR = false;
-          gotLF = false;
-          gotDollar = false;
-          memset(msgBuf, 0, bufSize);
-          msgBufLen = 0;
-          ubxParser.relPosTimer = 0;
-          LEDs.toggleTeensyLED();
         }
-      }
-      else
-      {
-        nmeaParser << gps1Read; // process after UDP passthrough check to send data to AgIO first
+        if (msgBuf[0] == '$')
+        {
+          for (u_int16_t i = 0; i < msgBufLen; i++)
+          {
+            nmeaParser << msgBuf[i];
+          }
+        }
+        if (msgBuf[0] == '#')
+        {
+          for (u_int16_t i = 0; i < msgBufLen; i++)
+          {
+            umParser << msgBuf[i];
+          }
+        }
+        gotCR = false;
+        gotLF = false;
+        gotDollar = false;
+        memset(msgBuf, 0, bufSize);
+        msgBufLen = 0;
+        ubxParser.relPosTimer = 0;
+        LEDs.toggleTeensyLED();
       }
 
       GPS1usage.timeOut();
       RS232usage.timeIn();
-      SerialRS232.write(gps1Read);
+      if (SerialRS232.availableForWrite() > 1)
+      {
+        SerialRS232.write(gps1Read);
+      }
       RS232usage.timeOut();
     }
   }

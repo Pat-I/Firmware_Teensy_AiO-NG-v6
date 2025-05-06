@@ -44,7 +44,7 @@ void serialSetup()
 void parserSetup()
 {
   // the dash means wildcard
-  nmeaParser.setErrorHandler(errorHandler);
+  nmeaParser.setErrorHandler(errorHandlerNmea);
   nmeaParser.addHandler("G-GGA", GGA_Handler);
   nmeaParser.addHandler("G-GNS", GNS_Handler);
   nmeaParser.addHandler("G-VTG", VTG_Handler);
@@ -54,8 +54,8 @@ void parserSetup()
 
 void umparserSetup()
 {
-  umParser.setErrorHandler(errorHandler);
-
+  umParser.setErrorHandler(errorHandlerUm);
+  umParser.addHandler("INSPVAXA", INSPVAXA_Handler);
 }
 
 void resetStartingTimersBuffers()

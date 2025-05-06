@@ -78,13 +78,23 @@ void DegreesToDegMinSec(double x, char *result, int resultSize)
     snprintf(result, resultSize, "%02d%.8f", deg, minutesRemainder);
 }
 
-// If odd characters showed up
-void errorHandler()
+// If odd characters showed up in NMEA input
+void errorHandlerNmea()
 {
   if (startup)
   {
     Serial.print("\r\n*Unexpected characters in NMEA parser - Normal at startup*\r\n - NMEA Parser ErrorCode: ");
     Serial.print(nmeaParser.mError);
+  }
+}
+
+// If odd characters showed up in UMParser input
+void errorHandlerUm()
+{
+  if (startup)
+  {
+    Serial.print("\r\n*Unexpected characters in UMParser parser - Normal at startup*\r\n - UMParser Parser ErrorCode: ");
+    // Serial.print(umParser.mError);
   }
 }
 
@@ -488,14 +498,12 @@ void KSXT_Handler()
 
 void INSPVAXA_Handler()
 {
-  Serial.println("Got INSPVAXA message");
   umParser.getArg(9, INS.status);
   umParser.getArg(11, INS.latitude);
   umParser.getArg(12, INS.longitude);
   umParser.getArg(18, INS.roll);
   umParser.getArg(19, INS.pitch);
   umParser.getArg(20, INS.heading);
-  Serial.println(atof(INS.latitude));
 }
 
 #endif // GNSSHANDLERS_H_

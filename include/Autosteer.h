@@ -19,7 +19,7 @@ const float LOW_HIGH_DEGREES = 3.0; // How many degrees before decreasing Max PW
 
 bool testBothWasSensors = false;
 bool adcDebug = false;
-bool useInternalADC = true;   // v5.0 Proto only uses Teensy ADC
+bool useInternalADC = true; // v5.0 Proto only uses Teensy ADC
 bool useExternalADS = false;
 
 #include <EEPROM.h>
@@ -52,7 +52,7 @@ void adcSetup()
     LEDs.set(LED_ID::STEER, STEER_STATE::WAS_READY);
   }*/
 
-  autoSteerEnabled = true;    // need other checks for valid WAS input but for now enable AS anyways
+  autoSteerEnabled = true; // need other checks for valid WAS input but for now enable AS anyways
 
 } // end adcSetup()
 
@@ -105,8 +105,8 @@ void autosteerSetup()
   {
     analogWriteFrequency(PWM1_PIN, 3921);
     analogWriteFrequency(PWM2_PIN, 3921);
-  } 
-  else if (PWM_Frequency == 3) 
+  }
+  else if (PWM_Frequency == 3)
   {
     analogWriteFrequency(PWM1_PIN, 9155);
     analogWriteFrequency(PWM2_PIN, 9155);
@@ -120,8 +120,8 @@ void autosteerSetup()
   pinMode(KICKOUT_D_PIN, INPUT_PULLUP); // also set by Encoder library
 
   // Disable pullup/down resistors for analog input pins
-  pinMode(WORK_PIN, INPUT_DISABLE);     // input driven by MCP6002 opamp
-  pinMode(CURRENT_PIN, INPUT_DISABLE);  // input driven by MCP6002 opamp
+  pinMode(WORK_PIN, INPUT_DISABLE);    // input driven by MCP6002 opamp
+  pinMode(CURRENT_PIN, INPUT_DISABLE); // input driven by MCP6002 opamp
 
   uint16_t as_ee_read = EE_ver;
   EEPROM.get(1, as_ee_read);
@@ -159,7 +159,7 @@ void autoSteerUpdate()
 {
   ASusage.timeIn();
 
-  if (autoSteerUpdateTimer > 9)  // update AS loop every 10ms (100hz)
+  if (autoSteerUpdateTimer > 9) // update AS loop every 10ms (100hz)
   {
     autoSteerUpdateTimer -= 10; // or = 0?
 
@@ -167,17 +167,21 @@ void autoSteerUpdate()
     // 1 PCB Button pressed?
     uint8_t reading = digitalRead(STEER_PIN);
 
-    if (steerConfig.SteerSwitch == 1) {
+    if (steerConfig.SteerSwitch == 1)
+    {
       // Switch is off so reset ready for next switch on
-      if (reading == HIGH) {
+      if (reading == HIGH)
+      {
         steerState = 1;
         prevSteerReading = reading;
       }
     }
 
     // 2 Has tablet button been pressed?
-    if (guidanceStatusChanged) {
-      if (guidanceStatus == 1) {  //Must have changed Off >> On
+    if (guidanceStatusChanged)
+    {
+      if (guidanceStatus == 1)
+      { // Must have changed Off >> On
         steerState = 0;
       }
     }
@@ -185,85 +189,89 @@ void autoSteerUpdate()
     // If AOG has stopped steering, wait then turn off steerswitch ready for next engage.
     static int switchCounter = 0;
 
-    if (steerState == 0 && guidanceStatus == 0) {
-      if (switchCounter++ > 30) {
+    if (steerState == 0 && guidanceStatus == 0)
+    {
+      if (switchCounter++ > 30)
+      {
         steerState = 1;
       }
-    } else {
+    }
+    else
+    {
       switchCounter = 0;
     }
 
     // Arduino software button code
-    if (reading == LOW && prevSteerReading == HIGH) {
+    if (reading == LOW && prevSteerReading == HIGH)
+    {
       steerState = !steerState;
     }
     prevSteerReading = reading;
 
-
     // Steer input logic all setup so that '1' (HIGH) is ON, and '0' (LOW) is OFF
-/*    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
+    /*    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
 
-    if (steerConfig.SteerSwitch == 1) // steer "Switch" mode (on - off)
-    {
-      // new code for steer "Switch" mode that keeps AutoSteer OFF after current/pressure kickout until switch is cycled
-      if (steerReading == LOW)
-      {                            // switching OFF
-        steerState = steerReading; // set OFF
-        if (prevSteerReading != steerState)
+        if (steerConfig.SteerSwitch == 1) // steer "Switch" mode (on - off)
         {
-          //char msg[] = "AutoSteer Switch OFF";
-          //char msgTime = 2;
-          LEDs.activateBlueFlash(LED_ID::STEER);
+          // new code for steer "Switch" mode that keeps AutoSteer OFF after current/pressure kickout until switch is cycled
+          if (steerReading == LOW)
+          {                            // switching OFF
+            steerState = steerReading; // set OFF
+            if (prevSteerReading != steerState)
+            {
+              //char msg[] = "AutoSteer Switch OFF";
+              //char msgTime = 2;
+              LEDs.activateBlueFlash(LED_ID::STEER);
+            }
+          }
+          else if (steerReading == HIGH && prevSteerReading == LOW)
+          {                            // switch ON after prev being OFF
+            steerState = steerReading; // set ON
+            //char msg[] = "AutoSteer Switch ON";
+            //char msgTime = 2;
+            LEDs.activateBlueFlash(LED_ID::STEER);
+          }
+          prevSteerReading = steerReading;
         }
-      }
-      else if (steerReading == HIGH && prevSteerReading == LOW)
-      {                            // switch ON after prev being OFF
-        steerState = steerReading; // set ON
-        //char msg[] = "AutoSteer Switch ON";
-        //char msgTime = 2;
-        LEDs.activateBlueFlash(LED_ID::STEER);
-      }
-      prevSteerReading = steerReading;
-    }
 
-    else if (steerConfig.SteerButton == 1) // steer "Button" mode (momentary)
-    {
-      if (steerReading == HIGH && prevSteerReading == LOW)
-      { // button is pressed
-        steerState = !steerState;
-        LEDs.activateBlueFlash(LED_ID::STEER);
-        //char *msg;
-        //if (steerState)
-          //msg = (char *)"AutoSteer Btn ON";
-        //else
-          //msg = (char *)"AutoSteer Btn OFF";
-        //char msgTime = 2;
-        // UDP.SendUdpFreeForm(1, msg, strlen(msg), msgTime, UDP.broadcastIP, UDP.portAgIO_9999);
-      }
-      prevSteerReading = steerReading; // get ready to detect next press
+        else if (steerConfig.SteerButton == 1) // steer "Button" mode (momentary)
+        {
+          if (steerReading == HIGH && prevSteerReading == LOW)
+          { // button is pressed
+            steerState = !steerState;
+            LEDs.activateBlueFlash(LED_ID::STEER);
+            //char *msg;
+            //if (steerState)
+              //msg = (char *)"AutoSteer Btn ON";
+            //else
+              //msg = (char *)"AutoSteer Btn OFF";
+            //char msgTime = 2;
+            // UDP.SendUdpFreeForm(1, msg, strlen(msg), msgTime, UDP.broadcastIP, UDP.portAgIO_9999);
+          }
+          prevSteerReading = steerReading; // get ready to detect next press
 
-      if (guidanceStatusChanged)
-        steerState = guidanceStatus; // allows AoG to turn AS on/off in parallel with Btn
-    }
+          if (guidanceStatusChanged)
+            steerState = guidanceStatus; // allows AoG to turn AS on/off in parallel with Btn
+        }
 
-    else // No steer switch or button
-    {
-      // If steering is OFF and AoG's GUI btn is switched ON
-      if (guidanceStatusChanged && guidanceStatus == 1 && steerState == 0 && prevSteerReading == 1)
-      {
-        prevSteerReading = steerState;
-        steerState = 1;
-        LEDs.activateBlueFlash(LED_ID::STEER);
-      }
+        else // No steer switch or button
+        {
+          // If steering is OFF and AoG's GUI btn is switched ON
+          if (guidanceStatusChanged && guidanceStatus == 1 && steerState == 0 && prevSteerReading == 1)
+          {
+            prevSteerReading = steerState;
+            steerState = 1;
+            LEDs.activateBlueFlash(LED_ID::STEER);
+          }
 
-      // If steering is ON and AoG's GUI btn is switched OFF
-      if (guidanceStatusChanged && guidanceStatus == 0 && steerState == 1 && prevSteerReading == 0)
-      {
-        prevSteerReading = steerState;
-        steerState = 0;
-        LEDs.activateBlueFlash(LED_ID::STEER);
-      }
-    }*/
+          // If steering is ON and AoG's GUI btn is switched OFF
+          if (guidanceStatusChanged && guidanceStatus == 0 && steerState == 1 && prevSteerReading == 0)
+          {
+            prevSteerReading = steerState;
+            steerState = 0;
+            LEDs.activateBlueFlash(LED_ID::STEER);
+          }
+        }*/
 
     // ******************* Kickouts ( Encoders / Pressure / Current ) *******************
     if (steerConfig.ShaftEncoder)
@@ -273,7 +281,7 @@ void autoSteerUpdate()
         pulseCount = encoder.readCount();
         if (pulseCount != lastEnc)
         {
-          //Serial << "\r\npulseCount:" << pulseCount;
+          // Serial << "\r\npulseCount:" << pulseCount;
           lastEnc = pulseCount;
         }
       }
@@ -291,7 +299,7 @@ void autoSteerUpdate()
         steerState = 1; // reset values like it turned off
         prevSteerReading = 1;
       }
-      //Serial << "\r\npulseCount:" << pulseCount << " limit:" << steerConfig.PulseCountMax;
+      // Serial << "\r\npulseCount:" << pulseCount << " limit:" << steerConfig.PulseCountMax;
     }
 
     // Pressure sensor?
@@ -317,12 +325,12 @@ void autoSteerUpdate()
         float sensorReading = sensorReading * 0.7 + KeyaCurrentSensorReading * 0.3; // then use keya current data
       }
       else
-      { // otherwise continue using analog input on PCB
+      {                                                           // otherwise continue using analog input on PCB
         float sensorSample = (float)analogRead(CURRENT_PIN) - 90; // 0 current offset
-        //Serial << "\r\n" << sensorSample;
-        //sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
+        // Serial << "\r\n" << sensorSample;
+        // sensorSample = abs(3100 - sensorSample) * 0.0625; // 3100 is like old firmware, 3150 is center (zero current) value on Matt's v4.0 Micro
         sensorReading = sensorReading * 0.7 + sensorSample * 0.3;
-        //Serial << " " << sensorReading << " limit:" << steerConfig.PulseCountMax;
+        // Serial << " " << sensorReading << " limit:" << steerConfig.PulseCountMax;
         if (sensorReading >= steerConfig.PulseCountMax)
         {
           steerState = 1; // turn OFF autoSteer
@@ -331,7 +339,7 @@ void autoSteerUpdate()
       }
     }
 
-    uint16_t read = analogRead(WORK_PIN) > ANALOG_TRIG_THRES + ANALOG_TRIG_HYST ? LOW : HIGH;  // read work input
+    uint16_t read = analogRead(WORK_PIN) > ANALOG_TRIG_THRES + ANALOG_TRIG_HYST ? LOW : HIGH; // read work input
 
     if (read != workInput)
     {
@@ -341,7 +349,7 @@ void autoSteerUpdate()
 
     switchByte = 0;
     switchByte |= (kickoutInput << 2); // put remote in bit 2, Matt - not exaclty sure what this does
-    switchByte |= (steerState << 1);  // put inverted steerInput status in bit 1 position
+    switchByte |= (steerState << 1);   // put inverted steerInput status in bit 1 position
     switchByte |= !workInput;          // put inverted workInput into bit 0
 
     // ***************************** READ WAS *****************************
@@ -391,12 +399,13 @@ void autoSteerUpdate()
     // if (abs(steerAngleError)< steerSettings.lowPWM) steerAngleError = 0;
 
     // If connection lost to AgOpenGPS, the watchdog will count up and turn off steering
-    if (watchdogTimer++ > 250) {
+    if (watchdogTimer++ > 250)
+    {
       watchdogTimer = WATCHDOG_FORCE_VALUE;
       steerState = 1; // reset values like it turned off
     }
 
-    //Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
+    // Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
     if (watchdogTimer < WATCHDOG_THRESHOLD)
     {
       // Enable H Bridge for Cytron, or JD DAC (triple analog output)
@@ -424,9 +433,9 @@ void autoSteerUpdate()
       jdDac.steerEnable(false);
       // jdDac.ch4Enable(false);
 #else
-      digitalWrite(SLEEP_PIN, LOW);   // sleep mode
-      //digitalWrite(PWM1_PIN, LOW);    // if both PWM pins are low, even if !sleep, the outputs are Hi-Z
-      //digitalWrite(PWM2_PIN, LOW);
+      digitalWrite(SLEEP_PIN, LOW); // sleep mode
+                                    // digitalWrite(PWM1_PIN, LOW);    // if both PWM pins are low, even if !sleep, the outputs are Hi-Z
+                                    // digitalWrite(PWM2_PIN, LOW);
 #endif
 
       motorDrive(); // out to motors the pwm value

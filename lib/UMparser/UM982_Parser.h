@@ -144,7 +144,7 @@ private:
   State mState;
 
   /*
-   * mError
+    mError
    */
   UM982::ErrorCode mError;
 

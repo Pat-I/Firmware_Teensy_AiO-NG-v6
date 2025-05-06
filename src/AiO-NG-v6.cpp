@@ -40,6 +40,7 @@ void setup()
 
   serialSetup();        // Configure the Serial comms
   parserSetup();        // Load the NMEA parser callbacks
+  umparserSetup();      // Load Unicore parser callbacks
   BNO.begin(SerialIMU); // Start the IMU
   autosteerSetup();     // Initialize autosteer
   CAN_Setup();          // Start CAN3 for Keya
