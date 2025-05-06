@@ -68,7 +68,7 @@ void gpsPoll()
           gotCR = false;
           gotLF = false;
           gotDollar = false;
-          memset(msgBuf, 0, msgBufSz);
+          memset(msgBuf, 0, 254);
           msgBufLen = 0;
           ubxParser.relPosTimer = 0;
           LEDs.toggleTeensyLED();

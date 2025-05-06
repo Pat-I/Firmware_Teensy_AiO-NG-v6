@@ -19,7 +19,7 @@
 
 void setup()
 {
-  delay(3000); // Delay for tesing to allow opening serial terminal to see output
+  delay(10000); // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");

@@ -196,8 +196,7 @@ const uint8_t syncLUT[12] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 bool gotCR = false;
 bool gotLF = false;
 bool gotDollar = false;
-u_int16_t msgBufSz = 384
-char msgBuf[msgBufSz];
+char msgBuf[254];
 int msgBufLen = 0;
 // End
 
