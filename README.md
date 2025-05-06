@@ -4,6 +4,7 @@
 [AOG YouTube](https://youtube.com/@AgOpenGPS)
 
 # 100hz RVC firmware for new All-In-One "Next Generation" PCB 
+### *** very alpha/testing/dev stage ***
 
 ### Project Overview
 This firmware is for the new [AiO-NextGen PCB](https://github.com/AgOpenGPS-Official/Board_Teensy_AiO-NextGen), with code copied from the official [All-In-One v4.x I2C](https://github.com/AgOpenGPS-Official/Firmware_Teensy_AiO-v4_I2C) firmware, more code copied from the ["Ace"](https://github.com/farmerbriantee/Ace) project and as is common for Arduino projects, the Internet. We hope to release the design files sometime in 2025. It is built on a bare metal [Mongoose](https://mongoose.ws/documentation) base which includes the TCP/UDP stack and a Web UI designed with the [Mongoose Wizard](https://mongoose.ws/wizard/#/). Mongoose [Discord Chat](https://discord.com/channels/1194962781745709128/1194962781745709131) is here. To start, we plan to support the usual v4.x AiO settings/options/operations via AOG's UI & PGNs with plans to add new settings in the Teesny's hosted Web UI to support the new board's capabilities (analog WORK input, RGB status LEDs brightness, RS232 NMEA output, Section/Machine control, speaker/buzzer, external RS232 IMU, ESP32 WiFi Bridge, AutoSteer Kickout options, etc).
