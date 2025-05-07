@@ -57,21 +57,13 @@ void fw_set_ins_cfg(struct ins_cfg *data)
     insCfg.posOffY = data->insPosOffY;
     insCfg.posOffZ = data->insPosOffZ;
 
-    insCfg.iniAttPch = data->insIniAttPch;
-    insCfg.iniAttRol = data->insIniAttRol;
-    insCfg.iniAttAzi = data->insIniAttAzi;
-    insCfg.iniAttSdPch = data->insIniAttSdPch;
-    insCfg.iniAttSdRol = data->insIniAttSdRol;
-    insCfg.iniAttSdAz = data->insIniAttSdAzi;
-
-    MG_DEBUG(("set_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
+    MG_DEBUG(("set_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
               data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
-              data->insPosOffX, data->insPosOffY, data->insPosOffZ, data->insIniAttPch, data->insIniAttRol, data->insIniAttAzi, data->insIniAttSdPch, data->insIniAttSdRol, data->insIniAttSdAzi));
+              data->insPosOffX, data->insPosOffY, data->insPosOffZ));
 
-    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
+    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
               insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
-              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ, insCfg.iniAttPch, insCfg.iniAttRol, insCfg.iniAttAzi,
-              insCfg.iniAttSdPch, insCfg.iniAttSdRol, insCfg.iniAttSdAz));
+              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
 
     save_ins();
 }
@@ -79,10 +71,9 @@ void fw_set_ins_cfg(struct ins_cfg *data)
 void fw_get_ins_cfg(struct ins_cfg *data)
 {
     load_ins();
-    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
+    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
               insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
-              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ, insCfg.iniAttPch, insCfg.iniAttRol, insCfg.iniAttAzi,
-              insCfg.iniAttSdPch, insCfg.iniAttSdRol, insCfg.iniAttSdAz));
+              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
 
     strcpy(data->insEn, insCfg.enable);
     data->insTOut = insCfg.timeOut;
@@ -105,16 +96,9 @@ void fw_get_ins_cfg(struct ins_cfg *data)
     data->insPosOffY = insCfg.posOffY;
     data->insPosOffZ = insCfg.posOffZ;
 
-    data->insIniAttPch = insCfg.iniAttPch;
-    data->insIniAttRol = insCfg.iniAttRol;
-    data->insIniAttAzi = insCfg.iniAttAzi;
-    data->insIniAttSdPch = insCfg.iniAttSdPch;
-    data->insIniAttSdRol = insCfg.iniAttSdRol;
-    data->insIniAttSdAzi = insCfg.iniAttSdAz;
-
-    MG_DEBUG(("get_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
+    MG_DEBUG(("get_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
               data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
-              data->insPosOffX, data->insPosOffY, data->insPosOffZ, data->insIniAttPch, data->insIniAttRol, data->insIniAttAzi, data->insIniAttSdPch, data->insIniAttSdRol, data->insIniAttSdAzi));
+              data->insPosOffX, data->insPosOffY, data->insPosOffZ));
 }
 
 void teensyReboot(void *param)

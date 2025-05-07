@@ -229,16 +229,9 @@ struct INSCfgStruct
   float posOffX;
   float posOffY;
   float posOffZ;
-
-  float iniAttPch;
-  float iniAttRol;
-  float iniAttAzi;
-  float iniAttSdPch;
-  float iniAttSdRol;
-  float iniAttSdAz;
 };
 INSCfgStruct insCfg;
-INSCfgStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+INSCfgStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 byte hotInfo[80]; // Hotstart data blob. Using this reduces start up time unitl INS is ready.
 float cfgFlag;    // Holds value of flag indicating the INS has been comfigured.

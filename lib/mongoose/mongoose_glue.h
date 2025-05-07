@@ -110,7 +110,7 @@ void glue_set_settings(struct settings *);
 
 struct ins_cfg {
   char insEn[8];
-  double insTOut;
+  int insTOut;
   double insAlVel;
   double insWhlbase;
   char insVehDir[9];
@@ -126,12 +126,6 @@ struct ins_cfg {
   double insPosOffX;
   double insPosOffY;
   double insPosOffZ;
-  double insIniAttPch;
-  double insIniAttRol;
-  double insIniAttAzi;
-  double insIniAttSdPch;
-  double insIniAttSdRol;
-  double insIniAttSdAzi;
 };
 void glue_get_ins_cfg(struct ins_cfg *);
 void glue_set_ins_cfg(struct ins_cfg *);
