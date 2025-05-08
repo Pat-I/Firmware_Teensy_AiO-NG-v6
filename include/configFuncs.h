@@ -79,6 +79,20 @@ void load_ins()
     EEPROM.get(insStore, insCfg);
 }
 
+// Save KWAS data
+void save_kwas()
+{
+    // Save KWAS to 700
+    EEPROM.put(kwasStore, kwasCfg);
+}
+
+// Load INS data
+void load_kwas()
+{
+    // Load INS to 600
+    EEPROM.get(kwasStore, kwasCfg);
+}
+
 // Load the IP address from EEPROM
 void ipSetup()
 {

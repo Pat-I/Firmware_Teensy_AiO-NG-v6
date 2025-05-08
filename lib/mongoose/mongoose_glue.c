@@ -52,3 +52,11 @@ void glue_get_ins_cfg(struct ins_cfg *data) {
 void glue_set_ins_cfg(struct ins_cfg *data) {
   s_ins_cfg = *data; // Sync with your device
 }
+
+static struct kwas_cfg s_kwas_cfg = {false, 0.1, 0.5, 3, 0.1, 0.0001};
+void glue_get_kwas_cfg(struct kwas_cfg *data) {
+  *data = s_kwas_cfg;  // Sync with your device
+}
+void glue_set_kwas_cfg(struct kwas_cfg *data) {
+  s_kwas_cfg = *data; // Sync with your device
+}

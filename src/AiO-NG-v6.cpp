@@ -54,10 +54,12 @@ void setup()
   initMachineOutputs();
 
   load_ins(); // Load INS data from EEPROM
+  load_kwas(); // Load IKWASdata from EEPROM
 
   mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
   mongoose_set_http_handlers("settings", fw_get_settings, fw_set_settings);
   mongoose_set_http_handlers("ins_cfg", fw_get_ins_cfg, fw_set_ins_cfg);
+  mongoose_set_http_handlers("kwas_cfg", fw_get_kwas_cfg, fw_set_kwas_cfg);
 
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);

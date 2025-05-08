@@ -101,6 +101,32 @@ void fw_get_ins_cfg(struct ins_cfg *data)
               data->insPosOffX, data->insPosOffY, data->insPosOffZ));
 }
 
+void fw_set_kwas_cfg(struct kwas_cfg *data)
+{
+    kwasCfg.useKalmanForSensor = data->kwasEn;
+    kwasCfg.intervalINS = data->kwasInt;
+    kwasCfg.minSpeedKalman = data->kwasMinSpd;
+    kwasCfg.secondsVarianceBuffer = data->kwasVarBufSec;
+    kwasCfg.kalmanR = data->kwasKalR;
+    kwasCfg.kalmanQ = data->kwasKalQ;
+    MG_DEBUG(("set_kwas_cfg: %d,%f,%f,%d,%f,%f", data->kwasEn, data->kwasInt, data->kwasMinSpd, data->kwasVarBufSec, data->kwasKalR, data->kwasKalQ));
+    MG_DEBUG(("fw_kwasCfg: %d,%f,%f,%d,%f,%f", kwasCfg.useKalmanForSensor, kwasCfg.intervalINS, kwasCfg.minSpeedKalman, kwasCfg.secondsVarianceBuffer, kwasCfg.kalmanR, kwasCfg.kalmanQ));
+    save_kwas();
+}
+
+void fw_get_kwas_cfg(struct kwas_cfg *data)
+{
+    load_kwas();
+    MG_DEBUG(("fw_kwasCfg: %d,%f,%f,%d,%f,%f", kwasCfg.useKalmanForSensor, kwasCfg.intervalINS, kwasCfg.minSpeedKalman, kwasCfg.secondsVarianceBuffer, kwasCfg.kalmanR, kwasCfg.kalmanQ));
+    data->kwasEn = kwasCfg.useKalmanForSensor;
+    data->kwasInt = kwasCfg.intervalINS;
+    data->kwasMinSpd = kwasCfg.minSpeedKalman;
+    data->kwasVarBufSec = kwasCfg.secondsVarianceBuffer;
+    data->kwasKalR = kwasCfg.kalmanR;
+    data->kwasKalQ = kwasCfg.kalmanQ;
+    MG_DEBUG(("get_kwas_cfg: %d,%f,%f,%d,%f,%f", data->kwasEn, data->kwasInt, data->kwasMinSpd, data->kwasVarBufSec, data->kwasKalR, data->kwasKalQ));
+}
+
 void teensyReboot(void *param)
 {
     SCB_AIRCR = 0x05FA0004;

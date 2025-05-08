@@ -130,6 +130,17 @@ struct ins_cfg {
 void glue_get_ins_cfg(struct ins_cfg *);
 void glue_set_ins_cfg(struct ins_cfg *);
 
+struct kwas_cfg {
+  bool kwasEn;
+  double kwasInt;
+  double kwasMinSpd;
+  int kwasVarBufSec;
+  double kwasKalR;
+  double kwasKalQ;
+};
+void glue_get_kwas_cfg(struct kwas_cfg *);
+void glue_set_kwas_cfg(struct kwas_cfg *);
+
 
 #ifdef __cplusplus
 }

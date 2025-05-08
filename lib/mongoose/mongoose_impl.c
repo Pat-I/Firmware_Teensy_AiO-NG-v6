@@ -147,19 +147,30 @@ struct attribute s_ins_cfg_attributes[] = {
   {"insPosOffZ", "double", NULL, offsetof(struct ins_cfg, insPosOffZ), 0, false},
   {NULL, NULL, NULL, 0, 0, false}
 };
+struct attribute s_kwas_cfg_attributes[] = {
+  {"kwasEn", "bool", NULL, offsetof(struct kwas_cfg, kwasEn), 0, false},
+  {"kwasInt", "double", NULL, offsetof(struct kwas_cfg, kwasInt), 0, false},
+  {"kwasMinSpd", "double", NULL, offsetof(struct kwas_cfg, kwasMinSpd), 0, false},
+  {"kwasVarBufSec", "int", NULL, offsetof(struct kwas_cfg, kwasVarBufSec), 0, false},
+  {"kwasKalR", "double", NULL, offsetof(struct kwas_cfg, kwasKalR), 0, false},
+  {"kwasKalQ", "double", NULL, offsetof(struct kwas_cfg, kwasKalQ), 0, false},
+  {NULL, NULL, NULL, 0, 0, false}
+};
 
 struct apihandler_action s_apihandler_save = {{"save", "action", false, 3, 7, 0UL}, glue_check_save, glue_start_save};
 struct apihandler_action s_apihandler_reboot = {{"reboot", "action", false, 3, 7, 0UL}, glue_check_reboot, glue_start_reboot};
 struct apihandler_ota s_apihandler_firmware_update = {{"firmware_update", "ota", false, 3, 7, 0UL}, glue_ota_begin_firmware_update, glue_ota_end_firmware_update, glue_ota_write_firmware_update};
 struct apihandler_data s_apihandler_settings = {{"settings", "data", false, 3, 7, 0UL}, s_settings_attributes, sizeof(struct settings), (void (*)(void *)) glue_get_settings, (void (*)(void *)) glue_set_settings};
 struct apihandler_data s_apihandler_ins_cfg = {{"ins_cfg", "data", false, 0, 0, 0UL}, s_ins_cfg_attributes, sizeof(struct ins_cfg), (void (*)(void *)) glue_get_ins_cfg, (void (*)(void *)) glue_set_ins_cfg};
+struct apihandler_data s_apihandler_kwas_cfg = {{"kwas_cfg", "data", false, 0, 0, 0UL}, s_kwas_cfg_attributes, sizeof(struct kwas_cfg), (void (*)(void *)) glue_get_kwas_cfg, (void (*)(void *)) glue_set_kwas_cfg};
 
 static struct apihandler *s_apihandlers[] = {
   (struct apihandler *) &s_apihandler_save,
   (struct apihandler *) &s_apihandler_reboot,
   (struct apihandler *) &s_apihandler_firmware_update,
   (struct apihandler *) &s_apihandler_settings,
-  (struct apihandler *) &s_apihandler_ins_cfg
+  (struct apihandler *) &s_apihandler_ins_cfg,
+  (struct apihandler *) &s_apihandler_kwas_cfg
 };
 
 static struct apihandler *get_api_handler(struct mg_str name) {

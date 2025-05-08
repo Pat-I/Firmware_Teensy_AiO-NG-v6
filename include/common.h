@@ -30,7 +30,8 @@ char inoVersion[] = "AiO-NG-v6.0.1";
 #define ipStore 300       // 100 bytes
 #define gpsStore 400      // 100 bytes
 #define machineStore 500  // 100 bytes
-#define insStore 600      // 200 bytes
+#define insStore 600      // 100 bytes
+#define kwasStore 700      // 100 bytes
 
 // Networking variables
 struct NetConfigStruct
@@ -237,18 +238,16 @@ float cfgFlag;    // Holds value of flag indicating the INS has been comfigured.
 // End
 
 // Kalman Filter Variables
-struct KALConfigStruct
+struct KwasConfigStruct
 {
-  bool using2serialGPS = true;
-  bool usingWT61 = false;
-  float intervalINS = 0.1; // 0.1 or 0.05 -> 10 or 20 Hz
   bool useKalmanForSensor = true;
+  float intervalINS = 0.1;         // 0.1 or 0.05 -> 10 or 20 Hz
   float minSpeedKalman = 0.5;      // m /s
-  float secondsVarianceBuffer = 3; // pay attention to max varianceBuffer len in zKalmanKeya
+  int secondsVarianceBuffer = 3; // pay attention to max varianceBuffer len in zKalmanKeya
   float kalmanR = 0.1;
   float kalmanQ = 0.0001;
 };
-KALConfigStruct kalConfig;
+KwasConfigStruct kwasCfg;
 // End
 
 // Keya as WAS (KWAS) variables
