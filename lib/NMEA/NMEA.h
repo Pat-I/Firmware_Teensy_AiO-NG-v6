@@ -388,7 +388,7 @@ public:
       case SENT:
         if (isalnum(inChar)) {
           if (spaceAvail()) {
-            if (mIndex < 5) {
+            if (mIndex < 6) {
               mBuffer[mIndex++] = inChar;
               mComputedCRC ^= inChar;
             } else {

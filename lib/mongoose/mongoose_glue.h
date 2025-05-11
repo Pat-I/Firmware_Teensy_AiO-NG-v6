@@ -86,9 +86,6 @@ void glue_update_state(void);
 
 // Firmware Glue
 
-void glue_start_save(struct mg_str);  // Start an action
-bool glue_check_save(void);  // Check if action is still in progress
-
 void glue_start_reboot(struct mg_str);  // Start an action
 bool glue_check_reboot(void);  // Check if action is still in progress
 
@@ -109,23 +106,23 @@ void glue_get_settings(struct settings *);
 void glue_set_settings(struct settings *);
 
 struct ins_cfg {
-  char insEn[8];
-  int insTOut;
-  double insAlVel;
-  double insWhlbase;
-  char insVehDir[9];
-  double insInstAngX;
-  double insInstAngY;
-  double insInstAngZ;
-  double insLevX;
-  double insLevY;
-  double insLevZ;
-  double insLevA;
-  double insLevB;
-  double insLevC;
-  double insPosOffX;
-  double insPosOffY;
-  double insPosOffZ;
+  char insEn[30];
+  char mode[30];
+  char insTOut[30];
+  char insAlVel[30];
+  char insVehDir[30];
+  char rtkTOut[30];
+  char rtkRelia[30];
+  char sigGrp[30];
+  char com1[30];
+  char com2[30];
+  char com3[30];
+  char mesg1[30];
+  char mesg2[30];
+  char mesg3[30];
+  char insInstAng[50];
+  char insLever[55];
+  char insPosOff[50];
 };
 void glue_get_ins_cfg(struct ins_cfg *);
 void glue_set_ins_cfg(struct ins_cfg *);
@@ -137,6 +134,7 @@ struct kwas_cfg {
   int kwasVarBufSec;
   double kwasKalR;
   double kwasKalQ;
+  double kwasWhlBs;
 };
 void glue_get_kwas_cfg(struct kwas_cfg *);
 void glue_set_kwas_cfg(struct kwas_cfg *);

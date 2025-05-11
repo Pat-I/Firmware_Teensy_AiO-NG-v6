@@ -5,15 +5,6 @@
 // Default mock implementation of the API callbacks
 
 #include "mongoose_glue.h"
-static uint64_t s_action_timeout_save;  // Time when save ends
-bool glue_check_save(void) {
-  return s_action_timeout_save > mg_now(); // Return true if save is in progress
-}
-void glue_start_save(struct mg_str params) {
-  MG_DEBUG(("Passed parameters: [%.*s]", params.len, params.buf));
-  s_action_timeout_save = mg_now() + 1000; // Start save, finish after 1 second
-}
-
 static uint64_t s_action_timeout_reboot;  // Time when reboot ends
 bool glue_check_reboot(void) {
   return s_action_timeout_reboot > mg_now(); // Return true if reboot is in progress
@@ -45,7 +36,7 @@ void glue_set_settings(struct settings *data) {
   s_settings = *data; // Sync with your device
 }
 
-static struct ins_cfg s_ins_cfg = {"enable", 1, 1, 2, "auto", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static struct ins_cfg s_ins_cfg = {"CONFIG INS RESET", "MODE ROVER SURVEY", "CONFIG INS TIMEOUT 60", "CONFIG INS ALIGNMENTVEL 1.5", "CONFIG INSDIRECTION AUTO", "CONFIG RTK TIMEOUT 120", "CONFIG RTK RELIABILITY 3 1", "CONFIG SIGNALGROUP 1", "CONFIG COM1 460800", "CONFIG COM2 460800", "CONFIG COM3 460800", "GNGGA COM3 0.1", "GPVTG COM3 0.1", "INSPVAXA COM3 0.1", "CONFIG INS ANGLE 0.00 0.00 0.00", "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00", "CONFIG INSSOL OFFSET 0.00 0.00 0.00"};
 void glue_get_ins_cfg(struct ins_cfg *data) {
   *data = s_ins_cfg;  // Sync with your device
 }
@@ -53,7 +44,7 @@ void glue_set_ins_cfg(struct ins_cfg *data) {
   s_ins_cfg = *data; // Sync with your device
 }
 
-static struct kwas_cfg s_kwas_cfg = {false, 0.1, 0.5, 3, 0.1, 0.0001};
+static struct kwas_cfg s_kwas_cfg = {false, 0.1, 0.5, 3, 0.1, 0.0001, 2};
 void glue_get_kwas_cfg(struct kwas_cfg *data) {
   *data = s_kwas_cfg;  // Sync with your device
 }

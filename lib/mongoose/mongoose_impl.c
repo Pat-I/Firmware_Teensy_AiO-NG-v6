@@ -128,23 +128,23 @@ struct attribute s_settings_attributes[] = {
   {NULL, NULL, NULL, 0, 0, false}
 };
 struct attribute s_ins_cfg_attributes[] = {
-  {"insEn", "string", NULL, offsetof(struct ins_cfg, insEn), 8, false},
-  {"insTOut", "int", NULL, offsetof(struct ins_cfg, insTOut), 0, false},
-  {"insAlVel", "double", NULL, offsetof(struct ins_cfg, insAlVel), 0, false},
-  {"insWhlbase", "double", NULL, offsetof(struct ins_cfg, insWhlbase), 0, false},
-  {"insVehDir", "string", NULL, offsetof(struct ins_cfg, insVehDir), 9, false},
-  {"insInstAngX", "double", NULL, offsetof(struct ins_cfg, insInstAngX), 0, false},
-  {"insInstAngY", "double", NULL, offsetof(struct ins_cfg, insInstAngY), 0, false},
-  {"insInstAngZ", "double", NULL, offsetof(struct ins_cfg, insInstAngZ), 0, false},
-  {"insLevX", "double", NULL, offsetof(struct ins_cfg, insLevX), 0, false},
-  {"insLevY", "double", NULL, offsetof(struct ins_cfg, insLevY), 0, false},
-  {"insLevZ", "double", NULL, offsetof(struct ins_cfg, insLevZ), 0, false},
-  {"insLevA", "double", NULL, offsetof(struct ins_cfg, insLevA), 0, false},
-  {"insLevB", "double", NULL, offsetof(struct ins_cfg, insLevB), 0, false},
-  {"insLevC", "double", NULL, offsetof(struct ins_cfg, insLevC), 0, false},
-  {"insPosOffX", "double", NULL, offsetof(struct ins_cfg, insPosOffX), 0, false},
-  {"insPosOffY", "double", NULL, offsetof(struct ins_cfg, insPosOffY), 0, false},
-  {"insPosOffZ", "double", NULL, offsetof(struct ins_cfg, insPosOffZ), 0, false},
+  {"insEn", "string", NULL, offsetof(struct ins_cfg, insEn), 30, false},
+  {"mode", "string", NULL, offsetof(struct ins_cfg, mode), 30, false},
+  {"insTOut", "string", NULL, offsetof(struct ins_cfg, insTOut), 30, false},
+  {"insAlVel", "string", NULL, offsetof(struct ins_cfg, insAlVel), 30, false},
+  {"insVehDir", "string", NULL, offsetof(struct ins_cfg, insVehDir), 30, false},
+  {"rtkTOut", "string", NULL, offsetof(struct ins_cfg, rtkTOut), 30, false},
+  {"rtkRelia", "string", NULL, offsetof(struct ins_cfg, rtkRelia), 30, false},
+  {"sigGrp", "string", NULL, offsetof(struct ins_cfg, sigGrp), 30, false},
+  {"com1", "string", NULL, offsetof(struct ins_cfg, com1), 30, false},
+  {"com2", "string", NULL, offsetof(struct ins_cfg, com2), 30, false},
+  {"com3", "string", NULL, offsetof(struct ins_cfg, com3), 30, false},
+  {"mesg1", "string", NULL, offsetof(struct ins_cfg, mesg1), 30, false},
+  {"mesg2", "string", NULL, offsetof(struct ins_cfg, mesg2), 30, false},
+  {"mesg3", "string", NULL, offsetof(struct ins_cfg, mesg3), 30, false},
+  {"insInstAng", "string", NULL, offsetof(struct ins_cfg, insInstAng), 50, false},
+  {"insLever", "string", NULL, offsetof(struct ins_cfg, insLever), 55, false},
+  {"insPosOff", "string", NULL, offsetof(struct ins_cfg, insPosOff), 50, false},
   {NULL, NULL, NULL, 0, 0, false}
 };
 struct attribute s_kwas_cfg_attributes[] = {
@@ -154,10 +154,10 @@ struct attribute s_kwas_cfg_attributes[] = {
   {"kwasVarBufSec", "int", NULL, offsetof(struct kwas_cfg, kwasVarBufSec), 0, false},
   {"kwasKalR", "double", NULL, offsetof(struct kwas_cfg, kwasKalR), 0, false},
   {"kwasKalQ", "double", NULL, offsetof(struct kwas_cfg, kwasKalQ), 0, false},
+  {"kwasWhlBs", "double", NULL, offsetof(struct kwas_cfg, kwasWhlBs), 0, false},
   {NULL, NULL, NULL, 0, 0, false}
 };
 
-struct apihandler_action s_apihandler_save = {{"save", "action", false, 3, 7, 0UL}, glue_check_save, glue_start_save};
 struct apihandler_action s_apihandler_reboot = {{"reboot", "action", false, 3, 7, 0UL}, glue_check_reboot, glue_start_reboot};
 struct apihandler_ota s_apihandler_firmware_update = {{"firmware_update", "ota", false, 3, 7, 0UL}, glue_ota_begin_firmware_update, glue_ota_end_firmware_update, glue_ota_write_firmware_update};
 struct apihandler_data s_apihandler_settings = {{"settings", "data", false, 3, 7, 0UL}, s_settings_attributes, sizeof(struct settings), (void (*)(void *)) glue_get_settings, (void (*)(void *)) glue_set_settings};
@@ -165,7 +165,6 @@ struct apihandler_data s_apihandler_ins_cfg = {{"ins_cfg", "data", false, 0, 0, 
 struct apihandler_data s_apihandler_kwas_cfg = {{"kwas_cfg", "data", false, 0, 0, 0UL}, s_kwas_cfg_attributes, sizeof(struct kwas_cfg), (void (*)(void *)) glue_get_kwas_cfg, (void (*)(void *)) glue_set_kwas_cfg};
 
 static struct apihandler *s_apihandlers[] = {
-  (struct apihandler *) &s_apihandler_save,
   (struct apihandler *) &s_apihandler_reboot,
   (struct apihandler *) &s_apihandler_firmware_update,
   (struct apihandler *) &s_apihandler_settings,

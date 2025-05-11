@@ -17,6 +17,10 @@
 #include "AutosteerPID.h"
 #include "serialComm.h"
 
+
+elapsedMillis configTimer = 0;
+uint8_t runCount = 0;
+
 void setup()
 {
   delay(3000); // Delay for tesing to allow opening serial terminal to see output
@@ -53,7 +57,6 @@ void setup()
   machinePTR->setUdpReplyHandler(machinePgnReplies);
   initMachineOutputs();
 
-  load_ins(); // Load INS data from EEPROM
   load_kwas(); // Load IKWASdata from EEPROM
 
   mongoose_set_http_handlers("reboot", teensyCheckReboot, teensyStartReboot);
@@ -68,6 +71,15 @@ void setup()
 
 void loop()
 {
+  // if (configTimer >= 2000 && g_mgr.ifp->state != MG_TCPIP_STATE_READY && runCount < 3)
+  // {
+  //   configTimer = 0;
+  //   runCount++;
+  //   //SerialGPS1.write("CONFIG\r\n");
+  //   //SerialGPS1.write("UNILOGLIST\r\n");
+  //   SerialGPS1.write("MODE\r\n");
+  // }
+
   GUIusage.timeIn(); // *usage objects are used to track cpu usage on certain sections of code, see debug.h or misc.h
   mongoose_poll();   // update all Mongoose processes, UDP/PGN/Web UI
   GUIusage.timeOut();

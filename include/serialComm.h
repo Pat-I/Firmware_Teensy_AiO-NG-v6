@@ -23,7 +23,7 @@ void gpsPoll()
       if (gps1Available > sizeof(GPS1rxbuffer) - 10)
       { // this should not trigger except maybe at boot up
         SerialGPS1.clear();
-        Serial.print((String) "\r\n" + millis() + " *SerialGPS1 buffer cleared!- Normal at startup***********************************************************************************************");
+        Serial.print((String) "\r\n" + millis() + " *SerialGPS1 buffer cleared!- Normal at startup*");
         return;
       }
       gps1Stats.update(gps1Available);
@@ -41,6 +41,11 @@ void gpsPoll()
         gotDollar = true;
         break;
       case '#':
+        msgBuf[msgBufLen] = gps1Read;
+        msgBufLen++;
+        gotDollar = true;
+        break;
+      case '<':
         msgBuf[msgBufLen] = gps1Read;
         msgBufLen++;
         gotDollar = true;
@@ -67,24 +72,46 @@ void gpsPoll()
       }
       if (gotCR && gotLF)
       {
-        if (gpsConfig.gpsPass)
+        if (gpsConfig.gpsPass) // Send via UDP when pass through enabled
         {
           sendUDPchars(msgBuf);
         }
-        if (msgBuf[0] == '$')
+
+        else if (strstr(msgBuf, "$G")) // Parse a regular NMEA GPS sentence
         {
           for (u_int16_t i = 0; i < msgBufLen; i++)
           {
             nmeaParser << msgBuf[i];
           }
         }
-        if (msgBuf[0] == '#')
+
+        else if (strstr(msgBuf, "$CON")) // Parse a UM98x configuration line using the NMEA parser
+        {
+          for (u_int16_t i = 0; i < msgBufLen; i++)
+          {
+            //Serial.write(msgBuf[i]);
+            nmeaParser << msgBuf[i];
+          }
+        }
+
+        else if (strstr(msgBuf, "#I")) // Parse a UM98x Unicore message using the um982 parser
         {
           for (u_int16_t i = 0; i < msgBufLen; i++)
           {
             umParser << msgBuf[i];
           }
         }
+
+        else if (strstr(msgBuf, "#MO")) // Process a UM98x MODE config query response
+        {
+          MODE_Handler();
+        }
+
+        else if (strstr(msgBuf, "<")) // Process a UM98x UNILOGLIST query response
+        {
+          UNILOG_Handler();
+        }
+
         gotCR = false;
         gotLF = false;
         gotDollar = false;

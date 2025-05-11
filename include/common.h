@@ -30,8 +30,8 @@ char inoVersion[] = "AiO-NG-v6.0.1";
 #define ipStore 300       // 100 bytes
 #define gpsStore 400      // 100 bytes
 #define machineStore 500  // 100 bytes
-#define insStore 600      // 100 bytes
-#define kwasStore 700      // 100 bytes
+#define kwasStore 600     // 100 bytes
+#define insStore 700      // 500 bytes
 
 // Networking variables
 struct NetConfigStruct
@@ -162,7 +162,7 @@ const uint8_t ANALOG_TRIG_HYST = 10;
 
 // GNSS processing and variables
 #include "NMEA.h"
-NMEAParser<5> nmeaParser;
+NMEAParser<7> nmeaParser;
 bool nmeaDebug = 0, nmeaDebug2 = 0, extraCRLF;
 
 #include "UBXParser.h"
@@ -186,11 +186,11 @@ uint16_t ggaMissed;
 
 struct GPSConfigStruct
 {
-  char gpsSync[12];
+  char gpsSync[12] = "10ms-UM98x";
   bool gpsPass = false; // False = GPS neeeds to send GGA, VTG & HPR messages. True = GPS needs to send KSXT messages only.
 };
 GPSConfigStruct gpsConfig;
-GPSConfigStruct defaultGPS = {"10ms-UM98x", 0};
+GPSConfigStruct defaultGPS = gpsConfig;
 
 const uint8_t syncLUT[12] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
@@ -208,33 +208,30 @@ int msgBufLen = 0;
 UM982Parser<3> umParser;
 
 // INS Variables
+
 struct INSCfgStruct
 {
-  char enable[8];
-  u_int16_t timeOut;
-  float alVel;
-  char vehDir[9];
-  float whlBase;
-
-  float instAglX;
-  float instAglY;
-  float instAglZ;
-
-  float levArmX;
-  float levArmY;
-  float levArmZ;
-  float levArmA;
-  float levArmB;
-  float levArmC;
-
-  float posOffX;
-  float posOffY;
-  float posOffZ;
+  char insEn[30] = "CONFIG INS RESET";
+  char mode[30] = "MODE ROVER SURVEY";
+  char insTOut[30] = "CONFIG INS TIMEOUT 60";
+  char insAlVel[30] = "CONFIG INS ALIGNMENTVEL 1.5";
+  char insVehDir[30] = "CONFIG INSDIRECTION AUTO";
+  char rtkTOut[30] = "CONFIG RTK TIMEOUT 120";
+  char rtkRelia[30] = "CONFIG RTK RELIABILITY 3 1";
+  char sigGrp[30] = "CONFIG SIGNALGROUP 1";
+  char com1[30] = "CONFIG COM1 460800";
+  char com2[30] = "CONFIG COM2 460800";
+  char com3[30] = "CONFIG COM3 460800";
+  char mesg1[30] = "GNGGA COM3 0.1";
+  char mesg2[30] = "GPVTG COM3 0.1";
+  char mesg3[30] = "INSPVAXA COM3 0.1";
+  char insInstAng[50] = "CONFIG INS ANGLE 0.00 0.00 0.00";
+  char insLever[55] = "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00";
+  char insPosOff[50] = "CONFIG INSSOL OFFSET 0.00 0.00 0.00";
 };
 INSCfgStruct insCfg;
-INSCfgStruct defaultIns = {"enabled", 1, 0.5, "auto", 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+INSCfgStruct defaultIns = insCfg;
 
-float cfgFlag;    // Holds value of flag indicating the INS has been comfigured.
 // End
 
 // Kalman Filter Variables
@@ -246,8 +243,10 @@ struct KwasConfigStruct
   int secondsVarianceBuffer = 3; // pay attention to max varianceBuffer len in zKalmanKeya
   float kalmanR = 0.1;
   float kalmanQ = 0.0001;
+  float whlBase = 2.5;
 };
 KwasConfigStruct kwasCfg;
+KwasConfigStruct defaultKwas = kwasCfg;
 // End
 
 // Keya as WAS (KWAS) variables

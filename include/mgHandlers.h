@@ -36,69 +36,75 @@ void fw_get_settings(struct settings *data)
 
 void fw_set_ins_cfg(struct ins_cfg *data)
 {
-    strcpy(insCfg.enable, data->insEn);
-    insCfg.timeOut = data->insTOut;
-    insCfg.alVel = data->insAlVel;
-    strcpy(insCfg.vehDir, data->insVehDir);
-    insCfg.whlBase = data->insWhlbase;
+    MG_DEBUG(("Set INS Cfg"));
+    SerialGPS1.println(data->mode);
+    // insCfg.eprm = data->insEprm;
+    // strcpy(insCfg.enable, data->insEn);
+    // insCfg.timeOut = data->insTOut;
+    // insCfg.alVel = data->insAlVel;
+    // strcpy(insCfg.vehDir, data->insVehDir);
+    // insCfg.whlBase = data->insWhlbase;
 
-    insCfg.instAglX = data->insInstAngX;
-    insCfg.instAglY = data->insInstAngY;
-    insCfg.instAglZ = data->insInstAngZ;
+    // insCfg.instAglX = data->insInstAngX;
+    // insCfg.instAglY = data->insInstAngY;
+    // insCfg.instAglZ = data->insInstAngZ;
 
-    insCfg.levArmX = data->insLevX;
-    insCfg.levArmY = data->insLevY;
-    insCfg.levArmZ = data->insLevZ;
-    insCfg.levArmA = data->insLevA;
-    insCfg.levArmB = data->insLevB;
-    insCfg.levArmC = data->insLevC;
+    // insCfg.levArmX = data->insLevX;
+    // insCfg.levArmY = data->insLevY;
+    // insCfg.levArmZ = data->insLevZ;
+    // insCfg.levArmA = data->insLevA;
+    // insCfg.levArmB = data->insLevB;
+    // insCfg.levArmC = data->insLevC;
 
-    insCfg.posOffX = data->insPosOffX;
-    insCfg.posOffY = data->insPosOffY;
-    insCfg.posOffZ = data->insPosOffZ;
+    // insCfg.posOffX = data->insPosOffX;
+    // insCfg.posOffY = data->insPosOffY;
+    // insCfg.posOffZ = data->insPosOffZ;
 
-    MG_DEBUG(("set_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
-              data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
-              data->insPosOffX, data->insPosOffY, data->insPosOffZ));
+    // MG_DEBUG(("set_ins_cfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEprm, data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
+    //           data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
+    //           data->insPosOffX, data->insPosOffY, data->insPosOffZ));
 
-    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
-              insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
-              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
-
-    save_ins();
+    // MG_DEBUG(("fw_insCfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.eprm, insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
+    //           insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
+    //           insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
+    
 }
 
 void fw_get_ins_cfg(struct ins_cfg *data)
 {
-    load_ins();
-    MG_DEBUG(("fw_insCfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
-              insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
-              insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
+    MG_DEBUG(("Get INS Cfg"));
+    SerialGPS1.println("MODE");
+    strcpy(data->mode, insCfg.mode);
+    // MG_DEBUG(("fw_insCfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.eprm, insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
+    //           insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
+    //           insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
 
-    strcpy(data->insEn, insCfg.enable);
-    data->insTOut = insCfg.timeOut;
-    data->insAlVel = insCfg.alVel;
-    strcpy(data->insVehDir, insCfg.vehDir);
-    data->insWhlbase = insCfg.whlBase;
+    
+    // data->insEprm = insCfg.eprm;
+    // strcpy(data->insEn, insCfg.enable);
+    // data->insTOut = insCfg.timeOut;
+    // data->insAlVel = insCfg.alVel;
+    // strcpy(data->insVehDir, insCfg.vehDir);
+    // data->insWhlbase = insCfg.whlBase;
 
-    data->insInstAngX = insCfg.instAglX;
-    data->insInstAngY = insCfg.instAglY;
-    data->insInstAngZ = insCfg.instAglZ;
+    // data->insInstAngX = insCfg.instAglX;
+    // data->insInstAngY = insCfg.instAglY;
+    // data->insInstAngZ = insCfg.instAglZ;
 
-    data->insLevX = insCfg.levArmX;
-    data->insLevY = insCfg.levArmY;
-    data->insLevZ = insCfg.levArmZ;
-    data->insLevA = insCfg.levArmA;
-    data->insLevB = insCfg.levArmB;
-    data->insLevC = insCfg.levArmC;
+    // data->insLevX = insCfg.levArmX;
+    // data->insLevY = insCfg.levArmY;
+    // data->insLevZ = insCfg.levArmZ;
+    // data->insLevA = insCfg.levArmA;
+    // data->insLevB = insCfg.levArmB;
+    // data->insLevC = insCfg.levArmC;
 
-    data->insPosOffX = insCfg.posOffX;
-    data->insPosOffY = insCfg.posOffY;
-    data->insPosOffZ = insCfg.posOffZ;
+    // data->insPosOffX = insCfg.posOffX;
+    // data->insPosOffY = insCfg.posOffY;
+    // data->insPosOffZ = insCfg.posOffZ;
 
-    MG_DEBUG(("get_ins_cfg: %s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
-              data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
-              data->insPosOffX, data->insPosOffY, data->insPosOffZ));
+    // MG_DEBUG(("get_ins_cfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEprm, data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
+    //           data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
+    //           data->insPosOffX, data->insPosOffY, data->insPosOffZ));
 }
 
 void fw_set_kwas_cfg(struct kwas_cfg *data)
@@ -109,22 +115,24 @@ void fw_set_kwas_cfg(struct kwas_cfg *data)
     kwasCfg.secondsVarianceBuffer = data->kwasVarBufSec;
     kwasCfg.kalmanR = data->kwasKalR;
     kwasCfg.kalmanQ = data->kwasKalQ;
-    MG_DEBUG(("set_kwas_cfg: %d,%f,%f,%d,%f,%f", data->kwasEn, data->kwasInt, data->kwasMinSpd, data->kwasVarBufSec, data->kwasKalR, data->kwasKalQ));
-    MG_DEBUG(("fw_kwasCfg: %d,%f,%f,%d,%f,%f", kwasCfg.useKalmanForSensor, kwasCfg.intervalINS, kwasCfg.minSpeedKalman, kwasCfg.secondsVarianceBuffer, kwasCfg.kalmanR, kwasCfg.kalmanQ));
+    kwasCfg.whlBase = data->kwasWhlBs;
+    MG_DEBUG(("set_kwas_cfg: %d,%f,%f,%d,%f,%f,%f", data->kwasEn, data->kwasInt, data->kwasMinSpd, data->kwasVarBufSec, data->kwasKalR, data->kwasKalQ, data->kwasWhlBs));
+    MG_DEBUG(("fw_kwasCfg: %d,%f,%f,%d,%f,%f,%f", kwasCfg.useKalmanForSensor, kwasCfg.intervalINS, kwasCfg.minSpeedKalman, kwasCfg.secondsVarianceBuffer, kwasCfg.kalmanR, kwasCfg.kalmanQ, kwasCfg.whlBase));
     save_kwas();
 }
 
 void fw_get_kwas_cfg(struct kwas_cfg *data)
 {
     load_kwas();
-    MG_DEBUG(("fw_kwasCfg: %d,%f,%f,%d,%f,%f", kwasCfg.useKalmanForSensor, kwasCfg.intervalINS, kwasCfg.minSpeedKalman, kwasCfg.secondsVarianceBuffer, kwasCfg.kalmanR, kwasCfg.kalmanQ));
+    MG_DEBUG(("fw_kwasCfg: %d,%f,%f,%d,%f,%f,%f", kwasCfg.useKalmanForSensor, kwasCfg.intervalINS, kwasCfg.minSpeedKalman, kwasCfg.secondsVarianceBuffer, kwasCfg.kalmanR, kwasCfg.kalmanQ, kwasCfg.whlBase));
     data->kwasEn = kwasCfg.useKalmanForSensor;
     data->kwasInt = kwasCfg.intervalINS;
     data->kwasMinSpd = kwasCfg.minSpeedKalman;
     data->kwasVarBufSec = kwasCfg.secondsVarianceBuffer;
     data->kwasKalR = kwasCfg.kalmanR;
     data->kwasKalQ = kwasCfg.kalmanQ;
-    MG_DEBUG(("get_kwas_cfg: %d,%f,%f,%d,%f,%f", data->kwasEn, data->kwasInt, data->kwasMinSpd, data->kwasVarBufSec, data->kwasKalR, data->kwasKalQ));
+    data->kwasWhlBs = kwasCfg.whlBase;
+    MG_DEBUG(("get_kwas_cfg: %d,%f,%f,%d,%f,%f,%f", data->kwasEn, data->kwasInt, data->kwasMinSpd, data->kwasVarBufSec, data->kwasKalR, data->kwasKalQ, data->kwasWhlBs));
 }
 
 void teensyReboot(void *param)

@@ -22,11 +22,6 @@ void save_default_GPS()
     EEPROM.put(gpsStore, defaultGPS);
 }
 
-void save_default_INS()
-{
-    EEPROM.put(insStore, defaultIns);
-}
-
 // Write current IP to EEPROM
 void save_current_net()
 {
@@ -65,32 +60,32 @@ void load_gps()
     EEPROM.get(gpsStore, gpsConfig);
 }
 
-// Save INS data
-void save_ins()
-{
-    // Save INS to 600
-    EEPROM.put(insStore, insCfg);
-}
-
-// Load INS data
-void load_ins()
-{
-    // Load INS to 600
-    EEPROM.get(insStore, insCfg);
-}
-
 // Save KWAS data
 void save_kwas()
 {
-    // Save KWAS to 700
+    // Save KWAS to 600
     EEPROM.put(kwasStore, kwasCfg);
 }
 
-// Load INS data
+// Load KWAS data
 void load_kwas()
 {
     // Load INS to 600
     EEPROM.get(kwasStore, kwasCfg);
+}
+
+// Save INS data
+void save_ins()
+{
+    // Save KWAS to 700
+    EEPROM.put(insStore, insCfg);
+}
+
+// Load KWAS data
+void load_kwas()
+{
+    // Load INS to 600
+    EEPROM.get(insStore, insCfg);
 }
 
 // Load the IP address from EEPROM
@@ -108,9 +103,6 @@ void ipSetup()
 
         save_default_GPS();
         Serial.print("\r\n\nWriting GPS defaults to EEPROM\r\n");
-
-        save_default_INS();
-        Serial.print("\r\n\nWriting INS defaults to EEPROM\r\n");
     }
     else
     {

@@ -498,6 +498,7 @@ void KSXT_Handler()
 
 void INSPVAXA_Handler()
 {
+  //Serial.println("Got INSP");
   umParser.getArg(9, INS.status);
   umParser.getArg(11, INS.latitude);
   umParser.getArg(12, INS.longitude);
@@ -506,4 +507,46 @@ void INSPVAXA_Handler()
   umParser.getArg(20, INS.heading);
 }
 
+void CONFIG_Handler()
+{
+  char umConfig[100];
+  nmeaParser.getArg(1, umConfig);
+  //Serial.println(umConfig);
+}
+
+void MODE_Handler()
+{
+  // Serial.println("Got MODE line");
+  char *argv[16]; // Max 16 arguments
+  int argc = 0;
+  argv[argc] = strtok(msgBuf, ";,");
+  while ((argv[argc] != NULL) && (argc < 15))
+  {
+    argc++;
+    argv[argc] = strtok(NULL, ";,");
+  }
+  Serial.println(argv[10]);
+  if (strstr(argv[10], "MODE"))
+  {
+    strcpy(insCfg.mode, argv[10]);
+    glue_update_state();
+  }
+}
+
+void UNILOG_Handler()
+{
+  // Serial.println("Got UNILOGLIST");
+  if (msgBufLen > 5)
+  {
+    char *argv[16]; // Max 16 arguments
+    int argc = 0;
+    argv[argc] = strtok(msgBuf, "\t\r\n");
+    while ((argv[argc] != NULL) && (argc < 15))
+    {
+      argc++;
+      argv[argc] = strtok(NULL, "\t\r\n");
+    }
+    //Serial.println(argv[1]);
+  }
+}
 #endif // GNSSHANDLERS_H_

@@ -44,12 +44,14 @@ void serialSetup()
 void parserSetup()
 {
   // the dash means wildcard
+  nmeaParser.setHandleCRC(false);
   nmeaParser.setErrorHandler(errorHandlerNmea);
   nmeaParser.addHandler("G-GGA", GGA_Handler);
   nmeaParser.addHandler("G-GNS", GNS_Handler);
   nmeaParser.addHandler("G-VTG", VTG_Handler);
   nmeaParser.addHandler("G-HPR", HPR_Handler);
   nmeaParser.addHandler("KSXT", KSXT_Handler);
+  nmeaParser.addHandler("CONFIG", CONFIG_Handler);
 }
 
 void umparserSetup()
