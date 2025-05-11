@@ -134,6 +134,7 @@ public:
 
   //const States& state = states;
   bool isInit;
+  bool AiOSCinUse = true;
 
   MACHINE(void) {}
   ~MACHINE(void) {}
@@ -148,6 +149,11 @@ public:
     loadFromEeprom();
 
     // trigger output callback to set all outputs to OFF
+
+    if (config.pinFunction[24] == 16) {
+      AiOSCinUse = false; 
+      Serial.println(" Onboard Section Control Hello and Scan reply to AgIO disabled by setting PIN24 to section 16 in AgOpenGPS");
+    }
 
     isInit = true;
   }
@@ -291,7 +297,7 @@ public:
     {
       if (debugLevel > 3) printPgnAnnoucement(pgnData, len, (char*)"Hello from AgIO");
 
-      if (isInit) {
+      if (isInit && AiOSCinUse) {
         uint8_t helloFromMachine[] = { 0x80, 0x81, 123, 123, 5, 0, 0, 0, 0, 0, 71 };
         helloFromMachine[5] = states.sections.groupsofeight[0];
         helloFromMachine[6] = states.sections.groupsofeight[1];
@@ -300,7 +306,7 @@ public:
           if (debugLevel > 3) printPgnAnnoucement(helloFromMachine, sizeof(helloFromMachine), (char*)"Machine Reply");
         }
       } else {
-        if (debugLevel > 3) Serial.print("\r\nMachine not initialized");
+        if (debugLevel > 3) Serial.print("\r\nMachine not initialized or Hello Reply disabled by setting PIN24 to section 16 in AgOpenGPS");
       }
       if (debugLevel > 3) Serial.println();
 
@@ -313,7 +319,7 @@ public:
     {
       if (debugLevel > 2) printPgnAnnoucement(pgnData, len, (char*)"Scan Request");
 
-      if (isInit) {
+      if (isInit && AiOSCinUse) {
         if (pgnData[4] == 3 && pgnData[5] == 202 && pgnData[6] == 202) {
           IPAddress destIP = { 255, 255, 255, 255 };
           uint8_t scanReplyMachine[] = { 128, 129, 123, 203, 7,
@@ -396,6 +402,11 @@ public:
       for (uint8_t i = 5; i < len - 1; i++) {
         config.pinFunction[i - 4] = pgnData[i];     // update each pin's function from PGN (from AOG machine pin config screen)
       }
+      if (pgnData[28] == 16) {// turn off interal Section Control answering to AgIO by setting PIN24 to section 16 in AgOpenGPS
+        AiOSCinUse = false; 
+        Serial.println("Onboard Section Control answers disabled by setting PIN24 to section 16 in AgOpenGPS");
+      }
+        else AiOSCinUse = true; 
       if (tempFunction != config.pinFunction) {        // compare, if different do stuff
         if (debugLevel > 2) printPinConfig();
         saveToEeprom();
