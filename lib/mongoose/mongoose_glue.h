@@ -105,28 +105,6 @@ struct settings {
 void glue_get_settings(struct settings *);
 void glue_set_settings(struct settings *);
 
-struct ins_cfg {
-  char insEn[30];
-  char mode[30];
-  char insTOut[30];
-  char insAlVel[30];
-  char insVehDir[30];
-  char rtkTOut[30];
-  char rtkRelia[30];
-  char sigGrp[30];
-  char com1[30];
-  char com2[30];
-  char com3[30];
-  char mesg1[30];
-  char mesg2[30];
-  char mesg3[30];
-  char insInstAng[50];
-  char insLever[55];
-  char insPosOff[50];
-};
-void glue_get_ins_cfg(struct ins_cfg *);
-void glue_set_ins_cfg(struct ins_cfg *);
-
 struct kwas_cfg {
   bool kwasEn;
   double kwasInt;
@@ -138,6 +116,28 @@ struct kwas_cfg {
 };
 void glue_get_kwas_cfg(struct kwas_cfg *);
 void glue_set_kwas_cfg(struct kwas_cfg *);
+
+struct ins_cfg {
+  char insEnable[30];
+  char insMode[30];
+  char insTmOut[30];
+  char insAlnVel[30];
+  char insVehDir[30];
+  char insRtkTOut[30];
+  char insRtkRelia[30];
+  char insSigGrp[30];
+  char insCom1[30];
+  char insCom2[30];
+  char insCom3[30];
+  char insMesg1[30];
+  char insMesg2[30];
+  char insMesg3[30];
+  char insInstAng[50];
+  char insLever[55];
+  char insPosOff[50];
+};
+void glue_get_ins_cfg(struct ins_cfg *);
+void glue_set_ins_cfg(struct ins_cfg *);
 
 
 #ifdef __cplusplus

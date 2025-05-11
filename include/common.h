@@ -209,7 +209,7 @@ UM982Parser<3> umParser;
 
 // INS Variables
 
-struct INSCfgStruct
+struct InsCfgStruct
 {
   char insEn[30] = "CONFIG INS RESET";
   char mode[30] = "MODE ROVER SURVEY";
@@ -229,8 +229,8 @@ struct INSCfgStruct
   char insLever[55] = "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00";
   char insPosOff[50] = "CONFIG INSSOL OFFSET 0.00 0.00 0.00";
 };
-INSCfgStruct insCfg;
-INSCfgStruct defaultIns = insCfg;
+InsCfgStruct insCfg;
+InsCfgStruct defaultIns = insCfg;
 
 // End
 

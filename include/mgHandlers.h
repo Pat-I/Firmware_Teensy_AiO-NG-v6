@@ -37,7 +37,7 @@ void fw_get_settings(struct settings *data)
 void fw_set_ins_cfg(struct ins_cfg *data)
 {
     MG_DEBUG(("Set INS Cfg"));
-    SerialGPS1.println(data->mode);
+    SerialGPS1.println(data->insMode);
     // insCfg.eprm = data->insEprm;
     // strcpy(insCfg.enable, data->insEn);
     // insCfg.timeOut = data->insTOut;
@@ -74,7 +74,7 @@ void fw_get_ins_cfg(struct ins_cfg *data)
 {
     MG_DEBUG(("Get INS Cfg"));
     SerialGPS1.println("MODE");
-    strcpy(data->mode, insCfg.mode);
+    strcpy(data->insMode, insCfg.mode);
     // MG_DEBUG(("fw_insCfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.eprm, insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
     //           insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
     //           insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));

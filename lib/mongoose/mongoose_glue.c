@@ -36,18 +36,18 @@ void glue_set_settings(struct settings *data) {
   s_settings = *data; // Sync with your device
 }
 
-static struct ins_cfg s_ins_cfg = {"CONFIG INS RESET", "MODE ROVER SURVEY", "CONFIG INS TIMEOUT 60", "CONFIG INS ALIGNMENTVEL 1.5", "CONFIG INSDIRECTION AUTO", "CONFIG RTK TIMEOUT 120", "CONFIG RTK RELIABILITY 3 1", "CONFIG SIGNALGROUP 1", "CONFIG COM1 460800", "CONFIG COM2 460800", "CONFIG COM3 460800", "GNGGA COM3 0.1", "GPVTG COM3 0.1", "INSPVAXA COM3 0.1", "CONFIG INS ANGLE 0.00 0.00 0.00", "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00", "CONFIG INSSOL OFFSET 0.00 0.00 0.00"};
-void glue_get_ins_cfg(struct ins_cfg *data) {
-  *data = s_ins_cfg;  // Sync with your device
-}
-void glue_set_ins_cfg(struct ins_cfg *data) {
-  s_ins_cfg = *data; // Sync with your device
-}
-
 static struct kwas_cfg s_kwas_cfg = {false, 0.1, 0.5, 3, 0.1, 0.0001, 2};
 void glue_get_kwas_cfg(struct kwas_cfg *data) {
   *data = s_kwas_cfg;  // Sync with your device
 }
 void glue_set_kwas_cfg(struct kwas_cfg *data) {
   s_kwas_cfg = *data; // Sync with your device
+}
+
+static struct ins_cfg s_ins_cfg = {"CONFIG INS RESET", "MODE ROVER SURVEY", "CONFIG INS TIMEOUT 60", "CONFIG INS ALIGNMENTVEL 1.5", "CONFIG INSDIRECTION AUTO", "CONFIG RTK TIMEOUT 120", "CONFIG RTK RELIABILITY 3 1", "CONFIG SIGNALGROUP 1", "CONFIG COM1 460800", "CONFIG COM2 460800", "CONFIG COM3 460800", "GNGGA COM3 0.1", "GPVTG COM3 0.1", "INSPVAXA COM3 0.1", "CONFIG INS ANGLE 0.00 0.00 0.00", "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00", "CONFIG INSSOL OFFSET 0.00 0.00 0.00"};
+void glue_get_ins_cfg(struct ins_cfg *data) {
+  *data = s_ins_cfg;  // Sync with your device
+}
+void glue_set_ins_cfg(struct ins_cfg *data) {
+  s_ins_cfg = *data; // Sync with your device
 }
