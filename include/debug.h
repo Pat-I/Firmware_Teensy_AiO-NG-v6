@@ -26,7 +26,13 @@ void checkUSBSerial()
       Serial.print("\r\nSetting CPU usage debug: ");
       Serial.print(printCpuUsages);
     }
-
+    
+    else if (usbRead == 'a') // output WAS adc data
+    {
+      adcDebug = !adcDebug;
+      Serial.print("\r\nSetting WAS ADC value debug: ");
+      Serial.print(adcDebug);
+    }
 
     else if (usbRead == 'g' && Serial.available() > 0) // temporarily set GPS fix state according to standard GGA fix numbers (see LEDS.h, setGpsLED())
     {
@@ -85,6 +91,12 @@ void checkUSBSerial()
       }
     }
 
+    else if (usbRead == 'p') // output PWM and current sensor data
+    {
+      pwmDebug = !pwmDebug;
+      Serial.print("\r\nSetting PWM / current sensor debug: ");
+      Serial.print(pwmDebug);
+    }
 
     else if (usbRead == 'r')
     {
