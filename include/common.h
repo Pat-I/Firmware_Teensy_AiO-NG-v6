@@ -31,7 +31,7 @@ char inoVersion[] = "AiO-NG-v6.0.1";
 #define gpsStore 400      // 100 bytes
 #define machineStore 500  // 100 bytes
 #define kwasStore 600     // 100 bytes
-#define insStore 700      // 500 bytes
+#define insStore 700      // 1000 bytes
 
 // Networking variables
 struct NetConfigStruct
@@ -209,28 +209,77 @@ UM982Parser<3> umParser;
 
 // INS Variables
 
-struct InsCfgStruct
+// struct InsCfgStruct
+// {
+//   char insEn[30] = "CONFIG INS RESET";
+//   char mode[30] = "MODE ROVER SURVEY";
+//   char insTOut[30] = "CONFIG INS TIMEOUT 60";
+//   char insAlVel[30] = "CONFIG INS ALIGNMENTVEL 1.5";
+//   char insVehDir[30] = "CONFIG INSDIRECTION AUTO";
+//   char rtkTOut[30] = "CONFIG RTK TIMEOUT 120";
+//   char rtkRelia[30] = "CONFIG RTK RELIABILITY 3 1";
+//   char sigGrp[30] = "CONFIG SIGNALGROUP 1";
+//   char com1[30] = "CONFIG COM1 460800";
+//   char com2[30] = "CONFIG COM2 460800";
+//   char com3[30] = "CONFIG COM3 460800";
+//   char mesg1[30] = "GNGGA COM3 0.1";
+//   char mesg2[30] = "GPVTG COM3 0.1";
+//   char mesg3[30] = "INSPVAXA COM3 0.1";
+//   char insInstAng[50] = "CONFIG INS ANGLE 0.00 0.00 0.00";
+//   char insLever[55] = "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00";
+//   char insPosOff[50] = "CONFIG INSSOL OFFSET 0.00 0.00 0.00";
+// };
+// InsCfgStruct insCfg;
+// InsCfgStruct defaultIns = insCfg;
+
+bool insCmdStat = false;
+bool startCfgIns = false;
+uint8_t insCfgCtr = 0;
+
+char insCfg[18][55] =
 {
-  char insEn[30] = "CONFIG INS RESET";
-  char mode[30] = "MODE ROVER SURVEY";
-  char insTOut[30] = "CONFIG INS TIMEOUT 60";
-  char insAlVel[30] = "CONFIG INS ALIGNMENTVEL 1.5";
-  char insVehDir[30] = "CONFIG INSDIRECTION AUTO";
-  char rtkTOut[30] = "CONFIG RTK TIMEOUT 120";
-  char rtkRelia[30] = "CONFIG RTK RELIABILITY 3 1";
-  char sigGrp[30] = "CONFIG SIGNALGROUP 1";
-  char com1[30] = "CONFIG COM1 460800";
-  char com2[30] = "CONFIG COM2 460800";
-  char com3[30] = "CONFIG COM3 460800";
-  char mesg1[30] = "GNGGA COM3 0.1";
-  char mesg2[30] = "GPVTG COM3 0.1";
-  char mesg3[30] = "INSPVAXA COM3 0.1";
-  char insInstAng[50] = "CONFIG INS ANGLE 0.00 0.00 0.00";
-  char insLever[55] = "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00";
-  char insPosOff[50] = "CONFIG INSSOL OFFSET 0.00 0.00 0.00";
+    {"CONFIG INS RESET"},
+    {"MODE ROVER SURVEY"},
+    {"CONFIG INS TIMEOUT 60"},
+    {"CONFIG INS ALIGNMENTVEL 1.5"},
+    {"CONFIG INSDIRECTION AUTO"},
+    {"CONFIG RTK TIMEOUT 120"},
+    {"CONFIG RTK RELIABILITY 3 1"},
+    {"CONFIG SIGNALGROUP 1"},
+    {"CONFIG COM1 460800"},
+    {"CONFIG COM2 460800"},
+    {"CONFIG COM3 460800"},
+    {"GNGGA COM3 0.1"},
+    {"GPVTG COM3 0.1"},
+    {"INSPVAXA COM3 0.1"},
+    {"CONFIG INS ANGLE 0 0 0"},
+    {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
+    {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
+    {"SAVECONFIG"}
 };
-InsCfgStruct insCfg;
-InsCfgStruct defaultIns = insCfg;
+enum {insEn, insMode, insTout, insAlVel, insVehDir, insRtkTout, insRtkReli, insSigGrp, insCom1, insCom2, insCom3, insMsg1, insMsg2, insMsg3, insInstAng, insLever, insPosOff};
+
+char defaultIns[18][55] =
+{
+    {"CONFIG INS RESET"},
+    {"MODE ROVER SURVEY"},
+    {"CONFIG INS TIMEOUT 60"},
+    {"CONFIG INS ALIGNMENTVEL 1.5"},
+    {"CONFIG INSDIRECTION AUTO"},
+    {"CONFIG RTK TIMEOUT 120"},
+    {"CONFIG RTK RELIABILITY 3 1"},
+    {"CONFIG SIGNALGROUP 1"},
+    {"CONFIG COM1 460800"},
+    {"CONFIG COM2 460800"},
+    {"CONFIG COM3 460800"},
+    {"GNGGA COM3 0.1"},
+    {"GPVTG COM3 0.1"},
+    {"INSPVAXA COM3 0.1"},
+    {"CONFIG INS ANGLE 0 0 0"},
+    {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
+    {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
+    {"SAVECONFIG"}
+  };
 
 // End
 

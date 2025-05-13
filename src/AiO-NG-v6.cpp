@@ -23,7 +23,7 @@ uint8_t runCount = 0;
 
 void setup()
 {
-  delay(3000); // Delay for tesing to allow opening serial terminal to see output
+  delay(15000); // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");
@@ -32,10 +32,7 @@ void setup()
   setCpuFrequency(600 * 1000000); // Set CPU speed, default is 600mhz, setup.ino
 
   // ** IP loading & Mongoose/Eth init needs to be first **
-  ipSetup();  // Load the IP address from EEPROM and setup the gateway & broadcast addresses
-  load_gps(); // Load the GPS settings from EEPROM
-  // load_config();                  // Sync the firmware EEPROM values to the GUI
-  // set_settings();
+  storedCfgSetup(); // Loaded IP address, GPS settings, KWAS settings & INS settings from EEPROM
   ethernet_init(); // Bring up the ethernet hardware
   mongoose_init(); // Bring up the mongoose services
   udpSetup();      // Bring up the UDP connections to/from AgIO
@@ -64,6 +61,8 @@ void setup()
   mongoose_set_http_handlers("ins_cfg", fw_get_ins_cfg, fw_set_ins_cfg);
   mongoose_set_http_handlers("kwas_cfg", fw_get_kwas_cfg, fw_set_kwas_cfg);
 
+  //writeInsCfg();
+
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);
   resetStartingTimersBuffers(); // setup.ino
@@ -85,6 +84,7 @@ void loop()
   GUIusage.timeOut();
 
   gpsPoll();         // check for data on GPS1 & GPS2 UARTs
+  writeInsPoll();      // check if it is time to write the config to the INS
   serialESP32();     // check for PGN replies on ESP32 UART
   readKeyaEncoder(); // Read encoder count & speed and current
   KeyaBus_Receive(); // check for Keya data on can bus 3

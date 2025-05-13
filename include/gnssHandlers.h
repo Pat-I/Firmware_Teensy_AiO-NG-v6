@@ -528,7 +528,7 @@ void MODE_Handler()
   Serial.println(argv[10]);
   if (strstr(argv[10], "MODE"))
   {
-    strcpy(insCfg.mode, argv[10]);
+    strcpy(insCfg[insMode], argv[10]);
     glue_update_state();
   }
 }
@@ -547,6 +547,18 @@ void UNILOG_Handler()
       argv[argc] = strtok(NULL, "\t\r\n");
     }
     //Serial.println(argv[1]);
+  }
+}
+
+void CMD_Handler()
+{
+  if (strstr(msgBuf, "OK*"))
+  {
+    Serial.print("Command OK");
+  }
+  else
+  {
+    Serial.print("Command ERROR");
   }
 }
 #endif // GNSSHANDLERS_H_

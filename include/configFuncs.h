@@ -22,6 +22,16 @@ void save_default_GPS()
     EEPROM.put(gpsStore, defaultGPS);
 }
 
+void save_default_kwas()
+{
+    EEPROM.put(kwasStore, defaultKwas);
+}
+
+void save_default_ins()
+{
+    EEPROM.put(insStore, defaultIns);
+}
+
 // Write current IP to EEPROM
 void save_current_net()
 {
@@ -89,7 +99,7 @@ void load_ins()
 }
 
 // Load the IP address from EEPROM
-void ipSetup()
+void storedCfgSetup()
 {
     uint16_t eth_ee_read;
     EEPROM.get(eeVersionStore, eth_ee_read);
@@ -103,11 +113,46 @@ void ipSetup()
 
         save_default_GPS();
         Serial.print("\r\n\nWriting GPS defaults to EEPROM\r\n");
+        load_gps();
+
+        save_default_kwas();
+        Serial.print("\r\n\nWriting KWAS defaults to EEPROM\r\n");
+        load_kwas();
+
+        save_default_ins();
+        Serial.print("\r\n\nWriting INS defaults to EEPROM\r\n");
+        load_ins();
     }
     else
     {
         load_current_net();
         Serial.print("\r\n\nLoaded IP address from EEPROM\r\n");
+
+        load_gps();
+        Serial.print("\r\n\nLoaded GPS settings from EEPROM\r\n");
+
+        load_kwas();
+        Serial.print("\r\n\nLoaded KWAS settings from EEPROM\r\n");
+
+        load_ins();
+        Serial.print("\r\n\nLoaded INS settings from EEPROM\r\n");
+    }
+}
+
+void writeInsPoll()
+{
+    if (startCfgIns)
+    {
+        Serial.printf("\r\nINS Cfg Writing: %d\r\n", insCfgCtr);
+        Serial.println(insCfg[insCfgCtr]);
+        SerialGPS1.println(insCfg[insCfgCtr]);
+        //Serial.printf("Comand Status0: %d\r\n", insCmdStat);
+        if (insCfgCtr == 17)
+        {
+            startCfgIns = false;
+            insCfgCtr = 0;
+        }
+        insCfgCtr++;
     }
 }
 

@@ -37,28 +37,27 @@ void fw_get_settings(struct settings *data)
 void fw_set_ins_cfg(struct ins_cfg *data)
 {
     MG_DEBUG(("Set INS Cfg"));
-    SerialGPS1.println(data->insMode);
-    // insCfg.eprm = data->insEprm;
-    // strcpy(insCfg.enable, data->insEn);
-    // insCfg.timeOut = data->insTOut;
-    // insCfg.alVel = data->insAlVel;
-    // strcpy(insCfg.vehDir, data->insVehDir);
-    // insCfg.whlBase = data->insWhlbase;
+    strcpy(insCfg[insEn], data->insEnable);
+    strcpy(insCfg[insMode], data->insMode);
+    strcpy(insCfg[insTout], data->insTmOut);
+    strcpy(insCfg[insAlVel], data->insAlnVel);
+    strcpy(insCfg[insVehDir], data->insVehDir);
+    strcpy(insCfg[insRtkTout], data->insRtkTOut);
+    strcpy(insCfg[insRtkReli], data->insRtkRelia);
+    strcpy(insCfg[insSigGrp], data->insSigGrp);
+    strcpy(insCfg[insCom1], data->insCom1);
+    strcpy(insCfg[insCom2], data->insCom2);
+    strcpy(insCfg[insCom3], data->insCom3);
+    strcpy(insCfg[insMsg1], data->insMesg1);
+    strcpy(insCfg[insMsg2], data->insMesg2);
+    strcpy(insCfg[insMsg3], data->insMesg3);
+    strcpy(insCfg[insInstAng], data->insInstAng);
+    strcpy(insCfg[insLever], data->insLever);
+    strcpy(insCfg[insPosOff], data->insPosOff);
 
-    // insCfg.instAglX = data->insInstAngX;
-    // insCfg.instAglY = data->insInstAngY;
-    // insCfg.instAglZ = data->insInstAngZ;
+    save_ins();
 
-    // insCfg.levArmX = data->insLevX;
-    // insCfg.levArmY = data->insLevY;
-    // insCfg.levArmZ = data->insLevZ;
-    // insCfg.levArmA = data->insLevA;
-    // insCfg.levArmB = data->insLevB;
-    // insCfg.levArmC = data->insLevC;
-
-    // insCfg.posOffX = data->insPosOffX;
-    // insCfg.posOffY = data->insPosOffY;
-    // insCfg.posOffZ = data->insPosOffZ;
+    startCfgIns = true;
 
     // MG_DEBUG(("set_ins_cfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEprm, data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
     //           data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
@@ -73,34 +72,28 @@ void fw_set_ins_cfg(struct ins_cfg *data)
 void fw_get_ins_cfg(struct ins_cfg *data)
 {
     MG_DEBUG(("Get INS Cfg"));
-    SerialGPS1.println("MODE");
-    strcpy(data->insMode, insCfg.mode);
+
     // MG_DEBUG(("fw_insCfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", insCfg.eprm, insCfg.enable, insCfg.timeOut, insCfg.alVel, insCfg.vehDir, insCfg.whlBase,
     //           insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
     //           insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
 
-    
-    // data->insEprm = insCfg.eprm;
-    // strcpy(data->insEn, insCfg.enable);
-    // data->insTOut = insCfg.timeOut;
-    // data->insAlVel = insCfg.alVel;
-    // strcpy(data->insVehDir, insCfg.vehDir);
-    // data->insWhlbase = insCfg.whlBase;
-
-    // data->insInstAngX = insCfg.instAglX;
-    // data->insInstAngY = insCfg.instAglY;
-    // data->insInstAngZ = insCfg.instAglZ;
-
-    // data->insLevX = insCfg.levArmX;
-    // data->insLevY = insCfg.levArmY;
-    // data->insLevZ = insCfg.levArmZ;
-    // data->insLevA = insCfg.levArmA;
-    // data->insLevB = insCfg.levArmB;
-    // data->insLevC = insCfg.levArmC;
-
-    // data->insPosOffX = insCfg.posOffX;
-    // data->insPosOffY = insCfg.posOffY;
-    // data->insPosOffZ = insCfg.posOffZ;
+    strcpy(data->insEnable, insCfg[insEn]);
+    strcpy(data->insMode, insCfg[insMode]);
+    strcpy(data->insTmOut, insCfg[insTout]);
+    strcpy(data->insAlnVel, insCfg[insAlVel]);
+    strcpy(data->insVehDir, insCfg[insVehDir]);
+    strcpy(data->insRtkTOut, insCfg[insRtkTout]);
+    strcpy(data->insRtkRelia, insCfg[insRtkReli]);
+    strcpy(data->insSigGrp, insCfg[insSigGrp]);
+    strcpy(data->insCom1, insCfg[insCom1]);
+    strcpy(data->insCom2, insCfg[insCom2]);
+    strcpy(data->insCom3, insCfg[insCom3]);
+    strcpy(data->insMesg1, insCfg[insMsg1]);
+    strcpy(data->insMesg2, insCfg[insMsg2]);
+    strcpy(data->insMesg3, insCfg[insMsg3]);
+    strcpy(data->insInstAng, insCfg[insInstAng]);
+    strcpy(data->insLever, insCfg[insLever]);
+    strcpy(data->insPosOff, insCfg[insPosOff]);
 
     // MG_DEBUG(("get_ins_cfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEprm, data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
     //           data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,

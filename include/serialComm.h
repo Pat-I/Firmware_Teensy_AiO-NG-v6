@@ -85,20 +85,20 @@ void gpsPoll()
           }
         }
 
-        else if (strstr(msgBuf, "$CON")) // Parse a UM98x configuration line using the NMEA parser
-        {
-          for (u_int16_t i = 0; i < msgBufLen; i++)
-          {
-            //Serial.write(msgBuf[i]);
-            nmeaParser << msgBuf[i];
-          }
-        }
-
-        else if (strstr(msgBuf, "#I")) // Parse a UM98x Unicore message using the um982 parser
+        else if (strstr(msgBuf, "#IN")) // Parse a UM98x Unicore message using the um982 parser
         {
           for (u_int16_t i = 0; i < msgBufLen; i++)
           {
             umParser << msgBuf[i];
+          }
+        }
+
+        else if (strstr(msgBuf, "$CON")) // Parse a UM98x configuration line using the NMEA parser
+        {
+          for (u_int16_t i = 0; i < msgBufLen; i++)
+          {
+            // Serial.write(msgBuf[i]);
+            nmeaParser << msgBuf[i];
           }
         }
 
@@ -110,6 +110,26 @@ void gpsPoll()
         else if (strstr(msgBuf, "<")) // Process a UM98x UNILOGLIST query response
         {
           UNILOG_Handler();
+        }
+
+        else if (strstr(msgBuf, "$com")) // Process config command responses
+        {
+          //Serial.println(msgBuf);
+          //Serial.println(msgBufLen);
+          //Serial.printf("Comand Status: %d\r\n", insCmdStat);
+          if (strstr(msgBuf, "OK*"))
+          {
+            insCmdStat = true;
+            Serial.println("Command Good");
+            //Serial.printf("Comand Status1: %d\r\n", insCmdStat);
+          }
+          else
+          {
+            insCmdStat = false;
+            Serial.println("Command Error");
+            Serial.print(msgBuf);
+          }
+          //Serial.printf("Comand Status: %d\r\n", insCmdStat);
         }
 
         gotCR = false;
