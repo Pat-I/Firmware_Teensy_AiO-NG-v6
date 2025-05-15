@@ -14,17 +14,16 @@
    Like all Arduino code - copied from somewhere else :)
    So don't claim it as your own
 */
-const uint8_t PWM_Frequency = 3;
+const uint8_t PWM_Frequency = 4; // 0=490Hz, 1=122Hz, 2=3921Hz, 3=9155Hz, 4=18310Hz
 const float LOW_HIGH_DEGREES = 3.0; // How many degrees before decreasing Max PWM
 
 bool testBothWasSensors = false;
-bool adcDebug = false;
 bool useInternalADC = true;   // v5.0 Proto only uses Teensy ADC
 bool useExternalADS = false;
 
 #include <EEPROM.h>
 
-uint32_t autoSteerLastTime, currentTime;
+uint32_t autoSteerLastTime, currentTime, steerStateONTime = 0;
 elapsedMillis autoSteerUpdateTimer;
 
 void calcSteeringPID(void);
@@ -111,6 +110,11 @@ void autosteerSetup()
     analogWriteFrequency(PWM1_PIN, 9155);
     analogWriteFrequency(PWM2_PIN, 9155);
   }
+    else if (PWM_Frequency == 4) 
+  {
+    analogWriteFrequency(PWM1_PIN, 18310);
+    analogWriteFrequency(PWM2_PIN, 18310);
+  }
 
   pinMode(SLEEP_PIN, OUTPUT);
   digitalWrite(SLEEP_PIN, LOW); // keep DRV8701 Cytron asleep
@@ -171,7 +175,8 @@ void autoSteerUpdate()
       // Switch is off so reset ready for next switch on
       if (reading == HIGH) {
         steerState = 1;
-        prevSteerReading = reading;
+        if (prevSteerReading != reading) steerStateONTime = 0;
+        prevSteerReading = reading;        
       }
     }
 
@@ -179,6 +184,7 @@ void autoSteerUpdate()
     if (guidanceStatusChanged) {
       if (guidanceStatus == 1) {  //Must have changed Off >> On
         steerState = 0;
+        steerStateONTime = millis();
       }
     }
 
@@ -188,6 +194,7 @@ void autoSteerUpdate()
     if (steerState == 0 && guidanceStatus == 0) {
       if (switchCounter++ > 30) {
         steerState = 1;
+        steerStateONTime = 0;
       }
     } else {
       switchCounter = 0;
@@ -196,7 +203,10 @@ void autoSteerUpdate()
     // Arduino software button code
     if (reading == LOW && prevSteerReading == HIGH) {
       steerState = !steerState;
+      if (steerState) steerStateONTime = 0;
+      else steerStateONTime = millis();
     }
+      
     prevSteerReading = reading;
 
 
@@ -290,6 +300,7 @@ void autoSteerUpdate()
       {
         steerState = 1; // reset values like it turned off
         prevSteerReading = 1;
+        steerStateONTime = 0;
       }
       //Serial << "\r\npulseCount:" << pulseCount << " limit:" << steerConfig.PulseCountMax;
     }
@@ -306,6 +317,7 @@ void autoSteerUpdate()
       {                 // if reading exceeds kickout setpoint
         steerState = 1; // turn OFF autoSteer
         prevSteerReading = 1;
+        steerStateONTime = 0;
       }
     }
 
@@ -326,6 +338,7 @@ void autoSteerUpdate()
         if (sensorReading >= steerConfig.PulseCountMax)
         {
           steerState = 1; // turn OFF autoSteer
+          steerStateONTime = 0;
           prevSteerReading = steerState;
         }
       }
@@ -389,11 +402,17 @@ void autoSteerUpdate()
       steerAngleActual = (steerAngleActual * steerSettings.AckermanFix); // Ackerman fix
     steerAngleError = steerAngleActual - steerAngleSetPoint;             // calculate the steering error
     // if (abs(steerAngleError)< steerSettings.lowPWM) steerAngleError = 0;
+    
+    if (adcDebug) {
+        Serial.print(" cor. steerPos: "); Serial.print(steeringPosition);
+        Serial.print(" act. steerAngle: "); Serial.println(steerAngleActual);
+    }
 
     // If connection lost to AgOpenGPS, the watchdog will count up and turn off steering
     if (watchdogTimer++ > 250) {
       watchdogTimer = WATCHDOG_FORCE_VALUE;
       steerState = 1; // reset values like it turned off
+      steerStateONTime = 0;
     }
 
     //Serial.print("\r\nAS wd: "); Serial.print(watchdogTimer);
@@ -408,6 +427,34 @@ void autoSteerUpdate()
 #endif
 
       calcSteeringPID(); // do the pid
+
+      // ramp up PWM at first start for about 1 sec, set in HW. Very usefull when using auto move line to center when engageing steering
+      if (steerStateONTime != 0)
+      {
+        float steerTimeSinceStart = millis() - steerStateONTime;
+        if ((steerTimeSinceStart < SteerPWMonStartRampTime) && (!steerConfig.IsDanfoss))
+        {
+          pwmDrive = pwmDrive * (steerTimeSinceStart / SteerPWMonStartRampTime);
+        }
+        else
+          steerStateONTime = 0;
+      }
+
+      if (pwmDebug) {
+        Serial.print("PWM (av.): ");
+        Serial.print(pwmDrive);
+        Serial.print(" PWMDis(abs, unfi): ");
+        Serial.print(pwmDisplay);
+        Serial.print(" kickout cur: ");
+        Serial.print(steerConfig.PulseCountMax);
+        Serial.print(" cur sens(unfi): ");
+       // Serial.print(sensorSample);
+        Serial.print(" sens by PWM: ");
+        //Serial.print(sensorReadingPWM);
+        Serial.print(" sens by PWM av: ");
+        Serial.println(sensorReading);
+      }
+
       motorDrive();      // out to motors the pwm value
 
       LEDs.set(LED_ID::STEER, STEER_STATE::AUTOSTEER_ACTIVE, true);
