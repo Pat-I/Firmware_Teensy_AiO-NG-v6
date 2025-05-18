@@ -124,8 +124,9 @@ uint8_t aog2Count = 0;
 uint8_t xte = 0;
 
 // pwm variables
-int16_t pwmDrive = 0, pwmDisplay = 0;
+int16_t pwmDrive = 0, pwmDisplay = 0, SteerPWMonStartRampTime = 1000;
 float highLowPerDeg = 0;
+bool pwmDebug = false;
 
 // Variables for settings
 struct SteerSettingsStruct
@@ -150,6 +151,7 @@ int16_t lastEnc = -999;
 bool autoSteerEnabled = false;
 float steerAngleActual = 0;
 int16_t steeringPosition = 0; // from steering sensor (WAS)
+bool adcDebug = false;
 // End
 
 // Switches/Sensors
