@@ -38,6 +38,7 @@ void setup()
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);
 
+  checkUM98x();         // Check for presence of UM98x GPS
   serialSetup();        // Configure the Serial comms
   parserSetup();        // Load the NMEA parser callbacks
   umparserSetup();      // Load Unicore parser callbacks
@@ -81,7 +82,7 @@ void loop()
   readKeyaEncoder(); // Read encoder count & speed and current
   KeyaBus_Receive(); // check for Keya data on can bus 3
   FOOusage.timeOut();
-  
+
   autoSteerUpdate(); // run autosteer loop
   serialRTCM();      // check for RTCM data on Xbee/Radio UART
 

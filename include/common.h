@@ -163,6 +163,22 @@ const int16_t ANALOG_TRIG_THRES = 100;
 const uint8_t ANALOG_TRIG_HYST = 10;
 // End
 
+// UM98x detection variables
+uint32_t baudrates[]{
+    460800,
+    115200,
+    921600
+};
+const uint32_t nrBaudrates = sizeof(baudrates) / sizeof(baudrates[0]);
+
+bool gotUM981 = false;
+bool gotUM982 = false;
+
+const int tmp_serial_buffer_size = 2048;
+uint8_t tmpGPSrxbuffer[tmp_serial_buffer_size]; // Temp serial rx buffer for detecting / configuring the UM982
+uint8_t tmpGPStxbuffer[tmp_serial_buffer_size]; // Temp serial tx buffer for detecting / configuring the UM982
+// End
+
 // GNSS processing and variables
 #include "NMEA.h"
 NMEAParser<7> nmeaParser;

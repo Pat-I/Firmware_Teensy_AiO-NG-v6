@@ -77,6 +77,8 @@ void fw_get_ins_cfg(struct ins_cfg *data)
     //           insCfg.instAglX, insCfg.instAglY, insCfg.instAglZ, insCfg.levArmX, insCfg.levArmY, insCfg.levArmZ, insCfg.levArmA, insCfg.levArmB, insCfg.levArmC,
     //           insCfg.posOffX, insCfg.posOffY, insCfg.posOffZ));
 
+    load_ins();
+
     strcpy(data->insEnable, insCfg[insEn]);
     strcpy(data->insMode, insCfg[insMode]);
     strcpy(data->insTmOut, insCfg[insTout]);
