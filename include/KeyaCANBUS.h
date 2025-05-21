@@ -105,6 +105,12 @@ void keyaCommand(uint8_t command[])
 // KWAS read encoder
 void readKeyaEncoder()
 {
+  static uint32_t keyaEnCheckTime;
+  uint32_t millisEnNow = millis();
+  if (millisEnNow < keyaEnCheckTime)
+    return; // only need to check for new data every ms, not 100s of times per ms
+  // Serial.print((String)"\r\n" + millisNow + " KEYA check " + keyaCheckTime);
+  keyaEnCheckTime = millisEnNow + 1; // allow check every ms
   if (keyaDetected)
   {
     uint8_t remain = (systick_millis_count - keyaCommandTime) % 30;
@@ -183,12 +189,11 @@ void KeyaBus_Receive()
   // Serial.print((String)"\r\n" + millisNow + " KEYA check " + keyaCheckTime);
   keyaCheckTime = millisNow + 1; // allow check every ms
 
-  KEYAusage.timeIn();
   CAN_message_t KeyaBusReceiveData;
   if (Keya_Bus.read(KeyaBusReceiveData))
   {
     // parse the different message types
-
+    
     // heartbeat 00:07:00:00:00:00:00:[ID]
     if (KeyaBusReceiveData.id == 0x07000001)
     {
@@ -332,7 +337,6 @@ void KeyaBus_Receive()
         }
       }
     }
-
     // parse query/command 00:05:08:00:00:00:00:[ID] responses
     if (KeyaBusReceiveData.id == 0x05800001)
     {
@@ -522,6 +526,7 @@ void KeyaBus_Receive()
         printIdAndReply(KeyaBusReceiveData.id, KeyaBusReceiveData.buf);
         Serial.print(" unknown reply ");
       }
+
     }
 
     if (lnNeeded)
@@ -531,7 +536,6 @@ void KeyaBus_Receive()
     }
   }
 
-  KEYAusage.timeOut();
 }
 
 #endif // KEYACANBUS_H_

@@ -25,7 +25,7 @@ void checkUSBSerial()
       Serial.print("\r\nSetting CPU usage debug: ");
       Serial.print(printCpuUsages);
     }
-    
+
     else if (usbRead == 'a') // output WAS adc data
     {
       adcDebug = !adcDebug;
@@ -375,6 +375,8 @@ void printTelem()
 
     Serial.print("\r\nGUI    cpu: ");
     printCpuPercent(GUIusage.reportAve(baselineProcUsage));
+    Serial.print("\r\nKEYA   cpu: ");
+    printCpuPercent(FOOusage.reportAve(baselineProcUsage));
     Serial.print("\r\nBNO_R  cpu: ");
     printCpuPercent(BNOusage.reportAve(baselineProcUsage));
     Serial.print("\r\nGPS1   cpu: ");
@@ -402,8 +404,8 @@ void printTelem()
     // printCpuPercent(MACHusage.reportAve());
     Serial.print("\r\nESP32  cpu: ");
     printCpuPercent(ESP32usage.reportAve(baselineProcUsage));
-    Serial.print("\r\nKEYA   cpu: ");
-    printCpuPercent(KEYAusage.reportAve(baselineProcUsage));
+    // Serial.print("\r\nKEYA   cpu: ");
+    // printCpuPercent(KEYAusage.reportAve(baselineProcUsage));
 
 #ifdef AIOv50a
     Serial.print("\r\nRS232  cpu: ");

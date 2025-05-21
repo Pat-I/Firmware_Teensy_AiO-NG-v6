@@ -79,27 +79,17 @@ void gpsPoll()
 
         else if (strstr(msgBuf, "$G")) // Parse a regular NMEA GPS sentence
         {
-          for (u_int16_t i = 0; i < msgBufLen; i++)
-          {
-            nmeaParser << msgBuf[i];
-          }
+          NMEA_Handler();
         }
 
         else if (strstr(msgBuf, "#IN")) // Parse a UM98x Unicore message using the um982 parser
         {
-          for (u_int16_t i = 0; i < msgBufLen; i++)
-          {
-            umParser << msgBuf[i];
-          }
+          UM_Handler();
         }
 
         else if (strstr(msgBuf, "$CON")) // Parse a UM98x configuration line using the NMEA parser
         {
-          for (u_int16_t i = 0; i < msgBufLen; i++)
-          {
-            // Serial.write(msgBuf[i]);
-            nmeaParser << msgBuf[i];
-          }
+          NMEA_Handler();
         }
 
         else if (strstr(msgBuf, "#MO")) // Process a UM98x MODE config query response
@@ -114,22 +104,7 @@ void gpsPoll()
 
         else if (strstr(msgBuf, "$com")) // Process config command responses
         {
-          //Serial.println(msgBuf);
-          //Serial.println(msgBufLen);
-          //Serial.printf("Comand Status: %d\r\n", insCmdStat);
-          if (strstr(msgBuf, "OK*"))
-          {
-            insCmdStat = true;
-            Serial.println("Command Good");
-            //Serial.printf("Comand Status1: %d\r\n", insCmdStat);
-          }
-          else
-          {
-            insCmdStat = false;
-            Serial.println("Command Error");
-            Serial.print(msgBuf);
-          }
-          //Serial.printf("Comand Status: %d\r\n", insCmdStat);
+          CMD_Handler();
         }
 
         gotCR = false;
@@ -231,12 +206,7 @@ void serialESP32()
     static uint8_t incomingIndex;
     incomingBytes[incomingIndex] = SerialESP32.read();
     incomingIndex++;
-    // Serial.print("\r\nindex: "); Serial.print(incomingIndex);
-    // Serial.print(" ");
-    // for (byte i = 0; i < incomingIndex; i++) {
-    // Serial.print(incomingBytes[i]);
-    // Serial.print(" ");
-    //}
+
     if (incomingBytes[incomingIndex - 2] == 13 && incomingBytes[incomingIndex - 1] == 10)
     {
       if (incomingBytes[0] == 128 && incomingBytes[1] == 129)
@@ -244,14 +214,6 @@ void serialESP32()
 
         // Modules--Wifi:9999-->ESP32--serial-->Teensy--ethernet:9999-->AgIO
         sendUDPbytes(incomingBytes, incomingIndex - 2);
-
-        // pass data to USB for debug
-        /*Serial.print("\r\nE32-s->T41-e:9999->AgIO ");
-        for (byte i = 0; i < incomingIndex - 2; i++) {
-          Serial.print(incomingBytes[i]);
-          Serial.print(" ");
-        }
-        Serial.print((String)" (" + SerialESP32.available() + ")");*/
       }
       else
       {
@@ -276,9 +238,6 @@ void serialRTCM()
     uint8_t rtcmByte = SerialRTK.read();
     if (!USB1DTR)
       SerialGPS1.write(rtcmByte); // send to GPS1
-    // only send to GPS2 if using abnormal setup like OGX receiver on GPS2
-    // if (!USB2DTR)
-    // SerialGPS2.write(rtcmByte); // send to GPS2
     LEDs.queueBlueFlash(LED_ID::GPS);
   }
 }

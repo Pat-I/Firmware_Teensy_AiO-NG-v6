@@ -55,6 +55,7 @@ LEDS LEDs = LEDS(1000, 16, 4, 8);
 
 // Usage stats
 ProcessorUsage GUIusage((char *)"GUI   ");
+ProcessorUsage FOOusage((char *)"KEY   ");
 ProcessorUsage BNOusage((char *)"BNO   ");
 ProcessorUsage GPS1usage((char *)"GPS1  ");
 ProcessorUsage GPS2usage((char *)"GPS2  ");
@@ -72,7 +73,7 @@ ProcessorUsage DACusage((char *)"DAC   ");
 ProcessorUsage MACHusage((char *)"MACH  ");
 ProcessorUsage LEDSusage((char *)"LEDS  ");
 ProcessorUsage ESP32usage((char *)"ESP32 ");
-ProcessorUsage KEYAusage((char *)"KEYA  ");
+//ProcessorUsage KEYAusage((char *)"KEYA  ");
 /*const uint8_t numCpuUsageTasks = 18;
 ProcessorUsage *cpuUsageArray[numCpuUsageTasks] = {
     &BNOusage, &GPS1usage, &GPS2usage, &PGNusage, &ASusage, &NTRIPusage,
@@ -235,53 +236,70 @@ UM982Parser<3> umParser;
 // InsCfgStruct defaultIns = insCfg;
 
 bool insCmdStat = false;
-bool startCfgIns = false;
+bool insCfgStart = false;
 uint8_t insCfgCtr = 0;
 
 char insCfg[18][55] =
+    {
+        {"CONFIG INS RESET"},
+        {"MODE ROVER SURVEY"},
+        {"CONFIG INS TIMEOUT 60"},
+        {"CONFIG INS ALIGNMENTVEL 1.5"},
+        {"CONFIG INSDIRECTION AUTO"},
+        {"CONFIG RTK TIMEOUT 120"},
+        {"CONFIG RTK RELIABILITY 3 1"},
+        {"CONFIG SIGNALGROUP 1"},
+        {"CONFIG COM1 460800"},
+        {"CONFIG COM2 460800"},
+        {"CONFIG COM3 460800"},
+        {"GNGGA COM3 0.1"},
+        {"GPVTG COM3 0.1"},
+        {"INSPVAXA COM3 0.1"},
+        {"CONFIG INS ANGLE 0 0 0"},
+        {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
+        {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
+        {"SAVECONFIG"}};
+enum
 {
-    {"CONFIG INS RESET"},
-    {"MODE ROVER SURVEY"},
-    {"CONFIG INS TIMEOUT 60"},
-    {"CONFIG INS ALIGNMENTVEL 1.5"},
-    {"CONFIG INSDIRECTION AUTO"},
-    {"CONFIG RTK TIMEOUT 120"},
-    {"CONFIG RTK RELIABILITY 3 1"},
-    {"CONFIG SIGNALGROUP 1"},
-    {"CONFIG COM1 460800"},
-    {"CONFIG COM2 460800"},
-    {"CONFIG COM3 460800"},
-    {"GNGGA COM3 0.1"},
-    {"GPVTG COM3 0.1"},
-    {"INSPVAXA COM3 0.1"},
-    {"CONFIG INS ANGLE 0 0 0"},
-    {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
-    {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
-    {"SAVECONFIG"}
+  insEn,
+  insMode,
+  insTout,
+  insAlVel,
+  insVehDir,
+  insRtkTout,
+  insRtkReli,
+  insSigGrp,
+  insCom1,
+  insCom2,
+  insCom3,
+  insMsg1,
+  insMsg2,
+  insMsg3,
+  insInstAng,
+  insLever,
+  insPosOff
 };
-enum {insEn, insMode, insTout, insAlVel, insVehDir, insRtkTout, insRtkReli, insSigGrp, insCom1, insCom2, insCom3, insMsg1, insMsg2, insMsg3, insInstAng, insLever, insPosOff};
 
 char defaultIns[18][55] =
-{
-    {"CONFIG INS RESET"},
-    {"MODE ROVER SURVEY"},
-    {"CONFIG INS TIMEOUT 60"},
-    {"CONFIG INS ALIGNMENTVEL 1.5"},
-    {"CONFIG INSDIRECTION AUTO"},
-    {"CONFIG RTK TIMEOUT 120"},
-    {"CONFIG RTK RELIABILITY 3 1"},
-    {"CONFIG SIGNALGROUP 1"},
-    {"CONFIG COM1 460800"},
-    {"CONFIG COM2 460800"},
-    {"CONFIG COM3 460800"},
-    {"GNGGA COM3 0.1"},
-    {"GPVTG COM3 0.1"},
-    {"INSPVAXA COM3 0.1"},
-    {"CONFIG INS ANGLE 0 0 0"},
-    {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
-    {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
-    {"SAVECONFIG"}
-  };
+    {
+        {"CONFIG INS RESET"},
+        {"MODE ROVER SURVEY"},
+        {"CONFIG INS TIMEOUT 60"},
+        {"CONFIG INS ALIGNMENTVEL 1.5"},
+        {"CONFIG INSDIRECTION AUTO"},
+        {"CONFIG RTK TIMEOUT 120"},
+        {"CONFIG RTK RELIABILITY 3 1"},
+        {"CONFIG SIGNALGROUP 1"},
+        {"CONFIG COM1 460800"},
+        {"CONFIG COM2 460800"},
+        {"CONFIG COM3 460800"},
+        {"GNGGA COM3 0.1"},
+        {"GPVTG COM3 0.1"},
+        {"INSPVAXA COM3 0.1"},
+        {"CONFIG INS ANGLE 0 0 0"},
+        {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
+        {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
+        {"SAVECONFIG"}};
 
 // End
 
@@ -289,8 +307,8 @@ char defaultIns[18][55] =
 struct KwasConfigStruct
 {
   bool useKalmanForSensor = true;
-  float intervalINS = 0.1;         // 0.1 or 0.05 -> 10 or 20 Hz
-  float minSpeedKalman = 0.5;      // m /s
+  float intervalINS = 0.1;       // 0.1 or 0.05 -> 10 or 20 Hz
+  float minSpeedKalman = 0.5;    // m /s
   int secondsVarianceBuffer = 3; // pay attention to max varianceBuffer len in zKalmanKeya
   float kalmanR = 0.1;
   float kalmanQ = 0.0001;

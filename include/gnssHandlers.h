@@ -452,15 +452,10 @@ void HPR_Handler()
 
   if (nmeaDebug)
   {
-    // Serial.print("\r\n");
     Serial.print(millis());
     Serial.printf(" HPR update "); //(%i)", headingMissed);
-    // Serial.print(headingTimer); Serial.print(" ");
     Serial.println(atoi(&fixTime[strlen(fixTime) - 2]));
   }
-
-  // headingTimer = 0;
-  // hprReady = 1;
 
   NMEA_Pusage.timeOut();
 }
@@ -476,29 +471,13 @@ void KSXT_Handler()
     convertedPosQual = 5; // convert UM982 "KSXT FLOAT" to "GGA FLOAT"
   if (convertedPosQual == 3)
     convertedPosQual = 4; // convert UM982 "KSXT RTK FIX" to "GGA RTK FIX"
+  
   LEDs.setGpsLED(convertedPosQual, true);
-
-  /*Serial.print("\r\nKSXT Pos Qual: ");
-  Serial.print(KSXTposqual);
-
-  nmeaParser.getArg(10, KSXTposqual);    // KSXT Heading Quality
-  Serial.print(" Hdg Qual: ");
-  Serial.print(KSXTposqual);
-
-  nmeaParser.getArg(11, KSXTposqual);    // KSXT Num Slave SVs
-  Serial.print(" Slave SVs: ");
-  Serial.print(KSXTposqual);
-
-  nmeaParser.getArg(12, KSXTposqual);    // KSXT Num Master SVs
-  Serial.print(" Master SVs: ");
-  Serial.print(KSXTposqual);*/
-
   LEDs.toggleTeensyLED();
 }
 
 void INSPVAXA_Handler()
 {
-  //Serial.println("Got INSP");
   umParser.getArg(9, INS.status);
   umParser.getArg(11, INS.latitude);
   umParser.getArg(12, INS.longitude);
@@ -507,16 +486,44 @@ void INSPVAXA_Handler()
   umParser.getArg(20, INS.heading);
 }
 
+void NMEA_Handler()
+{
+  for (u_int16_t i = 0; i < msgBufLen; i++)
+  {
+    nmeaParser << msgBuf[i];
+  }
+}
+
+void UM_Handler()
+{
+  for (u_int16_t i = 0; i < msgBufLen; i++)
+  {
+    umParser << msgBuf[i];
+  }
+}
+
+void CMD_Handler()
+{
+  if (strstr(msgBuf, "OK*"))
+  {
+    insCmdStat = true;
+    MG_DEBUG(("Command OK: %s", msgBuf));
+  }
+  else
+  {
+    insCmdStat = false;
+    MG_DEBUG(("Command Error: %s", msgBuf));
+  }
+}
+
 void CONFIG_Handler()
 {
   char umConfig[100];
   nmeaParser.getArg(1, umConfig);
-  //Serial.println(umConfig);
 }
 
 void MODE_Handler()
 {
-  // Serial.println("Got MODE line");
   char *argv[16]; // Max 16 arguments
   int argc = 0;
   argv[argc] = strtok(msgBuf, ";,");
@@ -535,7 +542,6 @@ void MODE_Handler()
 
 void UNILOG_Handler()
 {
-  // Serial.println("Got UNILOGLIST");
   if (msgBufLen > 5)
   {
     char *argv[16]; // Max 16 arguments
@@ -546,19 +552,6 @@ void UNILOG_Handler()
       argc++;
       argv[argc] = strtok(NULL, "\t\r\n");
     }
-    //Serial.println(argv[1]);
-  }
-}
-
-void CMD_Handler()
-{
-  if (strstr(msgBuf, "OK*"))
-  {
-    Serial.print("Command OK");
-  }
-  else
-  {
-    Serial.print("Command ERROR");
   }
 }
 #endif // GNSSHANDLERS_H_

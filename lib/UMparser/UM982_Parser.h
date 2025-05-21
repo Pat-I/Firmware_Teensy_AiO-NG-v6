@@ -362,7 +362,7 @@ public:
       mCRCBufIndex = 0;
       memset(mCRCBuffer, 0, kSentenceMaxSize);
       memset(mBuffer, 0, kSentenceMaxSize);
-      memset(mArgArray, 0, 100);
+      memset(mArgArray, 0, sizeof(mArgArray));
       mCRC32Index = 0;
       mArgIndex = 0;
       mError = UM982::NO_ERROR;

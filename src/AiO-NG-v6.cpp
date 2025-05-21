@@ -17,13 +17,12 @@
 #include "AutosteerPID.h"
 #include "serialComm.h"
 
-
 elapsedMillis configTimer = 0;
 uint8_t runCount = 0;
 
 void setup()
 {
-  delay(15000); // Delay for tesing to allow opening serial terminal to see output
+  delay(3000); // Delay for tesing to allow opening serial terminal to see output
   Serial.begin(115200);
   Serial.print("\r\n\n\n*********************\r\nStarting setup...\r\n");
   Serial.print("Firmware version: ");
@@ -33,9 +32,9 @@ void setup()
 
   // ** IP loading & Mongoose/Eth init needs to be first **
   storedCfgSetup(); // Loaded IP address, GPS settings, KWAS settings & INS settings from EEPROM
-  ethernet_init(); // Bring up the ethernet hardware
-  mongoose_init(); // Bring up the mongoose services
-  udpSetup();      // Bring up the UDP connections to/from AgIO
+  ethernet_init();  // Bring up the ethernet hardware
+  mongoose_init();  // Bring up the mongoose services
+  udpSetup();       // Bring up the UDP connections to/from AgIO
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);
 
@@ -61,7 +60,7 @@ void setup()
   mongoose_set_http_handlers("ins_cfg", fw_get_ins_cfg, fw_set_ins_cfg);
   mongoose_set_http_handlers("kwas_cfg", fw_get_kwas_cfg, fw_set_kwas_cfg);
 
-  //writeInsCfg();
+  // writeInsCfg();
 
   Serial.println("\r\n\nEnd of setup, waiting for GPS...\r\n");
   delay(1);
@@ -70,24 +69,19 @@ void setup()
 
 void loop()
 {
-  // if (configTimer >= 2000 && g_mgr.ifp->state != MG_TCPIP_STATE_READY && runCount < 3)
-  // {
-  //   configTimer = 0;
-  //   runCount++;
-  //   //SerialGPS1.write("CONFIG\r\n");
-  //   //SerialGPS1.write("UNILOGLIST\r\n");
-  //   SerialGPS1.write("MODE\r\n");
-  // }
-
   GUIusage.timeIn(); // *usage objects are used to track cpu usage on certain sections of code, see debug.h or misc.h
   mongoose_poll();   // update all Mongoose processes, UDP/PGN/Web UI
   GUIusage.timeOut();
 
   gpsPoll();         // check for data on GPS1 & GPS2 UARTs
-  writeInsPoll();      // check if it is time to write the config to the INS
+  insWritePoll();    // check if it is time to write the config to the INS
   serialESP32();     // check for PGN replies on ESP32 UART
+
+  FOOusage.timeIn();
   readKeyaEncoder(); // Read encoder count & speed and current
   KeyaBus_Receive(); // check for Keya data on can bus 3
+  FOOusage.timeOut();
+  
   autoSteerUpdate(); // run autosteer loop
   serialRTCM();      // check for RTCM data on Xbee/Radio UART
 

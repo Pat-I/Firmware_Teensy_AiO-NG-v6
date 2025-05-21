@@ -139,9 +139,9 @@ void storedCfgSetup()
     }
 }
 
-void writeInsPoll()
+void insWritePoll()
 {
-    if (startCfgIns)
+    if (insCfgStart)
     {
         Serial.printf("\r\nINS Cfg Writing: %d\r\n", insCfgCtr);
         Serial.println(insCfg[insCfgCtr]);
@@ -149,7 +149,7 @@ void writeInsPoll()
         //Serial.printf("Comand Status0: %d\r\n", insCmdStat);
         if (insCfgCtr == 17)
         {
-            startCfgIns = false;
+            insCfgStart = false;
             insCfgCtr = 0;
         }
         insCfgCtr++;

@@ -57,7 +57,7 @@ void fw_set_ins_cfg(struct ins_cfg *data)
 
     save_ins();
 
-    startCfgIns = true;
+    insCfgStart = true;
 
     // MG_DEBUG(("set_ins_cfg: %d,%s,%d,%f,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", data->insEprm, data->insEn, data->insTOut, data->insAlVel, data->insVehDir, data->insWhlbase,
     //           data->insInstAngX, data->insInstAngY, data->insInstAngZ, data->insLevX, data->insLevY, data->insLevZ, data->insLevA, data->insLevB, data->insLevC,
