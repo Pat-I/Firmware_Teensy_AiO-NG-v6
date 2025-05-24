@@ -56,19 +56,19 @@ IMU_DATA IMU;
 struct INS_DATA
 {
   char status[23];
-  char latitude[16];
+  char latitude[17];
   char longitude[17];
-  char roll[6];
-  char pitch[6];
-  char heading[6];
+  char roll[17];
+  char pitch[17];
+  char heading[17];
 };
 INS_DATA INS;
 
 elapsedMicros aogGpsToAutoSteerLoopTimer;
 bool aogGpsToAutoSteerLoopTimerEnabled;
 
-// Convert decimal degress to degress, meniutes, seconds
-void DegreesToDegMinSec(double x, char *result, int resultSize)
+// Convert decimal degress to degress, minutes, seconds
+void DegreesToDegMin(double x, char *result, int resultSize)
 {
   int deg = x;
   double minutesRemainder = abs(x - deg) * 60;
@@ -471,7 +471,7 @@ void KSXT_Handler()
     convertedPosQual = 5; // convert UM982 "KSXT FLOAT" to "GGA FLOAT"
   if (convertedPosQual == 3)
     convertedPosQual = 4; // convert UM982 "KSXT RTK FIX" to "GGA RTK FIX"
-  
+
   LEDs.setGpsLED(convertedPosQual, true);
   LEDs.toggleTeensyLED();
 }
@@ -484,6 +484,15 @@ void INSPVAXA_Handler()
   umParser.getArg(18, INS.roll);
   umParser.getArg(19, INS.pitch);
   umParser.getArg(20, INS.heading);
+  DegreesToDegMin(atof(INS.latitude), INS.latitude, 12);
+  DegreesToDegMin(atof(INS.longitude), INS.longitude, 12);
+
+  // Serial.println(INS.status);
+  // Serial.println(INS.latitude);
+  // Serial.println(INS.longitude);
+  // Serial.println(INS.roll);
+  // Serial.println(INS.pitch);
+  // Serial.println(INS.heading);
 }
 
 void NMEA_Handler()
@@ -524,14 +533,25 @@ void CONFIG_Handler()
 
 void MODE_Handler()
 {
+  // char *argv[16]; // Max 16 arguments
+  // int argc = 0;
+  // argv[argc] = strtok(msgBuf, ";,");
+  // while ((argv[argc] != NULL) && (argc < 15))
+  // {
+  //   argc++;
+  //   argv[argc] = strtok(NULL, ";,");
+  // }
+
   char *argv[16]; // Max 16 arguments
   int argc = 0;
-  argv[argc] = strtok(msgBuf, ";,");
+  char *bufptr = msgBuf;
+  argv[argc] = strsep(&bufptr, ";,");
   while ((argv[argc] != NULL) && (argc < 15))
   {
     argc++;
-    argv[argc] = strtok(NULL, ";,");
+    argv[argc] = strsep(&bufptr, ";,");
   }
+
   Serial.println(argv[10]);
   if (strstr(argv[10], "MODE"))
   {
@@ -544,13 +564,23 @@ void UNILOG_Handler()
 {
   if (msgBufLen > 5)
   {
+    // char *argv[16]; // Max 16 arguments
+    // int argc = 0;
+    // argv[argc] = strtok(msgBuf, "\t\r\n");
+    // while ((argv[argc] != NULL) && (argc < 15))
+    // {
+    //   argc++;
+    //   argv[argc] = strtok(NULL, "\t\r\n");
+    // }
+
     char *argv[16]; // Max 16 arguments
     int argc = 0;
-    argv[argc] = strtok(msgBuf, "\t\r\n");
+    char *bufptr = msgBuf;
+    argv[argc] = strsep(&bufptr, "\t\r\n");
     while ((argv[argc] != NULL) && (argc < 15))
     {
       argc++;
-      argv[argc] = strtok(NULL, "\t\r\n");
+      argv[argc] = strsep(&bufptr, "\t\r\n");
     }
   }
 }

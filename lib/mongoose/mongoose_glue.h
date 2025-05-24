@@ -63,14 +63,6 @@ void mongoose_set_modbus_handlers(struct mongoose_modbus_handlers *);
 
 void mongoose_set_auth_handler(int (*fn)(const char *user, const char *pass));
 
-#define run_mongoose() \
-  do {                 \
-    mongoose_init();   \
-    for (;;) {         \
-      mongoose_poll(); \
-    }                  \
-  } while (0)
-
 #if WIZARD_ENABLE_MQTT
 void glue_lock_init(void);  // Initialise global Mongoose mutex
 void glue_lock(void);       // Lock global Mongoose mutex
@@ -118,7 +110,6 @@ void glue_get_kwas_cfg(struct kwas_cfg *);
 void glue_set_kwas_cfg(struct kwas_cfg *);
 
 struct ins_cfg {
-  char insEnable[30];
   char insMode[30];
   char insTmOut[30];
   char insAlnVel[30];

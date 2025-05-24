@@ -37,7 +37,6 @@ void fw_get_settings(struct settings *data)
 void fw_set_ins_cfg(struct ins_cfg *data)
 {
     MG_DEBUG(("Set INS Cfg"));
-    strcpy(insCfg[insEn], data->insEnable);
     strcpy(insCfg[insMode], data->insMode);
     strcpy(insCfg[insTout], data->insTmOut);
     strcpy(insCfg[insAlVel], data->insAlnVel);
@@ -79,7 +78,6 @@ void fw_get_ins_cfg(struct ins_cfg *data)
 
     load_ins();
 
-    strcpy(data->insEnable, insCfg[insEn]);
     strcpy(data->insMode, insCfg[insMode]);
     strcpy(data->insTmOut, insCfg[insTout]);
     strcpy(data->insAlnVel, insCfg[insAlVel]);

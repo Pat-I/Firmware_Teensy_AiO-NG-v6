@@ -73,7 +73,7 @@ ProcessorUsage DACusage((char *)"DAC   ");
 ProcessorUsage MACHusage((char *)"MACH  ");
 ProcessorUsage LEDSusage((char *)"LEDS  ");
 ProcessorUsage ESP32usage((char *)"ESP32 ");
-//ProcessorUsage KEYAusage((char *)"KEYA  ");
+// ProcessorUsage KEYAusage((char *)"KEYA  ");
 /*const uint8_t numCpuUsageTasks = 18;
 ProcessorUsage *cpuUsageArray[numCpuUsageTasks] = {
     &BNOusage, &GPS1usage, &GPS2usage, &PGNusage, &ASusage, &NTRIPusage,
@@ -167,12 +167,11 @@ const uint8_t ANALOG_TRIG_HYST = 10;
 uint32_t baudrates[]{
     460800,
     115200,
-    921600
-};
+    921600};
 const uint32_t nrBaudrates = sizeof(baudrates) / sizeof(baudrates[0]);
 
-bool gotUM981 = false;
-bool gotUM982 = false;
+bool usingUM981 = false;
+bool usingUM982 = false;
 
 const int tmp_serial_buffer_size = 2048;
 uint8_t tmpGPSrxbuffer[tmp_serial_buffer_size]; // Temp serial rx buffer for detecting / configuring the UM982
@@ -228,36 +227,12 @@ UM982Parser<3> umParser;
 
 // INS Variables
 
-// struct InsCfgStruct
-// {
-//   char insEn[30] = "CONFIG INS RESET";
-//   char mode[30] = "MODE ROVER SURVEY";
-//   char insTOut[30] = "CONFIG INS TIMEOUT 60";
-//   char insAlVel[30] = "CONFIG INS ALIGNMENTVEL 1.5";
-//   char insVehDir[30] = "CONFIG INSDIRECTION AUTO";
-//   char rtkTOut[30] = "CONFIG RTK TIMEOUT 120";
-//   char rtkRelia[30] = "CONFIG RTK RELIABILITY 3 1";
-//   char sigGrp[30] = "CONFIG SIGNALGROUP 1";
-//   char com1[30] = "CONFIG COM1 460800";
-//   char com2[30] = "CONFIG COM2 460800";
-//   char com3[30] = "CONFIG COM3 460800";
-//   char mesg1[30] = "GNGGA COM3 0.1";
-//   char mesg2[30] = "GPVTG COM3 0.1";
-//   char mesg3[30] = "INSPVAXA COM3 0.1";
-//   char insInstAng[50] = "CONFIG INS ANGLE 0.00 0.00 0.00";
-//   char insLever[55] = "CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.00 0.00 0.00";
-//   char insPosOff[50] = "CONFIG INSSOL OFFSET 0.00 0.00 0.00";
-// };
-// InsCfgStruct insCfg;
-// InsCfgStruct defaultIns = insCfg;
-
 bool insCmdStat = false;
 bool insCfgStart = false;
 uint8_t insCfgCtr = 0;
 
-char insCfg[18][55] =
+char insCfg[17][55] =
     {
-        {"CONFIG INS RESET"},
         {"MODE ROVER SURVEY"},
         {"CONFIG INS TIMEOUT 60"},
         {"CONFIG INS ALIGNMENTVEL 1.5"},
@@ -277,7 +252,6 @@ char insCfg[18][55] =
         {"SAVECONFIG"}};
 enum
 {
-  insEn,
   insMode,
   insTout,
   insAlVel,
@@ -296,9 +270,8 @@ enum
   insPosOff
 };
 
-char defaultIns[18][55] =
+char defaultIns[17][55] =
     {
-        {"CONFIG INS RESET"},
         {"MODE ROVER SURVEY"},
         {"CONFIG INS TIMEOUT 60"},
         {"CONFIG INS ALIGNMENTVEL 1.5"},
@@ -316,7 +289,6 @@ char defaultIns[18][55] =
         {"CONFIG IMUTOANT OFFSET 0.00 0.00 0.00 0.01 0.01 0.01"},
         {"CONFIG INSSOL OFFSET 0.00 0.00 0.00"},
         {"SAVECONFIG"}};
-
 // End
 
 // Kalman Filter Variables

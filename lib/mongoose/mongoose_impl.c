@@ -138,7 +138,6 @@ struct attribute s_kwas_cfg_attributes[] = {
   {NULL, NULL, NULL, 0, 0, false}
 };
 struct attribute s_ins_cfg_attributes[] = {
-  {"insEnable", "string", NULL, offsetof(struct ins_cfg, insEnable), 30, false},
   {"insMode", "string", NULL, offsetof(struct ins_cfg, insMode), 30, false},
   {"insTmOut", "string", NULL, offsetof(struct ins_cfg, insTmOut), 30, false},
   {"insAlnVel", "string", NULL, offsetof(struct ins_cfg, insAlnVel), 30, false},

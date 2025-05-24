@@ -146,8 +146,8 @@ void insWritePoll()
         Serial.printf("\r\nINS Cfg Writing: %d\r\n", insCfgCtr);
         Serial.println(insCfg[insCfgCtr]);
         SerialGPS1.println(insCfg[insCfgCtr]);
-        //Serial.printf("Comand Status0: %d\r\n", insCmdStat);
-        if (insCfgCtr == 17)
+        // Serial.printf("Comand Status0: %d\r\n", insCmdStat);
+        if (insCfgCtr == 16)
         {
             insCfgStart = false;
             insCfgCtr = 0;
@@ -186,7 +186,7 @@ void checkUM98x()
             {
                 Serial.print("UM981 VERSION: ");
                 Serial.println(incoming);
-                gotUM981 = true;
+                usingUM981 = true;
                 if (baudrate != 460800)
                 {
                     Serial.println("UM981 baudrate wrong for AOG. Setting to 460800 bps for AOG");
@@ -205,7 +205,7 @@ void checkUM98x()
 
                 break;
             }
-            if (gotUM981)
+            if (usingUM981)
             {
                 break;
             }
@@ -213,7 +213,7 @@ void checkUM98x()
             {
                 Serial.print("UM982 VERSION: ");
                 Serial.println(incoming);
-                gotUM982 = true;
+                usingUM982 = true;
                 if (baudrate != 460800)
                 {
                     Serial.println("UM982 baudrate wrong for AOG. Setting to 460800 bps for AOG");
@@ -231,12 +231,12 @@ void checkUM98x()
                 }
                 break;
             }
-            if (gotUM982)
+            if (usingUM982)
             {
                 break;
             }
         }
-        if (gotUM981 || gotUM982)
+        if (usingUM981 || usingUM982)
         {
             break;
         }

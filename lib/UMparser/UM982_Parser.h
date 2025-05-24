@@ -792,8 +792,8 @@ public:
       printf("%s\n", mBuffer);
     }
     for (uint8_t i = 0; i < argCount(); i++) {
-      uint8_t startPos = startArgPos(i);
-      uint8_t endPos = endArgPos(i);
+      uint16_t startPos = startArgPos(i);
+      uint16_t endPos = endArgPos(i);
       {
         UM982ParserStringify stfy(this, endPos);
         printf("%s\n", &mBuffer[startPos]);
