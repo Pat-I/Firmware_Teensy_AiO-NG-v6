@@ -75,6 +75,7 @@ void gpsPoll()
         if (gpsConfig.gpsPass) // Send via UDP when pass through enabled
         {
           sendUDPchars(msgBuf);
+          setGPSLED(9, false);
         }
 
         else if (strstr(msgBuf, "$G")) // Parse a regular NMEA GPS sentence

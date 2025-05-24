@@ -489,7 +489,7 @@ void INSPVAXA_Handler()
   DegreesToDegMin(atof(INS.latitude), INS.latitude, 12);
   DegreesToDegMin(atof(INS.longitude), INS.longitude, 12);
 
-  Serial.println(INS.status);
+  // Serial.println(INS.status);
   // Serial.println(INS.posType);
   // Serial.println(INS.latitude);
   // Serial.println(INS.longitude);
@@ -499,27 +499,27 @@ void INSPVAXA_Handler()
 
   if (strstr(INS.status, "INS_INACTIVE"))
   {
-    LEDs.setInsLED(0, true);
+    LEDs.setInsLED(0, false);
   }
   if (strstr(INS.status, "INS_ALIGNING"))
   {
-    LEDs.setInsLED(1, true);
+    LEDs.setInsLED(1, false);
   }
   if (strstr(INS.status, "INS_HIGH_VARIANCE"))
   {
-    LEDs.setInsLED(2, true);
+    LEDs.setInsLED(2, false);
   }
   if (strstr(INS.status, "INS_SOLUTION_GOOD"))
   {
-    LEDs.setInsLED(3, true);
+    LEDs.setInsLED(3, false);
   }
   if (strstr(INS.status, "INS_SOLUTION_FREE"))
   {
-    LEDs.setInsLED(6, true);
+    LEDs.setInsLED(6, false);
   }
   if (strstr(INS.status, "INS_ALIGNMENT_COMPLETE"))
   {
-    LEDs.setInsLED(7, true);
+    LEDs.setInsLED(7, false);
   }
 }
 
