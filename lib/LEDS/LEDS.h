@@ -23,7 +23,7 @@ typedef enum {
   PWR_ETH,
   GPS,
   STEER,
-  UNUSED,
+  IGS,
   NUM_IDs
 } LED_ID;
 
@@ -34,6 +34,7 @@ typedef enum {
   STAGE3_GREEN_BLINK,
   STAGE4_GREEN,
   STAGE5_AMBER,
+  STAGE6_AMBER_BLINK,
 } LED_STAGE;
 
 typedef enum {
@@ -86,7 +87,7 @@ private:
       "PWR_ETH",
       "GPS",
       "STEER",
-      "UNUSED"};
+      "IGS"};
 
 public:
   struct LED_DATA {
@@ -173,6 +174,42 @@ public:
       default: // 3: Not applicable, 7: Manual input mode
         set(LED_ID::GPS, STAGE0_OFF, true);
         return;
+    }
+  }
+
+  void setInsLED(uint8_t _fixState, bool _debug = false)
+  {
+    gpsUpdateTimeoutTimer = 0;
+
+    switch (_fixState)
+    {
+    case 0: // 0: INS_INACTIVE
+      set(LED_ID::IGS, STAGE1_RED, _debug);
+      return;
+    case 1: // 1: INS_ALIGNING
+      set(LED_ID::IGS, STAGE2_RED_BLINK, _debug);
+      return;
+    case 2: // 2: INS_HIGH_VARIANCE Data not usable.
+      set(LED_ID::IGS, STAGE2_RED_BLINK, _debug);
+      return;
+    case 3: // 3: INS_SOLUTION_GOOD
+      set(LED_ID::IGS, STAGE5_AMBER, _debug);
+      return;
+    case 4: // 4: INS_RTKFLOAT Integrated solution of INS and RTK float
+      set(LED_ID::IGS, STAGE3_GREEN_BLINK, _debug);
+      return;
+    case 5: // 5: INS_RTKFIXED Integrated solution of INS and RTK fix
+      set(LED_ID::IGS, STAGE4_GREEN, _debug);
+      return;
+    case 6: // 6: INS_SOLUTION_FREE INS solution no GNSS
+      set(LED_ID::IGS, STAGE6_AMBER_BLINK, _debug);
+      return;
+    case 7: // 7: INS_ALIGNMENT_COMPLETE Data not usable.
+      set(LED_ID::IGS, STAGE2_RED_BLINK, _debug);
+      return;
+    default:
+      set(LED_ID::IGS, STAGE0_OFF, true);
+      return;
     }
   }
 

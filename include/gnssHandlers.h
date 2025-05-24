@@ -487,12 +487,45 @@ void INSPVAXA_Handler()
   DegreesToDegMin(atof(INS.latitude), INS.latitude, 12);
   DegreesToDegMin(atof(INS.longitude), INS.longitude, 12);
 
-  // Serial.println(INS.status);
+  Serial.println(INS.status);
   // Serial.println(INS.latitude);
   // Serial.println(INS.longitude);
   // Serial.println(INS.roll);
   // Serial.println(INS.pitch);
   // Serial.println(INS.heading);
+
+  if (strstr(INS.status, "INS_INACTIVE"))
+  {
+    LEDs.setInsLED(0, true);
+  }
+  if (strstr(INS.status, "INS_ALIGNING"))
+  {
+    LEDs.setInsLED(1, true);
+  }
+  if (strstr(INS.status, "INS_HIGH_VARIANCE"))
+  {
+    LEDs.setInsLED(2, true);
+  }
+  if (strstr(INS.status, "INS_SOLUTION_GOOD"))
+  {
+    LEDs.setInsLED(3, true);
+  }
+  if (strstr(INS.status, "INS_RTKFLOAT"))
+  {
+    LEDs.setInsLED(4, true);
+  }
+  if (strstr(INS.status, "INS_RTKFIXED"))
+  {
+    LEDs.setInsLED(5, true);
+  }
+  if (strstr(INS.status, "INS_SOLUTION_FREE"))
+  {
+    LEDs.setInsLED(6, true);
+  }
+  if (strstr(INS.status, "INS_ALIGNMENT_COMPLETE"))
+  {
+    LEDs.setInsLED(7, true);
+  }
 }
 
 void NMEA_Handler()

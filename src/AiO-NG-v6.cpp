@@ -37,6 +37,7 @@ void setup()
   udpSetup();       // Bring up the UDP connections to/from AgIO
   LEDs.init();
   LEDs.set(LED_ID::PWR_ETH, PWR_ETH_STATE::PWR_ON);
+  LEDs.setInsLED(0, true);
 
   checkUM98x();         // Check for presence of UM98x GPS
   serialSetup();        // Configure the Serial comms
