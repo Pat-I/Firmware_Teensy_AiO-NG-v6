@@ -56,6 +56,7 @@ IMU_DATA IMU;
 struct INS_DATA
 {
   char status[23];
+  char posType[13];
   char latitude[17];
   char longitude[17];
   char roll[17];
@@ -479,6 +480,7 @@ void KSXT_Handler()
 void INSPVAXA_Handler()
 {
   umParser.getArg(9, INS.status);
+  umParser.getArg(10, INS.posType);
   umParser.getArg(11, INS.latitude);
   umParser.getArg(12, INS.longitude);
   umParser.getArg(18, INS.roll);
@@ -488,6 +490,7 @@ void INSPVAXA_Handler()
   DegreesToDegMin(atof(INS.longitude), INS.longitude, 12);
 
   Serial.println(INS.status);
+  // Serial.println(INS.posType);
   // Serial.println(INS.latitude);
   // Serial.println(INS.longitude);
   // Serial.println(INS.roll);
@@ -509,14 +512,6 @@ void INSPVAXA_Handler()
   if (strstr(INS.status, "INS_SOLUTION_GOOD"))
   {
     LEDs.setInsLED(3, true);
-  }
-  if (strstr(INS.status, "INS_RTKFLOAT"))
-  {
-    LEDs.setInsLED(4, true);
-  }
-  if (strstr(INS.status, "INS_RTKFIXED"))
-  {
-    LEDs.setInsLED(5, true);
   }
   if (strstr(INS.status, "INS_SOLUTION_FREE"))
   {
