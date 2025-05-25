@@ -449,15 +449,16 @@ void rtcmHandler(struct mg_connection *rtcm, int ev, void *ev_data, void *fn_dat
     return; // Check if IP stack is up.
   if (ev == MG_EV_READ && mg_ntohs(rtcm->rem.port) == 9999 && rtcm->recv.len >= 5)
   {
+    char TXbuf[1024];
     for (size_t i = 0; i < rtcm->recv.len; i++)
-    {
-      if (!USB1DTR)
-        SerialGPS1.write(rtcm->recv.buf[i]);
-      // only send to GPS2 if using abnormal setup like OGX receiver on GPS2
-      /*if (!USB2DTR)
-        SerialGPS2.write(rtcm->recv.buf[i]);*/
-      LEDs.queueBlueFlash(LED_ID::GPS);
-    }
+    { TXbuf[i] = rtcm->recv.buf[i]; } //sending directly to serialGPS byte by byte didn't work with SAPOS BW (Germany)
+    int length = rtcm->recv.len;
+    LEDs.queueBlueFlash(LED_ID::GPS);
+    // if (!USB1DTR)
+    SerialGPS1.write(TXbuf,length);
+    // only send to GPS2 if using abnormal setup like OGX receiver on GPS2
+    //if (!USB2DTR)
+    //  SerialGPS2.write(rtcm->recv.buf[i]);
     mg_iobuf_del(&rtcm->recv, 0, rtcm->recv.len);
   }
   else
@@ -476,7 +477,7 @@ void udpSetup()
   g_mgr.ifp->mask = MG_IPV4(255, 255, 255, 0);
 
   char pgnListenURL[50];
-  char rtcmListen[50];
+  char rtcmListen[150];// char rtcmListen[50];
   mg_snprintf(pgnListenURL, sizeof(pgnListenURL), "udp://%d.%d.%d.126:8888", netConfig.currentIP[0], netConfig.currentIP[1], netConfig.currentIP[2]);
   // Serial.println(steerListen);
   mg_snprintf(rtcmListen, sizeof(rtcmListen), "udp://%d.%d.%d.126:2233", netConfig.currentIP[0], netConfig.currentIP[1], netConfig.currentIP[2]);
