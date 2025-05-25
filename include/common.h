@@ -223,7 +223,7 @@ int msgBufLen = 0;
 // UM98x parser
 #include "UM982_Parser.h"
 #include "calc_crc32.h"
-UM982Parser<3> umParser;
+UM982Parser<4> umParser;
 
 // INS Variables
 

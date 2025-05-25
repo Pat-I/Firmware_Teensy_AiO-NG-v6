@@ -58,6 +58,7 @@ void umparserSetup()
 {
   umParser.setErrorHandler(errorHandlerUm);
   umParser.addHandler("INSPVAXA", INSPVAXA_Handler);
+  umParser.addHandler("INSPVAA", INSPVAA_Handler);
 }
 
 void resetStartingTimersBuffers()

@@ -523,6 +523,50 @@ void INSPVAXA_Handler()
   }
 }
 
+void INSPVAA_Handler()
+{
+  umParser.getArg(20, INS.status);
+  umParser.getArg(11, INS.latitude);
+  umParser.getArg(12, INS.longitude);
+  umParser.getArg(17, INS.roll);
+  umParser.getArg(18, INS.pitch);
+  umParser.getArg(19, INS.heading);
+  DegreesToDegMin(atof(INS.latitude), INS.latitude, 12);
+  DegreesToDegMin(atof(INS.longitude), INS.longitude, 12);
+
+  // Serial.println(INS.status);
+  // Serial.println(INS.latitude);
+  // Serial.println(INS.longitude);
+  // Serial.println(INS.roll);
+  // Serial.println(INS.pitch);
+  // Serial.println(INS.heading);
+
+  if (strstr(INS.status, "INS_INACTIVE"))
+  {
+    LEDs.setInsLED(0, false);
+  }
+  if (strstr(INS.status, "INS_ALIGNING"))
+  {
+    LEDs.setInsLED(1, false);
+  }
+  if (strstr(INS.status, "INS_HIGH_VARIANCE"))
+  {
+    LEDs.setInsLED(2, false);
+  }
+  if (strstr(INS.status, "INS_SOLUTION_GOOD"))
+  {
+    LEDs.setInsLED(3, false);
+  }
+  if (strstr(INS.status, "INS_SOLUTION_FREE"))
+  {
+    LEDs.setInsLED(6, false);
+  }
+  if (strstr(INS.status, "INS_ALIGNMENT_COMPLETE"))
+  {
+    LEDs.setInsLED(7, false);
+  }
+}
+
 void NMEA_Handler()
 {
   for (u_int16_t i = 0; i < msgBufLen; i++)
