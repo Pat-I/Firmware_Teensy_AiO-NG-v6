@@ -21,7 +21,7 @@
 #include "RingBuf.h"
 
 // Firmware version variable
-char inoVersion[] = "AiO-NG-v6.0.1";
+char inoVersion[] = "AiO-NG-v6.0.1 2025-05-23 steer button fix";
 
 // Networking variables
 struct NetConfigStruct
@@ -132,7 +132,7 @@ struct SteerSettingsStruct
 SteerSettingsStruct defaultSteerSettings;                        // 11 bytes
 struct SteerSettingsStruct steerSettings = defaultSteerSettings; // don't need 'struct' in front?
 
-uint8_t steerReading, prevSteerReading = 1; // currentState = 0
+uint8_t steerReading, prevSteerReading = LOW, steerBtnDebncCnt = 0; // currentState = 0
 int16_t pulseCount = 0;                     // Steering Wheel Encoder
 int16_t lastEnc = -999;
 bool autoSteerEnabled = false;
