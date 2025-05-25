@@ -25,22 +25,85 @@ void calcSteeringPID(void)
   else if (pwmDrive > 0)
     pwmDrive += steerSettings.minPWM;
 
+ // Serial.print(" PWMDrive before: ");
+ // Serial.print(pwmDrive);
+ 
   int16_t newHighPWM = 0;
-
-  // from 0-3 deg error, scale newHighPWM from lowPWM(minPWM*1.2)-highPWM
+ // from 0-3 deg error, scale newHighPWM from lowPWM(minPWM*1.2)-highPWM
   if (errorAbs < LOW_HIGH_DEGREES)
   {
     newHighPWM = (errorAbs * highLowPerDeg) + steerSettings.lowPWM;
   }
+    else
+      newHighPWM = steerSettings.highPWM;  
+    
+  pwmDisplay = abs(pwmDrive);
+    
+  if (steerStateONTime != 0)// ramp up PWM at first start for about 0.7 sec, set in common. Very usefull when using auto move line to center when engageing steering
+  {
+    float steerTimeSinceStart = millis() - steerStateONTime;
+    if (steerTimeSinceStart < SteerPWMonStartRampTime)
+    {
+      newHighPWM = pwmDisplay * (steerTimeSinceStart / SteerPWMonStartRampTime); // start PWM from 0          
+      if ((steerConfig.SteerSwitch != 1) && (newHighPWM<steerSettings.minPWM)) // add min PWM for non flap motor systems
+        newHighPWM += steerSettings.minPWM;
+    }
+    else // end ramp up (time passed)      
+      steerStateONTime = 0;    
+  }  // ramp up PWM at first start
   else
-    newHighPWM = steerSettings.highPWM;
+  {
+    // soften acceleration, by averaging PWM to reduce current spikes so steering is much steadier, imediate PWM reduce, soften change of direction 
+    if (steerConfig.SteerSwitch == 1)
+    { // steer "Switch" mode (on - off) = flap motor      
+      if (pwmDrive > 0)
+      {
+        if (pwmDriveFloat < 0)
+        {
+          newHighPWM = 1;
+          pwmDriveFloat = 1;
+        } // change direction
+        else
+        {
+          if (pwmDrive > pwmDriveFloat)
+          { // accellerate softer
+            pwmDriveFloat = pwmDriveFloat * 0.7 + float(pwmDrive) * 0.3;
+            newHighPWM = abs(int(pwmDriveFloat));         
+          }
+          else
+            pwmDriveFloat = pwmDrive; // breaking, keep shelded PWM value
+        }
+      }
+      else
+      {
+        if (pwmDriveFloat > 0)
+        {
+          pwmDriveFloat = -1;
+          newHighPWM = 1;
+        } // change direction
+        else 
+          if (pwmDrive < pwmDriveFloat)
+          { // accellerate softer
+            pwmDriveFloat = pwmDriveFloat * 0.7 + float(pwmDrive) * 0.3;
+            newHighPWM = abs(int(pwmDriveFloat));             
+          }
+          else
+            pwmDriveFloat = pwmDrive; // breaking, keep shelded PWM value
+      }  
+    }// end PWM soften acceleration for flap motor
+  }
+
 
   // limit the pwm drive
-  //  causes oscillation in pwmDrive
+  //  causes oscillation in pwmDrive 
+  if (newHighPWM > steerSettings.highPWM) newHighPWM = steerSettings.highPWM;
   if (pwmDrive > newHighPWM)
-    pwmDrive = newHighPWM;
+  pwmDrive = newHighPWM;
   if (pwmDrive < -newHighPWM)
-    pwmDrive = -newHighPWM;
+  pwmDrive = -newHighPWM;
+
+ // Serial.print(" PWMDrive after: ");
+ // Serial.println(pwmDrive);
 
   if (steerConfig.MotorDriveDirection)
     pwmDrive *= -1;

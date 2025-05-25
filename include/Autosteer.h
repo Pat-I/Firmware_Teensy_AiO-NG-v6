@@ -166,7 +166,7 @@ void autoSteerUpdate()
   if (autoSteerUpdateTimer > 9)  // update AS loop every 10ms (100hz)
   {
     autoSteerUpdateTimer -= 10; // or = 0?
-
+/*
     // ******************************* Steer Switch/Button *******************************
     // 1 PCB Button pressed?
     uint8_t reading = digitalRead(STEER_PIN);
@@ -208,10 +208,10 @@ void autoSteerUpdate()
     }
       
     prevSteerReading = reading;
-
+*/
 
     // Steer input logic all setup so that '1' (HIGH) is ON, and '0' (LOW) is OFF
-/*    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
+    steerReading = !digitalRead(STEER_PIN); // read steer input switch/button, invert reading to match On/Off logic
 
     if (steerConfig.SteerSwitch == 1) // steer "Switch" mode (on - off)
     {
@@ -223,6 +223,7 @@ void autoSteerUpdate()
         {
           //char msg[] = "AutoSteer Switch OFF";
           //char msgTime = 2;
+          steerStateONTime = 0;
           LEDs.activateBlueFlash(LED_ID::STEER);
         }
       }
@@ -231,30 +232,55 @@ void autoSteerUpdate()
         steerState = steerReading; // set ON
         //char msg[] = "AutoSteer Switch ON";
         //char msgTime = 2;
+        steerStateONTime = millis() + 200;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
       prevSteerReading = steerReading;
-    }
+    }// end switch mode
 
     else if (steerConfig.SteerButton == 1) // steer "Button" mode (momentary)
     {
       if (steerReading == HIGH && prevSteerReading == LOW)
       { // button is pressed
-        steerState = !steerState;
-        LEDs.activateBlueFlash(LED_ID::STEER);
-        //char *msg;
-        //if (steerState)
-          //msg = (char *)"AutoSteer Btn ON";
-        //else
-          //msg = (char *)"AutoSteer Btn OFF";
-        //char msgTime = 2;
-        // UDP.SendUdpFreeForm(1, msg, strlen(msg), msgTime, UDP.broadcastIP, UDP.portAgIO_9999);
+        if (steerBtnDebncCnt == 0) 
+        {             
+          steerBtnDebncCnt++;
+          steerState = !steerState;
+          LEDs.activateBlueFlash(LED_ID::STEER);
+          if (steerState) steerStateONTime = millis() + 200;
+          else steerStateONTime = 0;
+        }
+        else                
+        {
+          steerBtnDebncCnt++; //debounce button short press
+          if (steerBtnDebncCnt > 5)//5x10ms
+          {
+            steerBtnDebncCnt = 0;
+            prevSteerReading = HIGH; // get ready to detect next press
+          }
+        }
       }
-      prevSteerReading = steerReading; // get ready to detect next press
+      if (steerReading == LOW && prevSteerReading == HIGH)
+      { // button is released
+        steerBtnDebncCnt++; //debounce button
+        if (steerBtnDebncCnt > 20)//20x10ms long release
+        {
+          steerBtnDebncCnt = 0;
+          prevSteerReading = LOW; // get ready to detect next press
+        }
+      }
 
       if (guidanceStatusChanged)
-        steerState = guidanceStatus; // allows AoG to turn AS on/off in parallel with Btn
-    }
+        {
+          steerState = guidanceStatus; // allows AoG to turn AS on/off in parallel with Btn
+          if (steerState) {steerStateONTime = millis() + 200;}
+          else{steerStateONTime = 0;}
+        }
+      //Serial.print("SteerState:");Serial.print(steerState);
+      //Serial.print(" steerReading:");Serial.print(steerReading);
+      //Serial.print(" prevSteerReading:");Serial.print(prevSteerReading);
+      //Serial.print(" steerBtnDebncCnt:");Serial.println(steerBtnDebncCnt);
+    }//end button mode
 
     else // No steer switch or button
     {
@@ -263,6 +289,7 @@ void autoSteerUpdate()
       {
         prevSteerReading = steerState;
         steerState = 1;
+        steerStateONTime = millis() + 200;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
 
@@ -271,9 +298,10 @@ void autoSteerUpdate()
       {
         prevSteerReading = steerState;
         steerState = 0;
+        steerStateONTime = 0;
         LEDs.activateBlueFlash(LED_ID::STEER);
       }
-    }*/
+    }
 
     // ******************* Kickouts ( Encoders / Pressure / Current ) *******************
     if (steerConfig.ShaftEncoder)
@@ -298,7 +326,7 @@ void autoSteerUpdate()
       }
       if (pulseCount >= steerConfig.PulseCountMax)
       {
-        steerState = 1; // reset values like it turned off
+        steerState = 0;//1; // reset values like it turned off
         prevSteerReading = 1;
         steerStateONTime = 0;
       }
@@ -315,7 +343,7 @@ void autoSteerUpdate()
 
       if (sensorReading >= steerConfig.PulseCountMax)
       {                 // if reading exceeds kickout setpoint
-        steerState = 1; // turn OFF autoSteer
+        steerState = 0;//1; // turn OFF autoSteer
         prevSteerReading = 1;
         steerStateONTime = 0;
       }
@@ -337,9 +365,9 @@ void autoSteerUpdate()
         //Serial << " " << sensorReading << " limit:" << steerConfig.PulseCountMax;
         if (sensorReading >= steerConfig.PulseCountMax)
         {
-          steerState = 1; // turn OFF autoSteer
+          steerState = 0;//1; // turn OFF autoSteer
           steerStateONTime = 0;
-          prevSteerReading = steerState;
+          prevSteerReading = 1;//0;
         }
       }
     }
@@ -354,7 +382,7 @@ void autoSteerUpdate()
 
     switchByte = 0;
     switchByte |= (kickoutInput << 2); // put remote in bit 2, Matt - not exaclty sure what this does
-    switchByte |= (steerState << 1);  // put inverted steerInput status in bit 1 position
+    switchByte |= (!steerState << 1);  // put inverted steerInput status in bit 1 position
     switchByte |= !workInput;          // put inverted workInput into bit 0
 
     // ***************************** READ WAS *****************************
@@ -411,7 +439,7 @@ void autoSteerUpdate()
     // If connection lost to AgOpenGPS, the watchdog will count up and turn off steering
     if (watchdogTimer++ > 250) {
       watchdogTimer = WATCHDOG_FORCE_VALUE;
-      steerState = 1; // reset values like it turned off
+      steerState = 0;//1; // reset values like it turned off
       steerStateONTime = 0;
     }
 
@@ -428,31 +456,13 @@ void autoSteerUpdate()
 
       calcSteeringPID(); // do the pid
 
-      // ramp up PWM at first start for about 1 sec, set in HW. Very usefull when using auto move line to center when engageing steering
-      if (steerStateONTime != 0)
-      {
-        float steerTimeSinceStart = millis() - steerStateONTime;
-        if ((steerTimeSinceStart < SteerPWMonStartRampTime) && (!steerConfig.IsDanfoss))
-        {
-          pwmDrive = pwmDrive * (steerTimeSinceStart / SteerPWMonStartRampTime);
-        }
-        else
-          steerStateONTime = 0;
-      }
-
       if (pwmDebug) {
         Serial.print("PWM (av.): ");
         Serial.print(pwmDrive);
         Serial.print(" PWMDis(abs, unfi): ");
         Serial.print(pwmDisplay);
         Serial.print(" kickout cur: ");
-        Serial.print(steerConfig.PulseCountMax);
-        Serial.print(" cur sens(unfi): ");
-       // Serial.print(sensorSample);
-        Serial.print(" sens by PWM: ");
-        //Serial.print(sensorReadingPWM);
-        Serial.print(" sens by PWM av: ");
-        Serial.println(sensorReading);
+        Serial.println(steerConfig.PulseCountMax);
       }
 
       motorDrive();      // out to motors the pwm value
