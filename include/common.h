@@ -117,6 +117,7 @@ uint8_t xte = 0;
 int16_t pwmDrive = 0, pwmDisplay = 0, SteerPWMonStartRampTime = 1000;
 float highLowPerDeg = 0;
 bool pwmDebug = false;
+bool intendToSteer = false; // true if the keya/motor/valve is autorized to move
 
 // Variables for settings
 struct SteerSettingsStruct
@@ -211,6 +212,10 @@ BNO_RVC_DATA bnoRingData;
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
 //FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_256> Keya_Bus;
 int8_t KeyaCurrentSensorReading = 0;
+int16_t keyaSteeringPosition = 0;
+int16_t keyaCurrentSetSpeed = 0;
+int16_t keyaCurrentActualSpeed = 0;
+int16_t keyaCurrentFromHeartbeat = 0;
 bool keyaDetected = false;
 // End
 
