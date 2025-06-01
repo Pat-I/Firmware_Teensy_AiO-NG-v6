@@ -122,6 +122,17 @@ void buildPandaOrPaogi(bool _panda) // only called by GGA_GNS_PostProcess()
   strcat(nmea, ","); // 9
   strcat(nmea, GGA.ageDGPS);
   strcat(nmea, ",");
+
+  //filter speed noise
+	if (FilterF9Pnoise) {
+		if (VTG.speedKnots[0] == char(48)) { //0
+			if (VTG.speedKnots[1] == char(46)) { //.
+				if (VTG.speedKnots[2] < char(49)) { //filter all < 0.099
+					VTG.speedKnots[2] = char(48); VTG.speedKnots[3] = char(48); VTG.speedKnots[4] = char(48); // set to 0.000
+				}
+			}
+		}
+	}
   strcat(nmea, VTG.speedKnots);
   strcat(nmea, ",");
 
