@@ -21,7 +21,7 @@
 #include "RingBuf.h"
 
 // Firmware version variable
-char inoVersion[] = "AiO-NG-v6.0.1";
+char inoVersion[] = "AiO-NG-v6.0.1 2025-05-31 steer button fix, soft acceleration, F9P noise filter";
 
 // Networking variables
 struct NetConfigStruct
@@ -115,7 +115,7 @@ uint8_t xte = 0;
 
 // pwm variables
 int16_t pwmDrive = 0, pwmDisplay = 0, SteerPWMonStartRampTime = 1000;
-float highLowPerDeg = 0;
+float highLowPerDeg = 0, pwmDriveFloat = 0;
 bool pwmDebug = false;
 
 // Variables for settings
@@ -132,7 +132,7 @@ struct SteerSettingsStruct
 SteerSettingsStruct defaultSteerSettings;                        // 11 bytes
 struct SteerSettingsStruct steerSettings = defaultSteerSettings; // don't need 'struct' in front?
 
-uint8_t steerReading, prevSteerReading = 1; // currentState = 0
+uint8_t steerReading, prevSteerReading = LOW, steerBtnDebncCnt = 0; // currentState = 0
 int16_t pulseCount = 0;                     // Steering Wheel Encoder
 int16_t lastEnc = -999;
 bool autoSteerEnabled = false;
@@ -152,7 +152,7 @@ const uint8_t ANALOG_TRIG_HYST = 10;
 // GNSS processing and variables
 #include "NMEA.h"
 NMEAParser<5> nmeaParser;
-bool nmeaDebug = 0, nmeaDebug2 = 0, extraCRLF;
+bool nmeaDebug = 0, nmeaDebug2 = 0, extraCRLF, FilterF9Pnoise = true;
 
 #include "UBXParser.h"
 UBX_Parser ubxParser;
