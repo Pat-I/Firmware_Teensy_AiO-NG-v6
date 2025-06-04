@@ -94,25 +94,32 @@ void keyaCommand(uint8_t command[])
   }
 }
 
-void SteerKeya(int steerSpeed)
+void SteerKeya(int steerSpeed, bool intendToSteer)
 {
   if (keyaCurrentUpdateTimer > 99)
     keyaCommand(keyaCurrentQuery); // for motors with slow HB
-  if (steerSpeed == 0)
-  {
-    keyaCommand(keyaDisableCommand);
-    if (debugKeya)
-      Serial.println("steerSpeed zero - disabling");
-    return; // don't need to go any further, if we're disabling, we're disabling
-  }
 
   if (keyaDetected)
   {
-    int actualSpeed = map(steerSpeed, -255, 255, -995, 995);
-    if (debugKeya)
-      Serial.println("told to steer, with " + String(steerSpeed) + " so....");
-    if (debugKeya)
-      Serial.println("I converted that to speed " + String(actualSpeed));
+    int16_t actualSpeed;
+    if (intendToSteer)
+    {
+      actualSpeed = map(steerSpeed, -255, 255, -995, 995);
+      if (debugKeya)
+        Serial.println("told to steer, with " + String(steerSpeed) + " so....");
+      if (debugKeya)
+        Serial.println("I converted that to speed " + String(actualSpeed));
+    }
+   else
+    {
+      keyaCommand(keyaDisableCommand);
+      actualSpeed = 0;
+      if (debugKeya)
+        Serial.println("not intended to steer - disabling");
+      //return; // don't need to go any further, if we're disabling, we're disabling  
+    }
+
+    keyaCurrentSetSpeed = actualSpeed * 0.1; //for the speed error reading in "pressure sensor"
 
     CAN_message_t KeyaBusSendData;
     KeyaBusSendData.id = KeyaID;
@@ -138,7 +145,7 @@ void SteerKeya(int steerSpeed)
         Serial.println("pwmDrive > zero - anticlock-clockwise - steerSpeed " + String(steerSpeed));
     }
     Keya_Bus.write(KeyaBusSendData);
-    keyaCommand(keyaEnableCommand);
+    if(intendToSteer) keyaCommand(keyaEnableCommand);
   }
 }
 
@@ -165,6 +172,16 @@ void KeyaBus_Receive()
         keyaDetected = true;
         keyaCommand(keyaVersionQuery);
       }
+      // 0-1 - Cumulative value of angle (360 def / circle)
+      // 2-3 - Motor speed, signed int eg -500 or 500
+      // 4-5 - Motor current
+      // 6-7 - Control_Close (error code)
+      // TODO Yeah, if we ever see something here, fire off a disable, refuse to engage autosteer or..?
+
+      keyaSteeringPosition = (int16_t)((int16_t)KeyaBusReceiveData.buf[0] << 8 | (int16_t)KeyaBusReceiveData.buf[1]) * -1;
+      keyaCurrentActualSpeed = (int16_t)((int16_t)KeyaBusReceiveData.buf[2] << 8 | (int16_t)KeyaBusReceiveData.buf[3]);
+      keyaCurrentFromHeartbeat = (int16_t)((int16_t)KeyaBusReceiveData.buf[4] << 8 | (int16_t)KeyaBusReceiveData.buf[5]);
+
       if (debugKeya)
       {
         uint32_t time = millis();

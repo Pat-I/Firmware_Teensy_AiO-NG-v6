@@ -336,11 +336,37 @@ void autoSteerUpdate()
     // Pressure sensor?
     if (steerConfig.PressureSensor)
     {
+      if(keyaDetected)
+      {
+        int16_t error = abs(keyaCurrentActualSpeed - keyaCurrentSetSpeed);
+        static int16_t counter = 0;
+            
+        if (error > abs(keyaCurrentSetSpeed) + 10)
+          {
+            if (counter++ < 8)
+            {
+              //Serial.print("Counter\t");
+            }
+            else
+            {
+              //Serial.print("Stop\t");
+              sensorReading = abs(abs(keyaCurrentSetSpeed) - error);
+            }
+          }
+          else
+          {
+            //Serial.print("Run\t");
+            sensorReading = 0;
+            counter = 0;
+          }
+      }
+      else
+      { 
       float sensorSample = (float)analogRead(KICKOUT_A_PIN);    // >> 4);    // to scale 12 bit down to 8 bit
       sensorSample *= 0.15;                                     // for 5v sensor, scale down to try matching old AIO
       sensorSample = min(sensorSample, 255);                    // limit to 1 byte (0-255)
       sensorReading = sensorReading * 0.8 + sensorSample * 0.2; // filter
-
+      }
       if (sensorReading >= steerConfig.PulseCountMax)
       {                 // if reading exceeds kickout setpoint
         steerState = 0;//1; // turn OFF autoSteer
@@ -460,6 +486,7 @@ void autoSteerUpdate()
       digitalWrite(SLEEP_PIN, HIGH);
 #endif
 
+      intendToSteer = true;
       calcSteeringPID(); // do the pid
 
       if (pwmDebug) {
@@ -486,6 +513,7 @@ void autoSteerUpdate()
     {
       // we've lost the comm to AgOpenGPS, or just stop request
       // Disable H Bridge for IBT2, hyd aux, etc for cytron
+      intendToSteer = false;
       pwmDrive = 0; // turn off steering motor
       pulseCount = 0;
       encoder.write(0);
